@@ -6,7 +6,7 @@ import { ChevronDown, Crown, Scissors, Sparkles, FileText, BookMarked } from "lu
 import { moduleCategories } from "@/lib/data";
 
 export const ModulesSection = () => {
-  const [activeCategory, setActiveCategory] = useState<string | null>("bridal");
+  const [activeCategory, setActiveCategory] = useState<string | null>("bridal-dresser");
 
   return (
     <section id="modules" className="py-24 bg-background">
@@ -115,5 +115,3 @@ export const ModulesSection = () => {
     </section>
   );
 };
-
-    
