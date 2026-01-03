@@ -29,12 +29,12 @@ export const HeroSection = () => {
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-40 right-20 w-32 h-32 rounded-full bg-gold/20 blur-2xl"
+        className="absolute bottom-40 right-10 md:right-20 w-32 h-32 rounded-full bg-gold/20 blur-2xl"
         animate={{ y: [20, -20, 20], x: [10, -10, 10] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute top-1/3 right-10 w-16 h-16 rounded-full bg-rose-medium/30 blur-xl"
+        className="absolute top-1/3 right-5 md:right-10 w-16 h-16 rounded-full bg-rose-medium/30 blur-xl"
         animate={{ y: [-15, 15, -15] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />

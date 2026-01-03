@@ -9,7 +9,7 @@ import { Menu, X, Sparkles, LogOut, LayoutDashboard, Shield, ShoppingCart } from
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,8 +69,11 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, userProfile, loading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
   const { cart } = useCart();
+
+  const isNonScrollablePage = pathname.startsWith('/dashboard') || pathname.startsWith('/auth') || pathname.startsWith('/order') || pathname.startsWith('/receipt');
 
   useEffect(() => {
     setIsClient(true);
@@ -81,7 +84,7 @@ export const Navbar = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Set initial state
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -96,15 +99,17 @@ export const Navbar = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
   
+  const navIsScrolled = scrolled || isNonScrollablePage;
+
   const navLinkClasses = cn(
     "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
-    scrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
+    navIsScrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
     "focus:bg-accent/10 focus:outline-none"
   );
   
   const navTriggerClasses = cn(navigationMenuTriggerStyle(),
     "bg-transparent",
-    scrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
+    navIsScrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
     "focus:bg-accent/10 focus:outline-none data-[state=open]:bg-accent/10"
   );
 
@@ -115,7 +120,7 @@ export const Navbar = () => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+        navIsScrolled
           ? "bg-background/95 backdrop-blur-md shadow-lg border-b border-border"
           : "bg-transparent"
       }`}
@@ -128,7 +133,7 @@ export const Navbar = () => {
             className="flex items-center gap-2"
           >
             <Image src="/ov.png" alt="Oshadi Vidarshana Logo" width={40} height={40} className="rounded-full" />
-            <span className={cn("font-playfair text-xl font-semibold", scrolled ? "text-foreground" : "text-white")}>
+            <span className={cn("font-playfair text-xl font-semibold", navIsScrolled ? "text-foreground" : "text-white")}>
               Oshadi
             </span>
           </Link>
@@ -179,7 +184,7 @@ export const Navbar = () => {
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
              <Link href="/order" className="relative">
-                <Button variant="ghost" size="icon" className={cn(scrolled ? 'text-foreground' : 'text-white/80 hover:text-white')}>
+                <Button variant="ghost" size="icon" className={cn(navIsScrolled ? 'text-foreground' : 'text-white/80 hover:text-white')}>
                     <ShoppingCart className="h-5 w-5" />
                 </Button>
                 {isClient && cart.length > 0 && (
@@ -244,7 +249,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className={cn("md:hidden p-2", scrolled ? "text-foreground" : "text-white")}
+            className={cn("md:hidden p-2", navIsScrolled ? "text-foreground" : "text-white")}
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
