@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
-import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, User as UserIcon, Shield } from "lucide-react";
+import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
@@ -31,7 +31,7 @@ const navLinks = [
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, userProfile } = useUser();
+  const { user, userProfile, loading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const Navbar = () => {
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "U";
-    return name.split(' ').map(n => n[0]).join('');
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
 
   return (
@@ -214,4 +214,3 @@ export const Navbar = () => {
     </motion.nav>
   );
 };
-
