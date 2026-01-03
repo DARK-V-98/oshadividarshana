@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Crown, Scissors, Sparkles, FileText, BookMarked } from "lucide-react";
+import { ChevronDown, FileText } from "lucide-react";
 import { moduleCategories } from "@/lib/data";
 
 export const ModulesSection = () => {

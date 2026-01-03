@@ -86,7 +86,7 @@ export const blogPostsData = [
 
 export const moduleCategories = [
   {
-    id: "bridal-dresser",
+    id: "bridal",
     name: "Bridal Dresser",
     description: "Master the art of bridal makeup, hair styling, and saree draping. Includes traditional and modern techniques.",
     href: "/courses/bridal",
@@ -138,7 +138,7 @@ export const moduleCategories = [
     ],
   },
   {
-    id: "hair-dresser",
+    id: "hair",
     name: "Hair Dresser",
     description: "Learn professional hair cutting, coloring, and styling techniques for all types of hair.",
     href: "/courses/hair",
