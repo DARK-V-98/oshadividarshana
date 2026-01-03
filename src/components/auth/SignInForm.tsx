@@ -38,6 +38,7 @@ const formSchema = z.object({
 });
 
 const provider = new GoogleAuthProvider();
+const ADMIN_EMAIL = "tikfese@gmail.com";
 
 export default function SignInForm({ onFlip }: { onFlip: () => void }) {
   const auth = useAuth();
@@ -84,7 +85,7 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
           displayName: user.displayName,
           email: user.email,
           photoURL: user.photoURL,
-          role: 'user',
+          role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
         }, { merge: true });
       }
 
