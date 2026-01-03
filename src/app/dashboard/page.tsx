@@ -32,8 +32,10 @@ export default function DashboardPage() {
   }, [user, loading, router]);
   
   useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab]);
+    // Ensure the tab updates if the user's role loads after initial render
+    const newInitialTab = searchParams.get('tab') || (userProfile?.role === 'admin' ? 'overview' : 'content');
+    setActiveTab(newInitialTab);
+  }, [userProfile, searchParams]);
 
   if (loading || !userProfile) {
     return (
