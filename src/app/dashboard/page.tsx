@@ -75,9 +75,9 @@ export default function DashboardPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-3 md:grid-cols-5 lg:grid-cols-9' : 'grid-cols-3'}`}>
+        <TabsList className="grid w-full h-auto grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-2">
             {tabsToShow.map(tab => (
-                <TabsTrigger key={tab.value} value={tab.value} className="py-2">{tab.label}</TabsTrigger>
+                <TabsTrigger key={tab.value} value={tab.value} className="py-2 data-[state=active]:shadow-md data-[state=active]:border-border border border-transparent">{tab.label}</TabsTrigger>
             ))}
         </TabsList>
         
