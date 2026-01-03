@@ -102,53 +102,58 @@ export const Navbar = () => {
           </div>
 
           {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-2">
-            {!isClient || loading ? (
-              <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />
-            ) : user && userProfile ? (
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={userProfile.photoURL || ''} alt={userProfile.displayName || 'User'} />
-                      <AvatarFallback>{getInitials(userProfile.displayName)}</AvatarFallback>
-                    </Avatar>
+          <div className="hidden md:flex items-center gap-2 min-h-[40px] min-w-[80px]">
+            {isClient && !loading && (
+              <>
+                {user && userProfile ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={userProfile.photoURL || ''} alt={userProfile.displayName || 'User'} />
+                          <AvatarFallback>{getInitials(userProfile.displayName)}</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{userProfile.displayName}</p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {userProfile.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </DropdownMenuItem>
+                      {userProfile.role === 'admin' && (
+                        <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Admin</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button asChild>
+                    <Link href="/auth">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Link>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userProfile.displayName}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {userProfile.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
-                  </DropdownMenuItem>
-                  {userProfile.role === 'admin' && (
-                     <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                      <Shield className="mr-2 h-4 w-4" />
-                      <span>Admin</span>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild>
-                <Link href="/auth">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Sign In
-                </Link>
-              </Button>
+                )}
+              </>
+            )}
+            {(!isClient || loading) && (
+                 <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />
             )}
           </div>
 
