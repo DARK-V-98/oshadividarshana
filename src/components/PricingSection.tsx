@@ -1,113 +1,39 @@
 
 "use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import Link from 'next/link';
 import { Crown, Sparkles, Scissors, Package, FileText, ShoppingCart, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-type MediumType = "sinhala" | "english";
+import { pricingData } from "@/lib/data";
 
 interface PricingItem {
   label: string;
   price: number;
-  type: "full" | "individual" | "partial";
+  type: 'fullNote' | 'fullAssignment' | 'partialNote' | 'partialAssignment' | 'individualNote' | 'individualAssignment';
   count?: number;
   buttonText: string;
+  category: string;
+  medium: 'sinhala' | 'english';
 }
 
-interface CategoryPricing {
-  name: string;
-  icon: typeof Crown;
-  modules: number;
-  color: string;
-  sinhala: PricingItem[];
-  english: PricingItem[];
-}
-
-const pricingData: CategoryPricing[] = [
-  {
-    name: "Bridal Dresser",
-    icon: Crown,
-    modules: 20,
-    color: "from-primary to-rose-dark",
-    sinhala: [
-      { label: "Full Note Pack (20)", price: 5800, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (20)", price: 7800, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 800, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1400, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 1800, type: "partial", count: 5, buttonText: "Select Items" },
-    ],
-    english: [
-      { label: "Full Note Pack (20)", price: 7800, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (20)", price: 9800, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 500, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1400, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1900, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 2400, type: "partial", count: 5, buttonText: "Select Items" },
-    ],
-  },
-  {
-    name: "Beauty",
-    icon: Sparkles,
-    modules: 12,
-    color: "from-rose-medium to-primary",
-    sinhala: [
-      { label: "Full Note Pack (12)", price: 3500, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (12)", price: 4700, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 800, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1400, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 1800, type: "partial", count: 5, buttonText: "Select Items" },
-    ],
-    english: [
-      { label: "Full Note Pack (12)", price: 4600, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (12)", price: 5700, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 500, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1400, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1900, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 2400, type: "partial", count: 5, buttonText: "Select Items" },
-    ],
-  },
-  {
-    name: "Hair Dresser",
-    icon: Scissors,
-    modules: 17,
-    color: "from-gold to-primary",
-    sinhala: [
-      { label: "Full Note Pack (17)", price: 5000, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (17)", price: 6600, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 800, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1400, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 1800, type: "partial", count: 5, buttonText: "Select Items" },
-    ],
-    english: [
-      { label: "Full Note Pack (17)", price: 6600, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (17)", price: 8300, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 500, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1400, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1900, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 2400, type: "partial", count: 5, buttonText: "Select Items" },
-    ],
-  },
-];
+const getItemType = (item: PricingItem) => {
+    if (item.type.includes('Note')) return 'note';
+    if (item.type.includes('Assignment')) return 'assignment';
+    return 'note';
+};
 
 const PricingCard = ({ item, delay }: { item: PricingItem; delay: number }) => {
-  const isFull = item.type === "full";
+  const isFull = item.type.startsWith('full');
+  const packType = getItemType(item);
+
+  const getHref = () => {
+    if (item.type.startsWith('full') || item.type.startsWith('individual')) {
+        return '/order'; // Go to main order page to select
+    }
+    // For partial packs
+    return `/order/${item.category.toLowerCase().replace(' ', '-')}-${item.medium}-${packType}-${item.count}`;
+  };
   
   return (
     <motion.div
@@ -116,7 +42,7 @@ const PricingCard = ({ item, delay }: { item: PricingItem; delay: number }) => {
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`relative bg-card border rounded-xl p-4 shadow-sm hover:shadow-lg transition-all ${
+      className={`relative bg-card border rounded-xl p-4 shadow-sm hover:shadow-lg transition-all flex flex-col ${
         isFull ? "border-primary/30 bg-gradient-to-br from-primary/5 to-transparent" : "border-border"
       }`}
     >
@@ -129,30 +55,42 @@ const PricingCard = ({ item, delay }: { item: PricingItem; delay: number }) => {
         </div>
       )}
       
-      <div className={`${isFull ? "pt-2" : ""}`}>
+      <div className={`pt-2 flex-grow flex flex-col`}>
         <h4 className="font-medium text-foreground text-sm mb-2">{item.label}</h4>
         <div className="flex items-baseline gap-1 mb-3">
           <span className="text-2xl font-bold text-foreground">Rs. {item.price.toLocaleString()}</span>
         </div>
-        <Button
-          asChild
-          size="sm"
-          variant={isFull ? "default" : "outline"}
-          className={`w-full ${isFull ? "bg-primary hover:bg-rose-dark" : "hover:bg-primary/5 hover:border-primary"}`}
-        >
-          <a href="https://wa.me/94754420805" target="_blank" rel="noopener noreferrer">
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            {item.buttonText}
-          </a>
-        </Button>
+        <div className="mt-auto">
+            <Button
+            asChild
+            size="sm"
+            variant={isFull ? "default" : "outline"}
+            className={`w-full ${isFull ? "bg-primary hover:bg-rose-dark" : "hover:bg-primary/5 hover:border-primary"}`}
+            >
+            <Link href={getHref()}>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                {item.buttonText}
+            </Link>
+            </Button>
+        </div>
       </div>
     </motion.div>
   );
 };
 
-const CategorySection = ({ category, medium }: { category: CategoryPricing; medium: MediumType }) => {
-  const items = medium === "sinhala" ? category.sinhala : category.english;
-  const IconComponent = category.icon;
+const CategorySection = ({ category, medium }: { category: any; medium: 'sinhala' | 'english' }) => {
+  const IconComponent = {
+    'Bridal Dresser': Crown,
+    'Beauty': Sparkles,
+    'Hair Dresser': Scissors,
+    'Extra Notes': FileText,
+  }[category.name] || FileText;
+
+  const items: PricingItem[] = category[medium].map((item: any) => ({
+    ...item,
+    category: category.name,
+    medium: medium,
+  }));
   
   return (
     <motion.div
@@ -179,7 +117,7 @@ const CategorySection = ({ category, medium }: { category: CategoryPricing; medi
       <div className="p-6">
         {/* Full Packs */}
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          {items.filter(i => i.type === "full").map((item, idx) => (
+          {items.filter(i => i.type.startsWith('full')).map((item, idx) => (
             <PricingCard key={item.label} item={item} delay={idx * 0.1} />
           ))}
         </div>
@@ -190,30 +128,9 @@ const CategorySection = ({ category, medium }: { category: CategoryPricing; medi
             <FileText className="w-4 h-4" />
             Individual & Partial Packs
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {items.filter(i => i.type !== "full").map((item, idx) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: idx * 0.05 }}
-                whileHover={{ scale: 1.02 }}
-                className="bg-muted/50 border border-border rounded-xl p-3 text-center hover:border-primary/30 transition-all"
-              >
-                <p className="text-xs font-medium text-foreground mb-1">{item.label}</p>
-                <p className="text-lg font-bold text-primary mb-2">Rs. {item.price.toLocaleString()}</p>
-                <Button
-                  asChild
-                  size="sm"
-                  variant="ghost"
-                  className="w-full h-8 text-xs hover:bg-primary/10 hover:text-primary"
-                >
-                  <a href="https://wa.me/94754420805" target="_blank" rel="noopener noreferrer">
-                    {item.buttonText}
-                  </a>
-                </Button>
-              </motion.div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+             {items.filter(i => i.type.startsWith('partial') || i.type.startsWith('individual')).map((item, idx) => (
+               <PricingCard key={item.label} item={item} delay={idx * 0.05} />
             ))}
           </div>
         </div>
@@ -241,7 +158,7 @@ export const PricingSection = () => {
             Choose Your <span className="text-gradient">Package</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Flexible options to fit your study needs and budget.
+            Flexible options to fit your study needs and budget. Select a pack to get started.
           </p>
         </motion.div>
 
@@ -256,7 +173,15 @@ export const PricingSection = () => {
                     {pricingData.map((category) => (
                     <CategorySection
                         key={`${category.name}-sinhala`}
-                        category={category}
+                        category={{
+                            ...category,
+                            color: {
+                                'Bridal Dresser': "from-primary to-rose-dark",
+                                'Beauty': "from-rose-medium to-primary",
+                                'Hair Dresser': "from-gold to-primary",
+                                'Extra Notes': "from-primary to-gold",
+                            }[category.name] || "from-primary to-rose-dark",
+                        }}
                         medium="sinhala"
                     />
                     ))}
@@ -271,7 +196,15 @@ export const PricingSection = () => {
                     {pricingData.map((category) => (
                     <CategorySection
                         key={`${category.name}-english`}
-                        category={category}
+                        category={{
+                            ...category,
+                             color: {
+                                'Bridal Dresser': "from-primary to-rose-dark",
+                                'Beauty': "from-rose-medium to-primary",
+                                'Hair Dresser': "from-gold to-primary",
+                                'Extra Notes': "from-primary to-gold",
+                            }[category.name] || "from-primary to-rose-dark",
+                        }}
                         medium="english"
                     />
                     ))}

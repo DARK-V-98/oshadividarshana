@@ -25,7 +25,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -81,6 +80,7 @@ export const Navbar = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Set initial state
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -94,6 +94,19 @@ export const Navbar = () => {
     if (!name) return "U";
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
+  
+  const navLinkClasses = cn(
+    "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+    scrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
+    "focus:bg-accent/10 focus:outline-none"
+  );
+  
+  const navTriggerClasses = cn(
+    "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
+    scrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
+    "focus:bg-accent/10 focus:outline-none"
+  );
+
 
   return (
     <motion.nav
@@ -114,7 +127,7 @@ export const Navbar = () => {
             className="flex items-center gap-2"
           >
             <Image src="/ov.png" alt="Oshadi Vidarshana Logo" width={40} height={40} className="rounded-full" />
-            <span className="font-playfair text-xl font-semibold text-foreground">
+            <span className={cn("font-playfair text-xl font-semibold", scrolled ? "text-foreground" : "text-white")}>
               Oshadi
             </span>
           </Link>
@@ -124,14 +137,16 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                            <Link href={link.href}>{link.label}</Link>
-                         </NavigationMenuLink>
+                         <Link href={link.href} legacyBehavior passHref>
+                           <NavigationMenuLink className={navLinkClasses}>
+                             {link.label}
+                           </NavigationMenuLink>
+                         </Link>
                     </NavigationMenuItem>
                 ))}
 
                 <NavigationMenuItem>
-                    <NavigationMenuTrigger>Courses</NavigationMenuTrigger>
+                    <NavigationMenuTrigger className={navTriggerClasses}>Courses</NavigationMenuTrigger>
                     <NavigationMenuContent>
                     <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                         {courseCategories.map((component) => (
@@ -149,9 +164,11 @@ export const Navbar = () => {
                 
                 {navLinks.slice(1).map((link) => (
                      <NavigationMenuItem key={link.href}>
-                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                           <Link href={link.href}>{link.label}</Link>
-                        </NavigationMenuLink>
+                        <Link href={link.href} legacyBehavior passHref>
+                          <NavigationMenuLink className={navLinkClasses}>
+                            {link.label}
+                          </NavigationMenuLink>
+                        </Link>
                     </NavigationMenuItem>
                 ))}
 
@@ -161,7 +178,7 @@ export const Navbar = () => {
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
              <Link href="/order" className="relative">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className={cn(scrolled ? 'text-foreground' : 'text-white/80 hover:text-white')}>
                     <ShoppingCart className="h-5 w-5" />
                 </Button>
                 {isClient && cart.length > 0 && (
@@ -226,7 +243,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-foreground"
+            className={cn("md:hidden p-2", scrolled ? "text-foreground" : "text-white")}
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

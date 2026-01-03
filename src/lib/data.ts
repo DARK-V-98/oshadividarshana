@@ -86,7 +86,7 @@ export const blogPostsData = [
 
 export const moduleCategories = [
   {
-    id: "bridal",
+    id: "bridal-dresser",
     name: "Bridal Dresser",
     description: "Master the art of bridal makeup, hair styling, and saree draping. Includes traditional and modern techniques.",
     href: "/courses/bridal",
@@ -138,7 +138,7 @@ export const moduleCategories = [
     ],
   },
   {
-    id: "hair",
+    id: "hair-dresser",
     name: "Hair Dresser",
     description: "Learn professional hair cutting, coloring, and styling techniques for all types of hair.",
     href: "/courses/hair",
@@ -178,108 +178,89 @@ export const moduleCategories = [
   }
 ];
 
-type MediumType = "sinhala" | "english";
-
-interface PricingItem {
-  label: string;
-  price: number;
-  type: "full" | "individual" | "partial";
-  count?: number;
-  buttonText: string;
-}
-
-interface CategoryPricing {
-  name: string;
-  modules: number;
-  sinhala: PricingItem[];
-  english: PricingItem[];
-}
-
-export const pricingData: CategoryPricing[] = [
+export const pricingData = [
   {
     name: "Bridal Dresser",
     modules: 20,
     sinhala: [
-      { label: "Full Note Pack (20)", price: 5800, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (20)", price: 7800, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 800, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1400, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 1800, type: "partial", count: 5, buttonText: "Select Items" },
+      { label: "Full Note Pack (20)", price: 5800, type: "fullNote", buttonText: "Order Now" },
+      { label: "Full Assignment Pack (20)", price: 7800, type: "fullAssignment", buttonText: "Order Now" },
+      { label: "Note", price: 300, type: "individualNote", buttonText: "Select Item" },
+      { label: "Assignment", price: 400, type: "individualAssignment", buttonText: "Select Item" },
+      { label: "Note 3", price: 800, type: "partialNote", count: 3, buttonText: "Select Items" },
+      { label: "Assignment 3", price: 1100, type: "partialAssignment", count: 3, buttonText: "Select Items" },
+      { label: "Note 5", price: 1400, type: "partialNote", count: 5, buttonText: "Select Items" },
+      { label: "Assignment 5", price: 1800, type: "partialAssignment", count: 5, buttonText: "Select Items" },
     ],
     english: [
-      { label: "Full Note Pack (20)", price: 7800, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (20)", price: 9800, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 500, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1400, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1900, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 2400, type: "partial", count: 5, buttonText: "Select Items" },
+      { label: "Full Note Pack (20)", price: 7800, type: "fullNote", buttonText: "Order Now" },
+      { label: "Full Assignment Pack (20)", price: 9800, type: "fullAssignment", buttonText: "Order Now" },
+      { label: "Note", price: 400, type: "individualNote", buttonText: "Select Item" },
+      { label: "Assignment", price: 500, type: "individualAssignment", buttonText: "Select Item" },
+      { label: "Note 3", price: 1100, type: "partialNote", count: 3, buttonText: "Select Items" },
+      { label: "Assignment 3", price: 1400, type: "partialAssignment", count: 3, buttonText: "Select Items" },
+      { label: "Note 5", price: 1900, type: "partialNote", count: 5, buttonText: "Select Items" },
+      { label: "Assignment 5", price: 2400, type: "partialAssignment", count: 5, buttonText: "Select Items" },
     ],
   },
   {
     name: "Beauty",
     modules: 12,
     sinhala: [
-      { label: "Full Note Pack (12)", price: 3500, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (12)", price: 4700, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 800, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1400, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 1800, type: "partial", count: 5, buttonText: "Select Items" },
+        { label: "Full Note Pack (12)", price: 3500, type: "fullNote", buttonText: "Order Now" },
+        { label: "Full Assignment Pack (12)", price: 4700, type: "fullAssignment", buttonText: "Order Now" },
+        { label: "Note", price: 300, type: "individualNote", buttonText: "Select Item" },
+        { label: "Assignment", price: 400, type: "individualAssignment", buttonText: "Select Item" },
+        { label: "Note 3", price: 800, type: "partialNote", count: 3, buttonText: "Select Items" },
+        { label: "Assignment 3", price: 1100, type: "partialAssignment", count: 3, buttonText: "Select Items" },
+        { label: "Note 5", price: 1400, type: "partialNote", count: 5, buttonText: "Select Items" },
+        { label: "Assignment 5", price: 1800, type: "partialAssignment", count: 5, buttonText: "Select Items" },
     ],
     english: [
-      { label: "Full Note Pack (12)", price: 4600, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (12)", price: 5700, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 500, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1400, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1900, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 2400, type: "partial", count: 5, buttonText: "Select Items" },
+        { label: "Full Note Pack (12)", price: 4600, type: "fullNote", buttonText: "Order Now" },
+        { label: "Full Assignment Pack (12)", price: 5700, type: "fullAssignment", buttonText: "Order Now" },
+        { label: "Note", price: 400, type: "individualNote", buttonText: "Select Item" },
+        { label: "Assignment", price: 500, type: "individualAssignment", buttonText: "Select Item" },
+        { label: "Note 3", price: 1100, type: "partialNote", count: 3, buttonText: "Select Items" },
+        { label: "Assignment 3", price: 1400, type: "partialAssignment", count: 3, buttonText: "Select Items" },
+        { label: "Note 5", price: 1900, type: "partialNote", count: 5, buttonText: "Select Items" },
+        { label: "Assignment 5", price: 2400, type: "partialAssignment", count: 5, buttonText: "Select Items" },
     ],
   },
   {
     name: "Hair Dresser",
     modules: 17,
     sinhala: [
-      { label: "Full Note Pack (17)", price: 5000, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (17)", price: 6600, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 800, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1400, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 1800, type: "partial", count: 5, buttonText: "Select Items" },
+        { label: "Full Note Pack (17)", price: 5000, type: "fullNote", buttonText: "Order Now" },
+        { label: "Full Assignment Pack (17)", price: 6600, type: "fullAssignment", buttonText: "Order Now" },
+        { label: "Note", price: 300, type: "individualNote", buttonText: "Select Item" },
+        { label: "Assignment", price: 400, type: "individualAssignment", buttonText: "Select Item" },
+        { label: "Note 3", price: 800, type: "partialNote", count: 3, buttonText: "Select Items" },
+        { label: "Assignment 3", price: 1100, type: "partialAssignment", count: 3, buttonText: "Select Items" },
+        { label: "Note 5", price: 1400, type: "partialNote", count: 5, buttonText: "Select Items" },
+        { label: "Assignment 5", price: 1800, type: "partialAssignment", count: 5, buttonText: "Select Items" },
     ],
     english: [
-      { label: "Full Note Pack (17)", price: 6600, type: "full", buttonText: "Add to Cart" },
-      { label: "Full Assignment Pack (17)", price: 8300, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
-      { label: "Assignment", price: 500, type: "individual", buttonText: "Select Item" },
-      { label: "Note 3", price: 1100, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Assignment 3", price: 1400, type: "partial", count: 3, buttonText: "Select Items" },
-      { label: "Note 5", price: 1900, type: "partial", count: 5, buttonText: "Select Items" },
-      { label: "Assignment 5", price: 2400, type: "partial", count: 5, buttonText: "Select Items" },
+        { label: "Full Note Pack (17)", price: 6600, type: "fullNote", buttonText: "Order Now" },
+        { label: "Full Assignment Pack (17)", price: 8300, type: "fullAssignment", buttonText: "Order Now" },
+        { label: "Note", price: 400, type: "individualNote", buttonText: "Select Item" },
+        { label: "Assignment", price: 500, type: "individualAssignment", buttonText: "Select Item" },
+        { label: "Note 3", price: 1100, type: "partialNote", count: 3, buttonText: "Select Items" },
+        { label: "Assignment 3", price: 1400, type: "partialAssignment", count: 3, buttonText: "Select Items" },
+        { label: "Note 5", price: 1900, type: "partialNote", count: 5, buttonText: "Select Items" },
+        { label: "Assignment 5", price: 2400, type: "partialAssignment", count: 5, buttonText: "Select Items" },
     ],
   },
   {
     name: "Extra Notes",
     modules: 2,
     sinhala: [
-      { label: "Full Note Pack (2)", price: 600, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 300, type: "individual", buttonText: "Select Item" },
+      { label: "Full Note Pack (2)", price: 600, type: "fullNote", buttonText: "Order Now" },
+      { label: "Note", price: 300, type: "individualNote", buttonText: "Select Item" },
     ],
     english: [
-      { label: "Full Note Pack (2)", price: 800, type: "full", buttonText: "Add to Cart" },
-      { label: "Note", price: 400, type: "individual", buttonText: "Select Item" },
+      { label: "Full Note Pack (2)", price: 800, type: "fullNote", buttonText: "Order Now" },
+      { label: "Note", price: 400, type: "individualNote", buttonText: "Select Item" },
     ],
   },
 ];
-
-    
