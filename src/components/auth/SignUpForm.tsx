@@ -9,7 +9,6 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   updateProfile,
-  FirebaseError,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -85,7 +84,7 @@ export default function SignUpForm({ onFlip }: { onFlip: () => void }) {
     } catch (error: any) {
       console.error("Sign up error:", error);
       let description = "An unexpected error occurred. Please try again.";
-      if (error instanceof FirebaseError) {
+      if (error && error.code) {
         if (error.code === 'auth/email-already-in-use') {
           description = "An account with this email already exists. Please sign in instead.";
         } else {
@@ -124,7 +123,7 @@ export default function SignUpForm({ onFlip }: { onFlip: () => void }) {
     } catch (error: any) {
       console.error("Google sign in error:", error);
       let description = "An unexpected error occurred during Google Sign-In.";
-      if (error instanceof FirebaseError) {
+      if (error && error.code) {
         description = error.message;
       }
       toast({
