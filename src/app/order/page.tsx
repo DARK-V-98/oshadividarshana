@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import type { Metadata } from 'next';
+import { cn } from '@/lib/utils';
 
 const metadata: Metadata = {
   title: 'Order Course Materials',
@@ -216,27 +217,27 @@ export default function OrderPage() {
                                     <div className="space-y-3">
                                         <h4 className="font-medium text-center text-sm border-b pb-2">Sinhala Medium</h4>
                                         <div className="flex items-center space-x-2">
-                                            <Checkbox id={`sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaNote', unit.priceSinhalaNote || 0, `${unit.title} - Sinhala Note`)} />
-                                            <Label htmlFor={`sn-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
-                                            <span className="text-sm font-semibold">Rs. {unit.priceSinhalaNote || 0}</span>
+                                            <Checkbox id={`sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaNote', unit.priceSinhalaNote || 0, `${unit.title} - Sinhala Note`)} disabled={!unit.pdfUrlSinhalaNote} />
+                                            <Label htmlFor={`sn-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlSinhalaNote && "text-muted-foreground/50")}>Note</Label>
+                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlSinhalaNote && "text-muted-foreground/50")}>Rs. {unit.priceSinhalaNote || 0}</span>
                                         </div>
                                          <div className="flex items-center space-x-2">
-                                            <Checkbox id={`sa-${unit.id}`} checked={isChecked(unit.id, 'sinhalaAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaAssignment', unit.priceSinhalaAssignment || 0, `${unit.title} - Sinhala Assignment`)}/>
-                                            <Label htmlFor={`sa-${unit.id}`} className="flex-1 text-sm font-normal">Assignment</Label>
-                                            <span className="text-sm font-semibold">Rs. {unit.priceSinhalaAssignment || 0}</span>
+                                            <Checkbox id={`sa-${unit.id}`} checked={isChecked(unit.id, 'sinhalaAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaAssignment', unit.priceSinhalaAssignment || 0, `${unit.title} - Sinhala Assignment`)} disabled={!unit.pdfUrlSinhalaAssignment} />
+                                            <Label htmlFor={`sa-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlSinhalaAssignment && "text-muted-foreground/50")}>Assignment</Label>
+                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlSinhalaAssignment && "text-muted-foreground/50")}>Rs. {unit.priceSinhalaAssignment || 0}</span>
                                         </div>
                                     </div>
                                     <div className="space-y-3">
                                         <h4 className="font-medium text-center text-sm border-b pb-2">English Medium</h4>
                                         <div className="flex items-center space-x-2">
-                                            <Checkbox id={`en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishNote', unit.priceEnglishNote || 0, `${unit.title} - English Note`)}/>
-                                            <Label htmlFor={`en-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
-                                            <span className="text-sm font-semibold">Rs. {unit.priceEnglishNote || 0}</span>
+                                            <Checkbox id={`en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishNote', unit.priceEnglishNote || 0, `${unit.title} - English Note`)} disabled={!unit.pdfUrlEnglishNote} />
+                                            <Label htmlFor={`en-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlEnglishNote && "text-muted-foreground/50")}>Note</Label>
+                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlEnglishNote && "text-muted-foreground/50")}>Rs. {unit.priceEnglishNote || 0}</span>
                                         </div>
                                          <div className="flex items-center space-x-2">
-                                            <Checkbox id={`ea-${unit.id}`} checked={isChecked(unit.id, 'englishAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishAssignment', unit.priceEnglishAssignment || 0, `${unit.title} - English Assignment`)}/>
-                                            <Label htmlFor={`ea-${unit.id}`} className="flex-1 text-sm font-normal">Assignment</Label>
-                                            <span className="text-sm font-semibold">Rs. {unit.priceEnglishAssignment || 0}</span>
+                                            <Checkbox id={`ea-${unit.id}`} checked={isChecked(unit.id, 'englishAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishAssignment', unit.priceEnglishAssignment || 0, `${unit.title} - English Assignment`)} disabled={!unit.pdfUrlEnglishAssignment}/>
+                                            <Label htmlFor={`ea-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlEnglishAssignment && "text-muted-foreground/50")}>Assignment</Label>
+                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlEnglishAssignment && "text-muted-foreground/50")}>Rs. {unit.priceEnglishAssignment || 0}</span>
                                         </div>
                                     </div>
                                 </div>
