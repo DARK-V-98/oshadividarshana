@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 
 
 const navLinks = [
-  { href: "/#home", label: "Home" },
+  { href: "/", label: "Home" },
   { href: "/order", label: "Order" },
   { href: "/#about", label: "About" },
   { href: "/#pricing", label: "Pricing" },
@@ -107,7 +107,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link
-            href="/#home"
+            href="/"
             className="flex items-center gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-dark flex items-center justify-center">
@@ -163,9 +163,7 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
-            {!isClient || loading ? (
-              <div className="h-10 w-24 animate-pulse rounded-md bg-muted" />
-            ) : (
+            {isClient && !loading && (
               <>
                 {user && userProfile ? (
                   <DropdownMenu>
@@ -293,7 +291,7 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
+        <Link
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -305,11 +303,9 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
 })
 ListItem.displayName = "ListItem"
-
-    
