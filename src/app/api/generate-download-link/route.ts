@@ -24,7 +24,6 @@ function initAdmin() {
     });
 }
 
-
 async function getUserFromToken(req: NextRequest) {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
