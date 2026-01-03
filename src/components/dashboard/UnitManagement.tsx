@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useFirestore } from "@/firebase";
-import { collection, writeBatch, doc, updateDoc, deleteDoc, getDocs } from "firebase/firestore";
+import { collection, writeBatch, doc, updateDoc, deleteDoc, getDocs, addDoc } from "firebase/firestore";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { moduleCategories, pricingData } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Card,
   CardContent,
@@ -54,7 +61,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import { Trash2 } from "lucide-react";
+import { Trash2, PlusCircle } from "lucide-react";
 import type { Unit } from "@/lib/types";
 import FileUpload from "./FileUpload";
 
@@ -67,6 +74,17 @@ const unitDetailsSchema = z.object({
     priceEnglishAssignment: z.coerce.number().min(0, "Price must be non-negative."),
 });
 
+const newUnitSchema = z.object({
+    code: z.string().min(3, "Unit code must be at least 3 characters."),
+    title: z.string().min(3, "English title must be at least 3 characters."),
+    sinhalaTitle: z.string().min(3, "Sinhala title must be at least 3 characters."),
+    category: z.string().min(1, "Please select a category."),
+    priceSinhalaNote: z.coerce.number().min(0),
+    priceSinhalaAssignment: z.coerce.number().min(0),
+    priceEnglishNote: z.coerce.number().min(0),
+    priceEnglishAssignment: z.coerce.number().min(0),
+});
+
 const getPriceForUnit = (categoryName: string, type: 'Note' | 'Assignment', medium: 'sinhala' | 'english'): number => {
     const categoryPricing = pricingData.find(p => p.name === categoryName);
     if (!categoryPricing) return 0;
@@ -77,6 +95,150 @@ const getPriceForUnit = (categoryName: string, type: 'Note' | 'Assignment', medi
     return individualItem?.price || 0;
 }
 
+const CreateUnitForm = ({ onUnitCreated }: { onUnitCreated: () => void }) => {
+    const [open, setOpen] = useState(false);
+    const firestore = useFirestore();
+    const { toast } = useToast();
+
+    const form = useForm<z.infer<typeof newUnitSchema>>({
+        resolver: zodResolver(newUnitSchema),
+        defaultValues: {
+            code: "",
+            title: "",
+            sinhalaTitle: "",
+            category: "",
+            priceSinhalaNote: 0,
+            priceSinhalaAssignment: 0,
+            priceEnglishNote: 0,
+            priceEnglishAssignment: 0,
+        },
+    });
+
+    const handleCreateUnit = async (values: z.infer<typeof newUnitSchema>) => {
+        if (!firestore) return;
+
+        const newUnit: Omit<Unit, 'id'> = {
+            ...values,
+            pdfUrlSinhalaNote: null,
+            pdfUrlSinhalaAssignment: null,
+            pdfUrlEnglishNote: null,
+            pdfUrlEnglishAssignment: null,
+        };
+
+        try {
+            await addDoc(collection(firestore, "units"), newUnit);
+            toast({ title: "Success", description: "New unit created successfully." });
+            onUnitCreated();
+            setOpen(false);
+            form.reset();
+        } catch (error) {
+            console.error("Error creating unit:", error);
+            toast({ variant: "destructive", title: "Error", description: "Failed to create new unit." });
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button size="sm">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Unit
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md md:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Create New Unit</DialogTitle>
+                    <DialogDescription>Manually add a new unit to the course catalog.</DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleCreateUnit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
+                        <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a category" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {moduleCategories.map(cat => (
+                                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField control={form.control} name="code" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Unit Code</FormLabel>
+                                <FormControl><Input placeholder="e.g., BD-M21" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={form.control} name="title" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>English Title</FormLabel>
+                                <FormControl><Input {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={form.control} name="sinhalaTitle" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Sinhala Title</FormLabel>
+                                <FormControl><Input {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+
+                        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                            <FormField control={form.control} name="priceSinhalaNote" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Sinhala Note Price</FormLabel>
+                                    <FormControl><Input type="number" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                             <FormField control={form.control} name="priceSinhalaAssignment" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Sinhala Assignment Price</FormLabel>
+                                    <FormControl><Input type="number" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                             <FormField control={form.control} name="priceEnglishNote" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>English Note Price</FormLabel>
+                                    <FormControl><Input type="number" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                             <FormField control={form.control} name="priceEnglishAssignment" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>English Assignment Price</FormLabel>
+                                    <FormControl><Input type="number" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                        </div>
+                        
+                        <DialogFooter className="pt-4">
+                            <DialogClose asChild>
+                                <Button type="button" variant="secondary">Cancel</Button>
+                            </DialogClose>
+                            <Button type="submit">Create Unit</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const UnitManager = ({ unit }: { unit: Unit }) => {
     const [open, setOpen] = useState(false);
@@ -410,6 +572,7 @@ export default function UnitManagement() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const { data: units, loading, error } = useCollection<Unit>("units");
+  const [_, setForceRender] = useState(0); // Helper to force re-render
 
   const handleSeedUnits = () => {
     if (!firestore) return;
@@ -472,6 +635,7 @@ export default function UnitManagement() {
                             <CardDescription>Seed or view existing units. Click 'Manage' to edit prices and upload files.</CardDescription>
                         </div>
                         <div className="flex gap-2 flex-shrink-0">
+                            <CreateUnitForm onUnitCreated={() => setForceRender(c => c+1)} />
                             <Button onClick={handleSeedUnits} variant="outline" size="sm" disabled={units.length > 0 || loading}>
                             {loading ? 'Loading...' : units.length > 0 ? 'Already Seeded' : 'Seed Units & Prices'}
                             </Button>
@@ -533,5 +697,3 @@ export default function UnitManagement() {
      </div>
   );
 }
-
-    
