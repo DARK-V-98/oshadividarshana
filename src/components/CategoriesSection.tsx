@@ -15,7 +15,7 @@ export const CategoriesSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             Course Categories
@@ -23,7 +23,7 @@ export const CategoriesSection = () => {
           <h2 className="font-playfair text-3xl md:text-5xl font-bold text-foreground mb-4">
             What You'll <span className="text-gradient">Learn</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg">
             Comprehensive study materials designed specifically for NVQ Level 4 students in Sri Lanka
           </p>
         </motion.div>
@@ -78,5 +78,3 @@ export const CategoriesSection = () => {
     </section>
   );
 };
-
-    

@@ -69,7 +69,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6"
           >
             <BookOpen className="w-4 h-4" />
             <span className="text-sm font-medium">Professional Bridal Dresser & Beautician</span>
@@ -80,7 +80,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
+            className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4"
           >
             Oshadi Vidarshana
           </motion.h1>
@@ -90,7 +90,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-10"
+            className="text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8"
           >
             NVQ Level 4 Notes & Bridal Services. Your expert resource for NVQ Level 4 study materials and professional bridal services in Sri Lanka.
           </motion.p>
@@ -105,7 +105,7 @@ export const HeroSection = () => {
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-rose-dark text-primary-foreground shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg"
+              className="bg-primary hover:bg-rose-dark text-primary-foreground shadow-lg hover:shadow-xl transition-all w-full sm:w-auto px-8 py-6 text-lg"
             >
               <a href="#categories">
                 Explore Courses
@@ -116,7 +116,7 @@ export const HeroSection = () => {
               asChild
               variant="outline"
               size="lg"
-              className="border-gold text-gold hover:bg-gold/10 hover:text-gold px-8 py-6 text-lg"
+              className="border-gold text-gold hover:bg-gold/10 hover:text-gold w-full sm:w-auto px-8 py-6 text-lg"
             >
               <a href="#pricing">View Pricing</a>
             </Button>
@@ -127,7 +127,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto text-white"
+            className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto text-white"
           >
             {[
               { value: "50+", label: "Modules" },
@@ -139,7 +139,7 @@ export const HeroSection = () => {
                   {stat.value}
                   {stat.icon && <Star className="w-5 h-5 text-gold fill-gold" />}
                 </div>
-                <div className="text-sm text-white/80 mt-1">{stat.label}</div>
+                <div className="text-xs sm:text-sm text-white/80 mt-1">{stat.label}</div>
               </div>
             ))}
           </motion.div>
