@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -28,14 +27,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
     Accordion,
     AccordionContent,
@@ -63,7 +54,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import { Upload, FileText, XCircle, AlertTriangle, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import type { Unit } from "@/lib/types";
 import FileUpload from "./FileUpload";
 
@@ -81,7 +72,7 @@ const getPriceForUnit = (categoryName: string, type: 'Note' | 'Assignment', medi
     if (!categoryPricing) return 0;
     
     const mediumPricing = categoryPricing[medium];
-    const individualItem = mediumPricing.find(item => item.type === 'individual' && item.label.toLowerCase() === type.toLowerCase());
+    const individualItem = mediumPricing.find(item => item.type === 'individualNote' || item.type === 'individualAssignment');
 
     return individualItem?.price || 0;
 }
@@ -117,7 +108,7 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
         }
     };
 
-    const handleUploadComplete = async (field: keyof Unit, url: string) => {
+    const handleUrlUpdate = async (field: keyof Unit, url: string | null) => {
         if (!firestore) return;
         const unitDocRef = doc(firestore, "units", unit.id);
         try {
@@ -133,14 +124,14 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">Manage</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="max-w-md md:max-w-3xl">
                 <DialogHeader>
                     <DialogTitle>Manage Unit: {unit.code}</DialogTitle>
                     <DialogDescription>{unit.title}</DialogDescription>
                 </DialogHeader>
                 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleDetailsUpdate)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(handleDetailsUpdate)} className="space-y-6 max-h-[70vh] overflow-y-auto p-1">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <FormField
                                 control={form.control}
@@ -190,7 +181,8 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                     <span className="text-sm font-medium">Note PDF:</span>
                                     <FileUpload 
                                         filePath={`units/${unit.id}/sinhala-note.pdf`}
-                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlSinhalaNote', url)}
+                                        onUploadComplete={(url) => handleUrlUpdate('pdfUrlSinhalaNote', url)}
+                                        onDelete={() => handleUrlUpdate('pdfUrlSinhalaNote', null)}
                                         currentFileUrl={unit.pdfUrlSinhalaNote}
                                     />
                                 </div>
@@ -212,7 +204,8 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                     <span className="text-sm font-medium">Assignment PDF:</span>
                                     <FileUpload 
                                         filePath={`units/${unit.id}/sinhala-assignment.pdf`}
-                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlSinhalaAssignment', url)}
+                                        onUploadComplete={(url) => handleUrlUpdate('pdfUrlSinhalaAssignment', url)}
+                                        onDelete={() => handleUrlUpdate('pdfUrlSinhalaAssignment', null)}
                                         currentFileUrl={unit.pdfUrlSinhalaAssignment}
                                     />
                                 </div>
@@ -238,7 +231,8 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                     <span className="text-sm font-medium">Note PDF:</span>
                                      <FileUpload 
                                         filePath={`units/${unit.id}/english-note.pdf`}
-                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlEnglishNote', url)}
+                                        onUploadComplete={(url) => handleUrlUpdate('pdfUrlEnglishNote', url)}
+                                        onDelete={() => handleUrlUpdate('pdfUrlEnglishNote', null)}
                                         currentFileUrl={unit.pdfUrlEnglishNote}
                                     />
                                 </div>
@@ -260,14 +254,15 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                     <span className="text-sm font-medium">Assignment PDF:</span>
                                     <FileUpload 
                                         filePath={`units/${unit.id}/english-assignment.pdf`}
-                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlEnglishAssignment', url)}
+                                        onUploadComplete={(url) => handleUrlUpdate('pdfUrlEnglishAssignment', url)}
+                                        onDelete={() => handleUrlUpdate('pdfUrlEnglishAssignment', null)}
                                         currentFileUrl={unit.pdfUrlEnglishAssignment}
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <DialogFooter>
+                        <DialogFooter className="pt-4">
                             <DialogClose asChild>
                                 <Button type="button" variant="secondary">Cancel</Button>
                             </DialogClose>
@@ -487,33 +482,24 @@ export default function UnitManagement() {
                                         <span className="font-semibold">{category.name} ({categoryUnits.length})</span>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <div className="w-full overflow-x-auto">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>Code</TableHead>
-                                                        <TableHead>Title</TableHead>
-                                                        <TableHead className="text-right">Actions</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {categoryUnits.map((unit) => (
-                                                        <TableRow key={unit.id}>
-                                                            <TableCell className="font-medium">{unit.code}</TableCell>
-                                                            <TableCell>{unit.title}</TableCell>
-                                                            <TableCell className="text-right space-x-2">
-                                                                <UnitManager unit={unit} />
-                                                                <AlertDialog>
-                                                                    <AlertDialogTrigger asChild>
-                                                                        <Button variant="destructive" size="sm">Delete</Button>
-                                                                    </AlertDialogTrigger>
-                                                                    <DeleteUnitConfirmation unitId={unit.id} onDeleted={() => {}} />
-                                                                </AlertDialog>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
+                                        <div className="flex flex-col gap-3">
+                                            {categoryUnits.map((unit) => (
+                                                 <div key={unit.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-lg border bg-muted/50 gap-2">
+                                                    <div className="flex-1">
+                                                        <p className="font-medium">{unit.code}: {unit.title}</p>
+                                                        <p className="text-sm text-muted-foreground">{unit.sinhalaTitle}</p>
+                                                    </div>
+                                                    <div className="flex gap-2 self-end sm:self-center">
+                                                        <UnitManager unit={unit} />
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button variant="destructive" size="sm">Delete</Button>
+                                                            </AlertDialogTrigger>
+                                                            <DeleteUnitConfirmation unitId={unit.id} onDeleted={() => {}} />
+                                                        </AlertDialog>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </AccordionContent>
                                 </AccordionItem>

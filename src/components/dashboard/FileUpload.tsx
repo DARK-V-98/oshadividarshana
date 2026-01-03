@@ -3,17 +3,17 @@
 
 import { useState } from "react";
 import { useStorage } from "@/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, XCircle, Trash2 } from "lucide-react";
+import { Upload, FileText, XCircle, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
   filePath: string;
   onUploadComplete: (downloadUrl: string) => void;
-  onDelete?: () => void;
+  onDelete: () => void;
   currentFileUrl: string | null;
 }
 
@@ -26,6 +26,7 @@ export default function FileUpload({
   const storage = useStorage();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
@@ -34,6 +35,31 @@ export default function FileUpload({
       setFile(e.target.files[0]);
     }
   };
+
+  const handleDelete = async () => {
+    if (!storage || !currentFileUrl) return;
+
+    setDeleting(true);
+    const fileRef = ref(storage, filePath);
+
+    try {
+        await deleteObject(fileRef);
+        onDelete();
+        toast({ title: "File Deleted", description: "The file has been successfully removed." });
+    } catch (error: any) {
+        console.error("File deletion error:", error);
+        if (error.code === 'storage/object-not-found') {
+            // If the file doesn't exist in storage, but we have a URL,
+            // we should still clear the URL from Firestore.
+            onDelete();
+            toast({ variant: 'default', title: "File Not Found in Storage", description: "Removing stale URL from record." });
+        } else {
+             toast({ variant: "destructive", title: "Deletion Failed", description: error.message });
+        }
+    } finally {
+        setDeleting(false);
+    }
+  }
 
   const handleUpload = () => {
     if (!file || !storage) return;
@@ -73,11 +99,9 @@ export default function FileUpload({
                     View File
                 </a>
             </div>
-            {onDelete && (
-                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={onDelete}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-            )}
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={handleDelete} disabled={deleting}>
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin text-destructive"/> : <Trash2 className="h-4 w-4 text-destructive" />}
+            </Button>
         </div>
     );
   }
