@@ -6,30 +6,78 @@ import { useUser } from "@/firebase/auth/use-user";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, AlertTriangle, FileText } from "lucide-react";
+import { Loader2, Download, AlertTriangle, FileText, Lock } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 
 type PurchasedItem = CartItem & {
     pdfUrl: string | null;
+    orderId: string;
 };
 
-const DownloadButton = ({ item }: { item: PurchasedItem }) => {
+const DownloadButton = ({ item, userId }: { item: PurchasedItem; userId: string }) => {
     const { toast } = useToast();
+    const [isDownloading, setIsDownloading] = useState(false);
 
-    const handleDownload = () => {
+    const hasDownloaded = useMemo(() => {
+        return item.downloads?.includes(userId);
+    }, [item.downloads, userId]);
+
+    const handleDownload = async () => {
         if (!item.pdfUrl) {
             toast({ variant: "destructive", title: "Download Failed", description: "File not available." });
             return;
         }
-        window.open(item.pdfUrl, '_blank');
+
+        setIsDownloading(true);
+        try {
+            const response = await fetch('/api/generate-download-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    orderId: item.orderId,
+                    unitId: item.unitId,
+                    itemType: item.itemType
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to generate download link.');
+            }
+
+            const { downloadUrl } = await response.json();
+            window.open(downloadUrl, '_blank');
+            
+            // Note: We don't need to optimistically update the UI to locked state
+            // because Firestore's real-time updates will do it for us once the backend
+            // updates the 'downloads' array.
+
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Download Failed", description: error.message });
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
+    if (hasDownloaded) {
+        return (
+            <Button size="sm" disabled>
+                <Lock className="mr-2 h-4 w-4" />
+                Downloaded
+            </Button>
+        );
+    }
+
     return (
-        <Button onClick={handleDownload} size="sm" disabled={!item.pdfUrl}>
-            <Download className="mr-2 h-4 w-4" />
+        <Button onClick={handleDownload} size="sm" disabled={!item.pdfUrl || isDownloading}>
+            {isDownloading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+                <Download className="mr-2 h-4 w-4" />
+            )}
             Download
         </Button>
     );
@@ -65,7 +113,7 @@ export default function MyContent() {
 
         const uniqueKey = `${item.unitId}-${item.itemType}`;
         if (!itemsWithUrls.has(uniqueKey)) {
-            itemsWithUrls.set(uniqueKey, { ...item, pdfUrl });
+            itemsWithUrls.set(uniqueKey, { ...item, pdfUrl, orderId: order.id });
         }
       });
     });
@@ -115,7 +163,7 @@ export default function MyContent() {
       <CardHeader>
         <CardTitle>My Content</CardTitle>
         <CardDescription>
-          Here are all the study materials you have purchased.
+          Here are all the study materials you have purchased. Downloads are limited to one time per item.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -144,7 +192,7 @@ export default function MyContent() {
                                             <p className="text-sm text-muted-foreground">{item.unitCode}</p>
                                         </div>
                                     </div>
-                                    <DownloadButton item={item} />
+                                    <DownloadButton item={item} userId={user.uid} />
                                 </div>
                             ))}
                         </div>

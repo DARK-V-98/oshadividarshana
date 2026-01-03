@@ -135,7 +135,12 @@
               "unitCode": { "type": "string" },
               "itemName": { "type": "string" },
               "price": { "type": "number" },
-              "itemType": { "type": "string" }
+              "itemType": { "type": "string" },
+              "downloads": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Array of UIDs of users who have downloaded this item."
+              }
             },
             "required": ["unitId", "itemName", "price", "itemType"]
           }

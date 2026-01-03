@@ -32,6 +32,7 @@ export type CartItem = {
     itemType: 'sinhalaNote' | 'sinhalaAssignment' | 'englishNote' | 'englishAssignment';
     title: string;
     sinhalaTitle: string;
+    downloads?: string[]; // Array of user UIDs who have downloaded
 };
 
 export type Order = {

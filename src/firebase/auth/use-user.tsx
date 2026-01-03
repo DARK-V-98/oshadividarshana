@@ -13,10 +13,13 @@ export function useUser() {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [idToken, setIdToken] = useState<string | null>(null);
 
   const getIdToken = useCallback(async () => {
     if (!auth?.currentUser) return null;
-    return auth.currentUser.getIdToken();
+    const token = await auth.currentUser.getIdToken(true); // Force refresh
+    setIdToken(token);
+    return token;
   }, [auth]);
 
   useEffect(() => {
@@ -27,7 +30,7 @@ export function useUser() {
 
     let profileUnsubscribe: Unsubscribe | undefined;
 
-    const authUnsubscribe = onAuthStateChanged(auth, (userAuth) => {
+    const authUnsubscribe = onAuthStateChanged(auth, async (userAuth) => {
       if (!userAuth) {
         if (profileUnsubscribe) {
           profileUnsubscribe();
@@ -35,11 +38,14 @@ export function useUser() {
         }
         setUser(null);
         setUserProfile(null);
+        setIdToken(null);
         setLoading(false);
         return;
       }
 
       setUser(userAuth);
+      const token = await userAuth.getIdToken();
+      setIdToken(token);
       
       const userDocRef = doc(firestore, "users", userAuth.uid);
       
@@ -72,5 +78,5 @@ export function useUser() {
     };
   }, [auth, firestore]);
 
-  return { user, userProfile, loading, getIdToken };
+  return { user, userProfile, loading, getIdToken, idToken };
 }
