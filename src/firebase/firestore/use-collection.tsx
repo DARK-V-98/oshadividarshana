@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect } from "react";
 import {
@@ -10,7 +11,7 @@ import {
 } from "firebase/firestore";
 import { useFirebase } from "@/firebase/client-provider";
 
-export function useCollection<T>(path: string, options?: {
+export function useCollection<T>(path: string | undefined, options?: {
   where?: [string, "==", any];
 }) {
   const { firestore } = useFirebase();
@@ -19,7 +20,11 @@ export function useCollection<T>(path: string, options?: {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!firestore) return;
+    if (!firestore || !path) {
+        setLoading(false);
+        setData([]);
+        return;
+    };
 
     let q: Query<DocumentData>;
     if (options?.where) {
@@ -42,6 +47,7 @@ export function useCollection<T>(path: string, options?: {
     );
 
     return () => unsubscribe();
+  // Ensure where clause is stable or memoized if it's an array/object
   }, [firestore, path, options?.where]);
 
   return { data, loading, error };

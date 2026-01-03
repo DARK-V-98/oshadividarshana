@@ -20,7 +20,7 @@ export default function MyContent() {
   
   // Fetch all completed orders for the current user
   const { data: orders, loading: ordersLoading } = useCollection<Order>(
-    user ? 'orders' : '',
+    user ? 'orders' : undefined,
     user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined
   );
 
@@ -28,7 +28,7 @@ export default function MyContent() {
   const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
   
   const purchasedItems = useMemo(() => {
-    if (!orders.length || !allUnits.length) return [];
+    if (!orders?.length || !allUnits?.length) return [];
     
     const itemsWithUrls = new Map<string, PurchasedItem>();
 
