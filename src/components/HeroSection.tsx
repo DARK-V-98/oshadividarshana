@@ -9,7 +9,7 @@ export const HeroSection = () => {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
+      className="relative min-h-screen flex items-center justify-center overflow-x-hidden pt-20"
     >
       {/* Background Elements */}
       <Image 
@@ -80,7 +80,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4"
+            className="font-playfair text-4xl sm:text-6xl md:text-7xl font-bold text-white leading-tight mb-4"
           >
             Oshadi Vidarshana
           </motion.h1>
@@ -90,7 +90,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8"
+            className="text-base sm:text-xl text-white/90 max-w-2xl mx-auto mb-8"
           >
             NVQ Level 4 Notes & Bridal Services. Your expert resource for NVQ Level 4 study materials and professional bridal services in Sri Lanka.
           </motion.p>
@@ -127,7 +127,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-12 grid grid-cols-3 gap-4 max-w-xl mx-auto text-white"
+            className="mt-12 grid grid-cols-3 gap-4 max-w-lg mx-auto text-white"
           >
             {[
               { value: "50+", label: "Modules" },
