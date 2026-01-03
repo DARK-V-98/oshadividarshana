@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -52,6 +53,33 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
       password: "",
     },
   });
+
+  const handlePasswordReset = async () => {
+    if (!auth) return;
+    const email = form.getValues("email");
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Email required",
+        description: "Please enter your email address to reset your password.",
+      });
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: "Password Reset Email Sent",
+        description: `An email has been sent to ${email} with instructions.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Failed to Send Email",
+        description: error.message,
+      });
+    }
+  };
 
   const handleSignIn = async (values: z.infer<typeof formSchema>) => {
     if (!auth) return;
@@ -154,7 +182,17 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                    <div className="flex items-center justify-between">
+                        <FormLabel>Password</FormLabel>
+                        <Button
+                            type="button"
+                            variant="link"
+                            className="p-0 h-auto text-xs"
+                            onClick={handlePasswordReset}
+                        >
+                            Forgot Password?
+                        </Button>
+                    </div>
                   <FormControl>
                     <Input type="password" placeholder="******" {...field} />
                   </FormControl>
