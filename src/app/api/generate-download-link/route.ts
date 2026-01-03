@@ -18,7 +18,6 @@ function initAdmin() {
 }
 
 async function getUserFromToken(req: NextRequest) {
-    initAdmin(); // Ensure admin is initialized
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return null;
@@ -45,7 +44,9 @@ const itemTypeToFileName = (itemType: string): string | null => {
 
 export async function POST(req: NextRequest) {
     try {
+        initAdmin(); // Initialize Admin SDK first
         const user = await getUserFromToken(req);
+
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized. Invalid or missing user token.' }, { status: 403 });
         }
