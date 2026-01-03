@@ -8,12 +8,62 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, AlertTriangle, FileText } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from 'next/link';
+import { watermarkPdf } from "@/ai/flows/watermark-flow";
+import { useToast } from "@/hooks/use-toast";
 
 type PurchasedItem = CartItem & {
     pdfUrl: string | null;
 };
+
+const DownloadButton = ({item}: {item: PurchasedItem}) => {
+    const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
+
+    const handleDownload = async () => {
+        if (!item.pdfUrl) {
+            toast({ variant: "destructive", title: "Download Failed", description: "File not available." });
+            return;
+        }
+
+        const isNote = item.itemType.includes('Note');
+
+        if (isNote) {
+            setLoading(true);
+            try {
+                const result = await watermarkPdf({ pdfUrl: item.pdfUrl });
+                
+                const link = document.createElement('a');
+                link.href = result.watermarkedPdf;
+                link.download = `${item.unitCode}_${item.itemName.replace(/\s/g, '_')}_watermarked.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error: any) {
+                console.error("Watermarking error:", error);
+                toast({ variant: "destructive", title: "Download Failed", description: error.message || "Could not generate watermarked PDF." });
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            // Direct download for assignments
+            window.open(item.pdfUrl, '_blank');
+        }
+    };
+
+    return (
+        <Button onClick={handleDownload} size="sm" disabled={loading || !item.pdfUrl}>
+            {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+                <Download className="mr-2 h-4 w-4" />
+            )}
+            {loading ? "Generating..." : "Download"}
+        </Button>
+    )
+}
 
 export default function MyContent() {
   const { user, loading: userLoading } = useUser();
@@ -126,15 +176,7 @@ export default function MyContent() {
                                             <p className="text-sm text-muted-foreground">{item.unitCode}</p>
                                         </div>
                                     </div>
-                                    {item.pdfUrl ? (
-                                        <Button asChild size="sm">
-                                            <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
-                                                <Download className="mr-2 h-4 w-4" /> Download
-                                            </a>
-                                        </Button>
-                                    ) : (
-                                        <span className="text-sm text-destructive">File not available</span>
-                                    )}
+                                    <DownloadButton item={item} />
                                 </div>
                             ))}
                         </div>
