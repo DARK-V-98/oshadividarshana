@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -91,7 +92,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className={cn("min-h-screen bg-background font-poppins antialiased")}>
+      <body className={cn("min-h-screen bg-background font-poppins antialiased overflow-x-hidden")}>
         <FirebaseProvider>
           <CartProvider>
             <Navbar />
