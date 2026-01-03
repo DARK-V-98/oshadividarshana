@@ -1,7 +1,8 @@
+
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Crown, Scissors, Sparkles, FileText } from "lucide-react";
+import { ChevronDown, Crown, Scissors, Sparkles, FileText, BookMarked } from "lucide-react";
 import { moduleCategories } from "@/lib/data";
 
 export const ModulesSection = () => {
@@ -43,9 +44,7 @@ export const ModulesSection = () => {
                   : "bg-card text-foreground border-border hover:border-primary/50"
               }`}
             >
-              {category.name === 'Bridal Dresser' && <Crown className="w-5 h-5" />}
-              {category.name === 'Beauty' && <Sparkles className="w-5 h-5" />}
-              {category.name === 'Hair Dresser' && <Scissors className="w-5 h-5" />}
+              <category.icon className="w-5 h-5" />
               <span className="font-medium">{category.name}</span>
               <span className={`text-xs px-2 py-0.5 rounded-full ${
                 activeCategory === category.id
@@ -74,9 +73,7 @@ export const ModulesSection = () => {
             >
               <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-lg">
                 <div className={`h-2 bg-gradient-to-r ${
-                  activeCategory === 'bridal' ? "from-primary to-rose-dark" : 
-                  activeCategory === 'beauty' ? "from-rose-medium to-primary" : 
-                  "from-gold to-primary"
+                  moduleCategories.find(c => c.id === activeCategory)?.color
                 }`} />
                 <div className="p-6">
                   <div className="grid gap-3">
@@ -118,3 +115,5 @@ export const ModulesSection = () => {
     </section>
   );
 };
+
+    

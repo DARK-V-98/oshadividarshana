@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
-import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield, ShoppingCart } from "lucide-react";
+import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
@@ -16,18 +16,50 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 
 const navLinks = [
   { href: "/#home", label: "Home" },
-  { href: "/#categories", label: "Courses" },
   { href: "/order", label: "Order" },
   { href: "/#about", label: "About" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/#testimonials", label: "Reviews" },
   { href: "/#contact", label: "Contact" },
 ];
+
+const courseCategories = [
+    {
+      title: "Bridal Dresser",
+      href: "/courses/bridal",
+      description: "Master the art of bridal makeup, hair styling, and saree draping.",
+    },
+    {
+      title: "Beauty",
+      href: "/courses/beauty",
+      description: "Comprehensive modules on skin care, facials, and beauty treatments.",
+    },
+    {
+      title: "Hair Dresser",
+      href: "/courses/hair",
+      description: "Learn professional hair cutting, coloring, and styling techniques.",
+    },
+    {
+      title: "Extra Notes",
+      href: "/courses/extra-notes",
+      description: "Specialized notes covering salon management, safety, and more.",
+    },
+  ];
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -86,25 +118,51 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link, i) => (
-              <motion.a
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-              </motion.a>
-            ))}
-          </div>
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+                {navLinks.slice(0, 1).map((link) => (
+                    <NavigationMenuItem key={link.href}>
+                        <Link href={link.href} legacyBehavior passHref>
+                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                {link.label}
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
+                ))}
+
+                <NavigationMenuItem>
+                    <NavigationMenuTrigger>Courses</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                        {courseCategories.map((component) => (
+                        <ListItem
+                            key={component.title}
+                            title={component.title}
+                            href={component.href}
+                        >
+                            {component.description}
+                        </ListItem>
+                        ))}
+                    </ul>
+                    </NavigationMenuContent>
+                </NavigationMenuItem>
+                
+                {navLinks.slice(1).map((link) => (
+                     <NavigationMenuItem key={link.href}>
+                        <Link href={link.href} legacyBehavior passHref>
+                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                {link.label}
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
+                ))}
+
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-2">
-            {isClient && !loading && (
+          <div className="hidden md:flex items-center gap-2 min-h-[40px]">
+            {isClient && !loading ? (
               <>
                 {user && userProfile ? (
                   <DropdownMenu>
@@ -152,8 +210,7 @@ export const Navbar = () => {
                   </Button>
                 )}
               </>
-            )}
-            {(!isClient || loading) && (
+            ) : (
                  <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
             )}
           </div>
@@ -227,3 +284,31 @@ export const Navbar = () => {
     </motion.nav>
   );
 };
+
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"
+
+    
