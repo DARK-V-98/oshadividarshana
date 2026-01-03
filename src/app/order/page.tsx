@@ -3,25 +3,45 @@
 
 import { useState, useMemo } from 'react';
 import { useCollection } from '@/firebase/firestore/use-collection';
+import { useUser } from '@/firebase/auth/use-user';
+import { useFirestore } from '@/firebase';
+import { addDoc, collection, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, ShoppingCart } from 'lucide-react';
+import { Loader2, ShoppingCart, AlertTriangle } from 'lucide-react';
 import { moduleCategories } from '@/lib/data';
 import type { Unit, CartItem } from '@/lib/types';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 export default function OrderPage() {
-  const { data: units, loading: unitsLoading, error } = useCollection<Unit>('units');
+  const { data: units, loading: unitsLoading, error: unitsError } = useCollection<Unit>('units');
   const [cart, setCart] = useState<CartItem[]>([]);
+  const { user, userProfile, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  const router = useRouter();
 
-  const handleCartChange = (checked: boolean | string, item: CartItem) => {
+  const handleCartChange = (checked: boolean | string, unit: Unit, itemType: CartItem['itemType'], price: number, itemName: string) => {
     setCart(prevCart => {
+      const cartItem: CartItem = {
+        unitId: unit.id,
+        unitCode: unit.code,
+        itemName,
+        price,
+        itemType,
+        title: unit.title,
+        sinhalaTitle: unit.sinhalaTitle,
+      };
       if (checked) {
-        return [...prevCart, item];
+        return [...prevCart, cartItem];
       } else {
-        return prevCart.filter(cartItem => !(cartItem.unitId === item.unitId && cartItem.itemType === item.itemType));
+        return prevCart.filter(item => !(item.unitId === cartItem.unitId && item.itemType === cartItem.itemType));
       }
     });
   };
@@ -33,36 +53,70 @@ export default function OrderPage() {
   const total = useMemo(() => {
     return cart.reduce((acc, item) => acc + item.price, 0);
   }, [cart]);
-  
-  const generateWhatsAppMessage = () => {
-    let message = "Hello! I'd like to place an order for the following items:\n\n";
-    
-    const itemsByCategory = cart.reduce((acc, item) => {
-        const category = units.find(u => u.id === item.unitId)?.category || 'Other';
-        if (!acc[category]) {
-            acc[category] = [];
-        }
-        acc[category].push(item);
-        return acc;
-    }, {} as Record<string, CartItem[]>);
 
-    for (const categoryId in itemsByCategory) {
-        const category = moduleCategories.find(c => c.id === categoryId);
-        message += `*${category ? category.name : categoryId}*\n`;
-        itemsByCategory[categoryId].forEach(item => {
-            message += `- ${item.itemName} (${item.unitCode}) - Rs. ${item.price}\n`;
+  const handlePlaceOrder = async () => {
+    if (!firestore || !user || !userProfile || cart.length === 0) return;
+
+    try {
+      // Get the last order to generate a new order code
+      const ordersRef = collection(firestore, 'orders');
+      const q = query(ordersRef, orderBy('createdAt', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+      let lastOrderCode = 1000;
+      if (!querySnapshot.empty) {
+          const lastOrder = querySnapshot.docs[0].data();
+          const codeNumber = parseInt(lastOrder.orderCode.split('-')[1]);
+          if (!isNaN(codeNumber)) {
+              lastOrderCode = codeNumber;
+          }
+      }
+      const newOrderCode = `ORD-${lastOrderCode + 1}`;
+
+      // Create order document
+      const orderData = {
+        orderCode: newOrderCode,
+        userId: user.uid,
+        userDisplayName: userProfile.displayName,
+        userEmail: userProfile.email,
+        items: cart,
+        total: total,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      };
+      
+      await addDoc(ordersRef, orderData);
+
+      // Generate WhatsApp message
+      let message = `Hello! I'd like to place an order.\n\n*Order Code: ${newOrderCode}*\n\n`;
+      cart.forEach(item => {
+        message += `- ${item.itemName} (${item.unitCode}) - Rs. ${item.price}\n`;
+      });
+      message += `\n*Total: Rs. ${total.toLocaleString()}*\n\n`;
+      message += "Please provide the bank details for payment. Thank you!";
+      
+      const whatsappUrl = `https://wa.me/94754420805?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+
+      toast({
+        title: 'Order Submitted!',
+        description: 'Your order has been created. Please complete the process on WhatsApp.',
+      });
+      setCart([]); // Clear cart
+      router.push('/dashboard');
+
+    } catch (error) {
+        console.error("Error placing order:", error);
+        toast({
+            variant: "destructive",
+            title: 'Order Failed',
+            description: 'There was a problem creating your order. Please try again.',
         });
-        message += '\n';
     }
+  };
 
-    message += `*Total: Rs. ${total.toLocaleString()}*\n\n`;
-    message += "Please let me know the next steps. Thank you!";
+  const isLoading = unitsLoading || userLoading;
 
-    return encodeURIComponent(message);
-};
-
-
-  if (unitsLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin" />
@@ -70,12 +124,32 @@ export default function OrderPage() {
     );
   }
 
-  if (error) {
+  if (unitsError) {
     return (
       <div className="container my-12 md:my-24 text-center text-destructive">
         <h1 className="text-2xl font-bold">Error loading units</h1>
-        <p>{error.message}</p>
+        <p>{unitsError.message}</p>
       </div>
+    )
+  }
+
+  if (!user) {
+    return (
+        <div className="container my-12 md:my-24 text-center">
+            <Card className="max-w-md mx-auto">
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-center gap-2"><AlertTriangle className="text-destructive"/> Please Sign In</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">You need to be logged in to place an order.</p>
+                </CardContent>
+                <CardFooter>
+                    <Button asChild className="w-full">
+                        <Link href="/auth">Sign In or Create Account</Link>
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
     )
   }
 
@@ -112,12 +186,12 @@ export default function OrderPage() {
                                     <div className="space-y-2">
                                         <h4 className="font-medium text-center text-sm border-b pb-1">Sinhala Medium</h4>
                                         <div className="flex items-center space-x-2">
-                                            <Checkbox id={`sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, {unitId: unit.id, unitCode: unit.code, itemName: `${unit.title} - Sinhala Note`, price: unit.priceSinhalaNote || 0, itemType: 'sinhalaNote' })} />
+                                            <Checkbox id={`sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaNote', unit.priceSinhalaNote || 0, `${unit.title} - Sinhala Note`)} />
                                             <Label htmlFor={`sn-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
                                             <span className="text-sm font-semibold">Rs. {unit.priceSinhalaNote || 0}</span>
                                         </div>
                                          <div className="flex items-center space-x-2">
-                                            <Checkbox id={`sa-${unit.id}`} checked={isChecked(unit.id, 'sinhalaAssignment')} onCheckedChange={(c) => handleCartChange(c, {unitId: unit.id, unitCode: unit.code, itemName: `${unit.title} - Sinhala Assignment`, price: unit.priceSinhalaAssignment || 0, itemType: 'sinhalaAssignment' })}/>
+                                            <Checkbox id={`sa-${unit.id}`} checked={isChecked(unit.id, 'sinhalaAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaAssignment', unit.priceSinhalaAssignment || 0, `${unit.title} - Sinhala Assignment`)}/>
                                             <Label htmlFor={`sa-${unit.id}`} className="flex-1 text-sm font-normal">Assignment</Label>
                                             <span className="text-sm font-semibold">Rs. {unit.priceSinhalaAssignment || 0}</span>
                                         </div>
@@ -125,12 +199,12 @@ export default function OrderPage() {
                                     <div className="space-y-2">
                                         <h4 className="font-medium text-center text-sm border-b pb-1">English Medium</h4>
                                         <div className="flex items-center space-x-2">
-                                            <Checkbox id={`en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, {unitId: unit.id, unitCode: unit.code, itemName: `${unit.title} - English Note`, price: unit.priceEnglishNote || 0, itemType: 'englishNote' })}/>
+                                            <Checkbox id={`en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishNote', unit.priceEnglishNote || 0, `${unit.title} - English Note`)}/>
                                             <Label htmlFor={`en-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
                                             <span className="text-sm font-semibold">Rs. {unit.priceEnglishNote || 0}</span>
                                         </div>
                                          <div className="flex items-center space-x-2">
-                                            <Checkbox id={`ea-${unit.id}`} checked={isChecked(unit.id, 'englishAssignment')} onCheckedChange={(c) => handleCartChange(c, {unitId: unit.id, unitCode: unit.code, itemName: `${unit.title} - English Assignment`, price: unit.priceEnglishAssignment || 0, itemType: 'englishAssignment' })}/>
+                                            <Checkbox id={`ea-${unit.id}`} checked={isChecked(unit.id, 'englishAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishAssignment', unit.priceEnglishAssignment || 0, `${unit.title} - English Assignment`)}/>
                                             <Label htmlFor={`ea-${unit.id}`} className="flex-1 text-sm font-normal">Assignment</Label>
                                             <span className="text-sm font-semibold">Rs. {unit.priceEnglishAssignment || 0}</span>
                                         </div>
@@ -158,7 +232,7 @@ export default function OrderPage() {
                         <ul className="space-y-2">
                             {cart.map((item, index) => (
                                 <li key={index} className="flex justify-between items-center text-sm">
-                                    <span className="flex-1 pr-2">{item.itemName} ({item.unitCode})</span>
+                                    <span className="flex-1 pr-2">{item.itemName}</span>
                                     <span className="font-medium">Rs. {item.price}</span>
                                 </li>
                             ))}
@@ -170,11 +244,9 @@ export default function OrderPage() {
                         <span>Total</span>
                         <span>Rs. {total.toLocaleString()}</span>
                     </div>
-                    <Button size="lg" disabled={cart.length === 0} asChild>
-                         <a href={`https://wa.me/94754420805?text=${generateWhatsAppMessage()}`} target="_blank" rel="noopener noreferrer">
-                            <ShoppingCart className="mr-2 h-5 w-5" />
-                            Place Order via WhatsApp
-                        </a>
+                    <Button size="lg" disabled={cart.length === 0 || !user} onClick={handlePlaceOrder}>
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Place Order via WhatsApp
                     </Button>
                 </CardFooter>
             </Card>

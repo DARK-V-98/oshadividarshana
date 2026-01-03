@@ -8,7 +8,8 @@ import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserManagement from "@/components/dashboard/UserManagement";
 import UnitManagement from "@/components/dashboard/UnitManagement";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import OrderManagement from "@/components/dashboard/OrderManagement";
+import MyContent from "@/components/dashboard/MyContent";
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();
@@ -45,31 +46,25 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="courses" className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-1'}`}>
-          <TabsTrigger value="courses">My Courses</TabsTrigger>
+      <Tabs defaultValue="content" className="w-full">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-1'}`}>
+          <TabsTrigger value="content">My Content</TabsTrigger>
           {isAdmin && (
             <>
+              <TabsTrigger value="orders">Order Management</TabsTrigger>
               <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="units">Unit Management</TabsTrigger>
             </>
           )}
         </TabsList>
-        <TabsContent value="courses">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Courses</CardTitle>
-              <CardDescription>Your purchased study materials will appear here.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center text-muted-foreground py-8">
-                <p>No courses purchased yet.</p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="content">
+            <MyContent />
         </TabsContent>
         {isAdmin && (
           <>
+            <TabsContent value="orders">
+                <OrderManagement />
+            </TabsContent>
             <TabsContent value="users">
                 <UserManagement />
             </TabsContent>

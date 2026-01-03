@@ -1,4 +1,5 @@
 
+
 export type UserProfile = {
     uid: string;
     email: string;
@@ -29,4 +30,18 @@ export type CartItem = {
     itemName: string;
     price: number;
     itemType: 'sinhalaNote' | 'sinhalaAssignment' | 'englishNote' | 'englishAssignment';
+    title: string;
+    sinhalaTitle: string;
 };
+
+export type Order = {
+    id: string;
+    orderCode: string;
+    userId: string;
+    userDisplayName: string;
+    userEmail: string;
+    items: CartItem[];
+    total: number;
+    status: 'pending' | 'completed';
+    createdAt: any; // Firestore timestamp
+}
