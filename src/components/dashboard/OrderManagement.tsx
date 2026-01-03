@@ -38,7 +38,7 @@ export default function OrderManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  const handleStatusChange = async (orderId: string, status: "pending" | "completed") => {
+  const handleStatusChange = async (orderId: string, status: Order['status']) => {
     if (!firestore) return;
     const orderDocRef = doc(firestore, "orders", orderId);
     try {
@@ -87,7 +87,11 @@ export default function OrderManagement() {
                         <AccordionTrigger>
                             <div className="flex justify-between w-full pr-4">
                                 <span>{order.orderCode} - {order.userDisplayName}</span>
-                                <span className={order.status === 'completed' ? 'text-green-600' : 'text-orange-500'}>
+                                <span className={
+                                    order.status === 'completed' ? 'text-green-600' :
+                                    order.status === 'pending' ? 'text-orange-500' :
+                                    order.status === 'processing' ? 'text-blue-500' : 'text-red-500'
+                                }>
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                 </span>
                                 <span>Rs. {order.total.toLocaleString()}</span>
@@ -102,7 +106,7 @@ export default function OrderManagement() {
                                     <strong>Status:</strong>
                                     <Select
                                         value={order.status}
-                                        onValueChange={(value: "pending" | "completed") =>
+                                        onValueChange={(value: Order['status']) =>
                                             handleStatusChange(order.id, value)
                                         }
                                         >
@@ -111,7 +115,9 @@ export default function OrderManagement() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="processing">Processing</SelectItem>
                                             <SelectItem value="completed">Completed</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

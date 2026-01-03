@@ -10,6 +10,7 @@ import UserManagement from "@/components/dashboard/UserManagement";
 import UnitManagement from "@/components/dashboard/UnitManagement";
 import OrderManagement from "@/components/dashboard/OrderManagement";
 import MyContent from "@/components/dashboard/MyContent";
+import MyOrders from "@/components/dashboard/MyOrders";
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();
@@ -47,11 +48,12 @@ export default function DashboardPage() {
       </div>
 
       <Tabs defaultValue="content" className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-1'}`}>
-          <TabsTrigger value="content">My Content</TabsTrigger>
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'}`}>
+          <TabsTrigger value="content">My Unlocked Content</TabsTrigger>
+          <TabsTrigger value="orders">My Orders</TabsTrigger>
           {isAdmin && (
             <>
-              <TabsTrigger value="orders">Order Management</TabsTrigger>
+              <TabsTrigger value="admin-orders">Order Management</TabsTrigger>
               <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="units">Unit Management</TabsTrigger>
             </>
@@ -60,9 +62,12 @@ export default function DashboardPage() {
         <TabsContent value="content">
             <MyContent />
         </TabsContent>
+         <TabsContent value="orders">
+            <MyOrders />
+        </TabsContent>
         {isAdmin && (
           <>
-            <TabsContent value="orders">
+            <TabsContent value="admin-orders">
                 <OrderManagement />
             </TabsContent>
             <TabsContent value="users">

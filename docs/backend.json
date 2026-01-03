@@ -146,7 +146,7 @@
         },
         "status": {
           "type": "string",
-          "enum": ["pending", "completed"],
+          "enum": ["pending", "processing", "completed", "rejected"],
           "description": "The current status of the order."
         },
         "createdAt": {

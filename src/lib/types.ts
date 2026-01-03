@@ -42,6 +42,6 @@ export type Order = {
     userEmail: string;
     items: CartItem[];
     total: number;
-    status: 'pending' | 'completed';
+    status: 'pending' | 'processing' | 'completed' | 'rejected';
     createdAt: any; // Firestore timestamp
 }
