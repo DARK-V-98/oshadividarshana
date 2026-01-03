@@ -17,9 +17,15 @@ export function useUser() {
 
   const getIdToken = useCallback(async () => {
     if (!auth?.currentUser) return null;
-    const token = await auth.currentUser.getIdToken(true); // Force refresh
-    setIdToken(token);
-    return token;
+    try {
+        const token = await auth.currentUser.getIdToken(true); // Force refresh
+        setIdToken(token);
+        return token;
+    } catch(error) {
+        console.error("Error getting ID token:", error);
+        setIdToken(null);
+        return null;
+    }
   }, [auth]);
 
   useEffect(() => {
@@ -44,8 +50,7 @@ export function useUser() {
       }
 
       setUser(userAuth);
-      const token = await userAuth.getIdToken();
-      setIdToken(token);
+      await getIdToken(); // Get initial token
       
       const userDocRef = doc(firestore, "users", userAuth.uid);
       
@@ -76,7 +81,7 @@ export function useUser() {
         profileUnsubscribe();
       }
     };
-  }, [auth, firestore]);
+  }, [auth, firestore, getIdToken]);
 
   return { user, userProfile, loading, getIdToken, idToken };
 }

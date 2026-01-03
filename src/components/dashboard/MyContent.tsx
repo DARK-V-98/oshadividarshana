@@ -17,7 +17,7 @@ type PurchasedItem = CartItem & {
     orderId: string;
 };
 
-const DownloadButton = ({ item, userId }: { item: PurchasedItem; userId: string }) => {
+const DownloadButton = ({ item, userId, idToken, onDownloadSuccess }: { item: PurchasedItem; userId: string; idToken: string | null, onDownloadSuccess: () => void; }) => {
     const { toast } = useToast();
     const [isDownloading, setIsDownloading] = useState(false);
 
@@ -31,11 +31,19 @@ const DownloadButton = ({ item, userId }: { item: PurchasedItem; userId: string 
             return;
         }
 
+        if (!idToken) {
+            toast({ variant: "destructive", title: "Authentication Error", description: "Could not authenticate your request. Please sign in again." });
+            return;
+        }
+
         setIsDownloading(true);
         try {
             const response = await fetch('/api/generate-download-link', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                 },
                 body: JSON.stringify({ 
                     orderId: item.orderId,
                     unitId: item.unitId,
@@ -50,11 +58,8 @@ const DownloadButton = ({ item, userId }: { item: PurchasedItem; userId: string 
 
             const { downloadUrl } = await response.json();
             window.open(downloadUrl, '_blank');
-            
-            // Note: We don't need to optimistically update the UI to locked state
-            // because Firestore's real-time updates will do it for us once the backend
-            // updates the 'downloads' array.
-
+            toast({ title: "Download started!", description: "Your file is downloading. This is a one-time download." });
+            onDownloadSuccess();
         } catch (error: any) {
             toast({ variant: "destructive", title: "Download Failed", description: error.message });
         } finally {
@@ -84,11 +89,13 @@ const DownloadButton = ({ item, userId }: { item: PurchasedItem; userId: string 
 };
 
 export default function MyContent() {
-  const { user, loading: userLoading } = useUser();
+  const { user, idToken, getIdToken, loading: userLoading } = useUser();
+  const [refreshKey, setRefreshKey] = useState(0); // Add this state
   
   const { data: orders, loading: ordersLoading } = useCollection<Order>(
     user ? 'orders' : undefined,
-    user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined
+    user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined,
+    [refreshKey] // Add refreshKey to dependencies
   );
 
   const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
@@ -112,8 +119,9 @@ export default function MyContent() {
         }
 
         const uniqueKey = `${item.unitId}-${item.itemType}`;
+        // We only want to show the item if it hasn't been added yet, to avoid duplicates across multiple orders
         if (!itemsWithUrls.has(uniqueKey)) {
-            itemsWithUrls.set(uniqueKey, { ...item, pdfUrl, orderId: order.id });
+             itemsWithUrls.set(uniqueKey, { ...item, pdfUrl, orderId: order.id });
         }
       });
     });
@@ -158,6 +166,13 @@ export default function MyContent() {
     );
   }
 
+  const handleDownloadSuccess = () => {
+    // This function will be called after a successful download API call.
+    // It refreshes the user's token and forces a re-fetch of the orders data.
+    getIdToken();
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -192,7 +207,7 @@ export default function MyContent() {
                                             <p className="text-sm text-muted-foreground">{item.unitCode}</p>
                                         </div>
                                     </div>
-                                    <DownloadButton item={item} userId={user.uid} />
+                                    <DownloadButton item={item} userId={user.uid} idToken={idToken} onDownloadSuccess={handleDownloadSuccess} />
                                 </div>
                             ))}
                         </div>

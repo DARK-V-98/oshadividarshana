@@ -13,14 +13,14 @@ import { useFirebase } from "@/firebase/client-provider";
 
 export function useCollection<T>(path: string | undefined, options?: {
   where?: [string, "==", any];
-}) {
+}, dependencies: any[] = []) { // Add dependencies array
   const { firestore } = useFirebase();
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   // Memoize the where clause to prevent re-renders
-  const whereClause = useMemo(() => options?.where, [options?.where && options.where[2]]);
+  const whereClause = useMemo(() => options?.where, [options?.where ? options.where[2] : undefined]);
 
   useEffect(() => {
     // Exit early if firestore, path, or the value in the where clause is not ready
@@ -53,7 +53,8 @@ export function useCollection<T>(path: string | undefined, options?: {
     );
 
     return () => unsubscribe();
-  }, [firestore, path, whereClause]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firestore, path, whereClause, ...dependencies]); // Add dependencies to useEffect
 
   return { data, loading, error };
 }
