@@ -6,8 +6,10 @@ import { Toaster } from "@/components/ui/toaster"
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
-import { FirebaseProvider } from '@/firebase';
+import { FirebaseProvider, useDoc } from '@/firebase';
 import { CartProvider } from '@/context/CartContext';
+import { SiteSettings } from '@/lib/types';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
 
 const siteUrl = 'https://www.oshadividarshana.online';
 
@@ -96,6 +98,7 @@ export default function RootLayout({
         <div className="relative overflow-x-hidden">
           <FirebaseProvider>
             <CartProvider>
+              <AnnouncementBanner />
               <Navbar />
               <main>{children}</main>
               <Footer />

@@ -221,7 +221,7 @@ export const Navbar = () => {
                         <span>Dashboard</span>
                       </DropdownMenuItem>
                       {userProfile.role === 'admin' && (
-                        <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                        <DropdownMenuItem onClick={() => router.push('/dashboard?tab=overview')}>
                           <Shield className="mr-2 h-4 w-4" />
                           <span>Admin</span>
                         </DropdownMenuItem>
@@ -287,8 +287,8 @@ export const Navbar = () => {
                         </Link>
                     </Button>
                     {userProfile?.role === 'admin' && (
-                       <Button asChild variant="ghost" onClick={() => {router.push('/dashboard'); setIsOpen(false)}}>
-                          <Link href="/dashboard">
+                       <Button asChild variant="ghost" onClick={() => {router.push('/dashboard?tab=overview'); setIsOpen(false)}}>
+                          <Link href="/dashboard?tab=overview">
                             <Shield className="mr-2 h-4 w-4" />
                             Admin
                           </Link>

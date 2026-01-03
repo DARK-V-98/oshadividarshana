@@ -21,6 +21,7 @@ export type Unit = {
     pdfUrlSinhalaAssignment: string | null;
     pdfUrlEnglishNote: string | null;
     pdfUrlEnglishAssignment: string | null;
+    orderIndex: number;
 };
 
 export type CartItem = {
@@ -43,4 +44,19 @@ export type Order = {
     total: number;
     status: 'pending' | 'processing' | 'completed' | 'rejected';
     createdAt: any; // Firestore timestamp
+}
+
+export type SiteSettings = {
+    id?: string;
+    announcement: {
+        message: string;
+        enabled: boolean;
+    };
+    testimonials: {
+        id: string;
+        name: string;
+        role: string;
+        text: string;
+        rating: number;
+    }[];
 }

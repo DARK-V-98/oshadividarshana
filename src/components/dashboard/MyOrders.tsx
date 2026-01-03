@@ -21,13 +21,6 @@ import { Button } from "@/components/ui/button";
 
 
 const OrderStatusBadge = ({ status }: { status: Order['status'] }) => {
-    const variant = {
-      pending: "secondary",
-      processing: "default",
-      completed: "default",
-      rejected: "destructive",
-    }[status] as "secondary" | "default" | "destructive";
-
     const className = {
         pending: "bg-yellow-500/20 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400 border-yellow-500/30",
         processing: "bg-blue-500/20 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-500/30",
@@ -122,12 +115,13 @@ const OrderList = ({ orders, title, description }: { orders: Order[], title: str
     )
 }
 
-export default function MyOrders() {
+export default function MyOrders({ userId }: { userId?: string }) {
   const { user, loading: userLoading } = useUser();
+  const displayUserId = userId || user?.uid;
   
   const { data: orders, loading: ordersLoading } = useCollection<Order>(
-    user ? 'orders' : undefined,
-    user ? { where: ['userId', '==', user.uid] } : undefined
+    displayUserId ? 'orders' : undefined,
+    displayUserId ? { where: ['userId', '==', displayUserId] } : undefined
   );
 
   const isLoading = userLoading || ordersLoading;
@@ -140,7 +134,7 @@ export default function MyOrders() {
     );
   }
 
-  if (!user) {
+  if (!displayUserId) {
     return (
         <Card>
             <CardHeader>
@@ -153,7 +147,7 @@ export default function MyOrders() {
     );
   }
 
-  const sortedOrders = orders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+  const sortedOrders = (orders || []).sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
   const currentOrders = sortedOrders.filter(o => o.status === 'pending' || o.status === 'processing');
   const orderHistory = sortedOrders.filter(o => o.status === 'completed' || o.status === 'rejected');
 

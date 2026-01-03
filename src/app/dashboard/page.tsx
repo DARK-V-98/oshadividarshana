@@ -2,8 +2,8 @@
 "use client";
 
 import { useUser } from "@/firebase/auth/use-user";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserManagement from "@/components/dashboard/UserManagement";
@@ -11,18 +11,27 @@ import UnitManagement from "@/components/dashboard/UnitManagement";
 import OrderManagement from "@/components/dashboard/OrderManagement";
 import MyContent from "@/components/dashboard/MyContent";
 import MyOrders from "@/components/dashboard/MyOrders";
+import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import SiteSettings from "@/components/dashboard/SiteSettings";
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') || (userProfile?.role === 'admin' ? 'overview' : 'content');
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/auth");
     }
   }, [user, loading, router]);
+  
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
-  if (loading) {
+  if (loading || !userProfile) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin" />
@@ -30,11 +39,24 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user || !userProfile) {
-    return null;
-  }
-  
   const isAdmin = userProfile.role === 'admin';
+
+  const adminTabs = [
+    { value: "overview", label: "Overview" },
+    { value: "admin-orders", label: "Order Management" },
+    { value: "users", label: "User Management" },
+    { value: "units", label: "Unit Management" },
+    { value: "site-settings", label: "Site Settings" },
+    { value: "content", label: "My Unlocked Content" },
+    { value: "orders", label: "My Orders" },
+  ];
+
+  const userTabs = [
+    { value: "content", label: "My Unlocked Content" },
+    { value: "orders", label: "My Orders" },
+  ];
+
+  const tabsToShow = isAdmin ? adminTabs : userTabs;
 
   return (
     <main className="container my-12 md:my-24 min-h-screen">
@@ -47,26 +69,27 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="content" className="w-full">
-        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5' : 'grid-cols-2'}`}>
-          <TabsTrigger value="content" className="py-2">My Unlocked Content</TabsTrigger>
-          <TabsTrigger value="orders" className="py-2">My Orders</TabsTrigger>
-          {isAdmin && (
-            <>
-              <TabsTrigger value="admin-orders" className="py-2">Order Management</TabsTrigger>
-              <TabsTrigger value="users" className="py-2">User Management</TabsTrigger>
-              <TabsTrigger value="units" className="py-2">Unit Management</TabsTrigger>
-            </>
-          )}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-7' : 'grid-cols-2'}`}>
+            {tabsToShow.map(tab => (
+                <TabsTrigger key={tab.value} value={tab.value} className="py-2">{tab.label}</TabsTrigger>
+            ))}
         </TabsList>
+        
+        {/* User Tabs */}
         <TabsContent value="content">
             <MyContent />
         </TabsContent>
          <TabsContent value="orders">
             <MyOrders />
         </TabsContent>
+        
+        {/* Admin Tabs */}
         {isAdmin && (
           <>
+            <TabsContent value="overview">
+                <DashboardOverview />
+            </TabsContent>
             <TabsContent value="admin-orders">
                 <OrderManagement />
             </TabsContent>
@@ -75,6 +98,9 @@ export default function DashboardPage() {
             </TabsContent>
             <TabsContent value="units">
               <UnitManagement />
+            </TabsContent>
+             <TabsContent value="site-settings">
+              <SiteSettings />
             </TabsContent>
           </>
         )}

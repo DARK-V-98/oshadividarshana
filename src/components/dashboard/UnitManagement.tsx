@@ -61,7 +61,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import { Trash2, PlusCircle } from "lucide-react";
+import { Trash2, PlusCircle, ArrowUp, ArrowDown } from "lucide-react";
 import type { Unit } from "@/lib/types";
 import FileUpload from "./FileUpload";
 
@@ -90,12 +90,12 @@ const getPriceForUnit = (categoryName: string, type: 'Note' | 'Assignment', medi
     if (!categoryPricing) return 0;
     
     const mediumPricing = categoryPricing[medium];
-    const individualItem = mediumPricing.find(item => item.type === 'individualNote' || item.type === 'individualAssignment');
+    const individualItem = mediumPricing.find(item => item.type.startsWith('individual'));
 
     return individualItem?.price || 0;
 }
 
-const CreateUnitForm = ({ onUnitCreated }: { onUnitCreated: () => void }) => {
+const CreateUnitForm = ({ onUnitCreated, highestOrderIndex }: { onUnitCreated: () => void, highestOrderIndex: number }) => {
     const [open, setOpen] = useState(false);
     const firestore = useFirestore();
     const { toast } = useToast();
@@ -123,6 +123,7 @@ const CreateUnitForm = ({ onUnitCreated }: { onUnitCreated: () => void }) => {
             pdfUrlSinhalaAssignment: null,
             pdfUrlEnglishNote: null,
             pdfUrlEnglishAssignment: null,
+            orderIndex: highestOrderIndex + 1,
         };
 
         try {
@@ -574,7 +575,7 @@ export default function UnitManagement() {
   const { data: units, loading, error } = useCollection<Unit>("units");
   const [_, setForceRender] = useState(0); // Helper to force re-render
 
-  const handleSeedUnits = () => {
+  const handleSeedUnits = async () => {
     if (!firestore) return;
     if (units.length > 0) {
         toast({
@@ -586,6 +587,7 @@ export default function UnitManagement() {
     }
 
     const batch = writeBatch(firestore);
+    let orderCounter = 0;
     moduleCategories.forEach(category => {
         const categoryName = category.name;
         category.modules.forEach(module => {
@@ -603,13 +605,14 @@ export default function UnitManagement() {
                 pdfUrlSinhalaAssignment: null,
                 pdfUrlEnglishNote: null,
                 pdfUrlEnglishAssignment: null,
+                orderIndex: orderCounter++,
             };
             batch.set(unitDocRef, newUnit);
         });
     });
 
     try {
-        batch.commit();
+        await batch.commit();
         toast({
             title: "Success",
             description: "Units have been seeded successfully with default prices.",
@@ -624,6 +627,40 @@ export default function UnitManagement() {
     }
   }
 
+    const handleReorder = async (unit: Unit, direction: 'up' | 'down') => {
+        if (!firestore) return;
+
+        const categoryUnits = units
+            .filter(u => u.category === unit.category)
+            .sort((a, b) => a.orderIndex - b.orderIndex);
+
+        const currentIndex = categoryUnits.findIndex(u => u.id === unit.id);
+        if (currentIndex === -1) return;
+
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (targetIndex < 0 || targetIndex >= categoryUnits.length) return;
+
+        const otherUnit = categoryUnits[targetIndex];
+
+        const batch = writeBatch(firestore);
+        
+        const unitRef = doc(firestore, 'units', unit.id);
+        batch.update(unitRef, { orderIndex: otherUnit.orderIndex });
+        
+        const otherUnitRef = doc(firestore, 'units', otherUnit.id);
+        batch.update(otherUnitRef, { orderIndex: unit.orderIndex });
+
+        try {
+            await batch.commit();
+            toast({ title: 'Success', description: 'Unit order updated.' });
+        } catch (e) {
+            console.error(e);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not reorder units.' });
+        }
+    };
+
+    const highestOrderIndex = units.reduce((max, u) => Math.max(max, u.orderIndex), 0);
+
   return (
      <div className="grid grid-cols-1 gap-8">
         <div>
@@ -635,7 +672,7 @@ export default function UnitManagement() {
                             <CardDescription>Seed or view existing units. Click 'Manage' to edit prices and upload files.</CardDescription>
                         </div>
                         <div className="flex gap-2 flex-shrink-0">
-                            <CreateUnitForm onUnitCreated={() => setForceRender(c => c+1)} />
+                            <CreateUnitForm onUnitCreated={() => setForceRender(c => c+1)} highestOrderIndex={highestOrderIndex} />
                             <Button onClick={handleSeedUnits} variant="outline" size="sm" disabled={units.length > 0 || loading}>
                             {loading ? 'Loading...' : units.length > 0 ? 'Already Seeded' : 'Seed Units & Prices'}
                             </Button>
@@ -657,7 +694,7 @@ export default function UnitManagement() {
                     ) : (
                         <Accordion type="single" collapsible className="w-full">
                             {moduleCategories.map((category) => {
-                                const categoryUnits = units.filter(u => u.category === category.id).sort((a,b) => a.code.localeCompare(b.code));
+                                const categoryUnits = units.filter(u => u.category === category.id).sort((a,b) => (a.orderIndex || 0) - (b.orderIndex || 0));
                                 if(categoryUnits.length === 0) return null;
                                 
                                 return (
@@ -667,13 +704,19 @@ export default function UnitManagement() {
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="flex flex-col gap-3">
-                                            {categoryUnits.map((unit) => (
+                                            {categoryUnits.map((unit, index) => (
                                                  <div key={unit.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-lg border bg-muted/50 gap-2">
                                                     <div className="flex-1">
                                                         <p className="font-medium">{unit.code}: {unit.title}</p>
                                                         <p className="text-sm text-muted-foreground">{unit.sinhalaTitle}</p>
                                                     </div>
                                                     <div className="flex items-center gap-2 self-end sm:self-center">
+                                                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReorder(unit, 'up')} disabled={index === 0}>
+                                                            <ArrowUp className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReorder(unit, 'down')} disabled={index === categoryUnits.length - 1}>
+                                                            <ArrowDown className="h-4 w-4" />
+                                                        </Button>
                                                         <UploadStatusIndicator unit={unit} />
                                                         <UnitManager unit={unit} />
                                                         <AlertDialog>
