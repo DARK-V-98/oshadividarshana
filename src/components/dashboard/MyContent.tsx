@@ -8,40 +8,55 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, AlertTriangle, FileText } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-const DownloadButton = ({ item }: { item: CartItem }) => {
+const DownloadButton = ({ item, orderId }: { item: CartItem, orderId: string }) => {
     const { toast } = useToast();
+    const { idToken } = useUser();
     const [isDownloading, setIsDownloading] = useState(false);
-    const storage = getStorage();
 
     const handleDownload = async () => {
-        if (!item.userFileUrl) {
-            toast({ variant: "destructive", title: "Download Failed", description: "File not available for download." });
+        if (!idToken) {
+            toast({ variant: "destructive", title: "Authentication Error", description: "Could not authenticate user. Please sign in again." });
             return;
         }
 
         setIsDownloading(true);
         try {
-            const fileRef = ref(storage, item.userFileUrl);
-            const downloadUrl = await getDownloadURL(fileRef);
-            
+            const response = await fetch('/api/generate-download-link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    orderId,
+                    unitId: item.unitId,
+                    itemType: item.itemType,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to generate download link.");
+            }
+
+            const { downloadUrl } = await response.json();
             window.open(downloadUrl, '_blank');
             toast({ title: "Download started!", description: "Your file should begin downloading shortly." });
 
         } catch (error: any) {
             console.error("Download error:", error);
-            toast({ variant: "destructive", title: "Download Failed", description: "Could not generate download link. Please try again." });
+            toast({ variant: "destructive", title: "Download Failed", description: error.message });
         } finally {
             setIsDownloading(false);
         }
     };
 
     return (
-        <Button onClick={handleDownload} size="sm" disabled={!item.userFileUrl || isDownloading}>
+        <Button onClick={handleDownload} size="sm" disabled={isDownloading}>
             {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             Download
         </Button>
@@ -60,23 +75,21 @@ export default function MyContent() {
   const purchasedItems = useMemo(() => {
     if (!orders?.length || !allUnits?.length) return [];
     
-    const itemsWithUrls: (CartItem & { orderId: string, category: string })[] = [];
+    const itemsWithDetails: (CartItem & { orderId: string, category: string })[] = [];
 
     orders.forEach(order => {
       order.items.forEach(item => {
-        if(item.userFileUrl) { 
-            const unit = allUnits.find(u => u.id === item.unitId);
-            itemsWithUrls.push({ 
-                ...item, 
-                orderId: order.id,
-                category: unit?.category || 'other'
-            });
-        }
+        const unit = allUnits.find(u => u.id === item.unitId);
+        itemsWithDetails.push({ 
+            ...item, 
+            orderId: order.id,
+            category: unit?.category || 'other'
+        });
       });
     });
 
     const itemsByCategory: Record<string, (CartItem & { orderId: string })[]> = {};
-    itemsWithUrls.forEach(item => {
+    itemsWithDetails.forEach(item => {
         const category = item.category || 'other';
         if (!itemsByCategory[category]) {
             itemsByCategory[category] = [];
@@ -149,7 +162,7 @@ export default function MyContent() {
                                             <p className="text-sm text-muted-foreground">{item.unitCode}</p>
                                         </div>
                                     </div>
-                                    <DownloadButton item={item} />
+                                    <DownloadButton item={item} orderId={item.orderId} />
                                 </div>
                             ))}
                         </div>
