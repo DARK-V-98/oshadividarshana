@@ -15,9 +15,8 @@ export const HeroSection = () => {
       <Image 
         src="/bg.jpg"
         alt="Bridal makeup background"
-        layout="fill"
-        objectFit="cover"
-        className="absolute inset-0 z-0"
+        fill
+        className="absolute inset-0 z-0 object-cover"
         priority
       />
       <div className="absolute inset-0 bg-black/50 z-0"/>
