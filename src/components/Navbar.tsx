@@ -102,7 +102,7 @@ export const Navbar = () => {
           </div>
 
           {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-2 min-h-[40px] min-w-[80px]">
+          <div className="hidden md:flex items-center gap-2">
             {isClient && !loading && (
               <>
                 {user && userProfile ? (
