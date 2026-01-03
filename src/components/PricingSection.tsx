@@ -2,7 +2,7 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from 'next/link';
-import { Crown, Sparkles, Scissors, Package, FileText, ShoppingCart, AlertTriangle } from "lucide-react";
+import { Crown, Sparkles, Scissors, Package, FileText, ShoppingCart, AlertTriangle, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { pricingData } from "@/lib/data";
@@ -23,17 +23,17 @@ const getItemType = (item: PricingItem) => {
     return 'note';
 };
 
-const PricingCard = ({ item, delay }: { item: PricingItem; delay: number }) => {
-  const isFull = item.type.startsWith('full');
-  const packType = getItemType(item);
-
-  const getHref = () => {
+const getHref = (item: PricingItem) => {
     if (item.type.startsWith('full') || item.type.startsWith('individual')) {
         return '/order'; // Go to main order page to select
     }
+    const packType = getItemType(item);
     // For partial packs
-    return `/order/${item.category.toLowerCase().replace(' ', '-')}-${item.medium}-${packType}-${item.count}`;
-  };
+    return `/order/${item.category.toLowerCase().replace(/ /g, '-')}-${item.medium}-${packType}-${item.count}`;
+};
+
+const PricingCard = ({ item, delay }: { item: PricingItem; delay: number }) => {
+  const isFull = item.type.startsWith('full');
   
   return (
     <motion.div
@@ -67,7 +67,7 @@ const PricingCard = ({ item, delay }: { item: PricingItem; delay: number }) => {
             variant={isFull ? "default" : "outline"}
             className={`w-full ${isFull ? "bg-primary hover:bg-rose-dark" : "hover:bg-primary/5 hover:border-primary"}`}
             >
-            <Link href={getHref()}>
+            <Link href={getHref(item)}>
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 {item.buttonText}
             </Link>
@@ -83,7 +83,7 @@ const CategorySection = ({ category, medium }: { category: any; medium: 'sinhala
     'Bridal Dresser': Crown,
     'Beauty': Sparkles,
     'Hair Dresser': Scissors,
-    'Extra Notes': FileText,
+    'Extra Notes': BookMarked,
   }[category.name] || FileText;
 
   const items: PricingItem[] = category[medium].map((item: any) => ({
@@ -128,10 +128,34 @@ const CategorySection = ({ category, medium }: { category: any; medium: 'sinhala
             <FileText className="w-4 h-4" />
             Individual & Partial Packs
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-             {items.filter(i => i.type.startsWith('partial') || i.type.startsWith('individual')).map((item, idx) => (
-               <PricingCard key={item.label} item={item} delay={idx * 0.05} />
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+             {items.filter(i => i.type.startsWith('partial') || i.type.startsWith('individual')).map((item, idx) => {
+                const isPartial = item.type.startsWith('partial');
+                return (
+                 <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-muted/50 border border-border rounded-xl p-3 text-center hover:border-primary/30 transition-all"
+                  >
+                    <p className="text-xs font-medium text-foreground mb-1">{item.label}</p>
+                    <p className="text-lg font-bold text-primary mb-2">Rs. {item.price.toLocaleString()}</p>
+                    <Button
+                      asChild
+                      size="sm"
+                      variant={isPartial ? "outline" : "ghost"}
+                      className={`w-full h-8 text-xs ${isPartial ? 'hover:bg-primary/10 hover:text-primary' : 'hover:bg-primary/10 hover:text-primary'}`}
+                    >
+                      <Link href={getHref(item)}>
+                        {item.buttonText}
+                      </Link>
+                    </Button>
+                  </motion.div>
+                )
+             })}
           </div>
         </div>
       </div>
@@ -154,10 +178,10 @@ export const PricingSection = () => {
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             Pricing
           </span>
-          <h2 className="font-playfair text-3xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="font-playfair text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
             Choose Your <span className="text-gradient">Package</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto md:text-xl">
             Flexible options to fit your study needs and budget. Select a pack to get started.
           </p>
         </motion.div>
@@ -166,7 +190,7 @@ export const PricingSection = () => {
         {/* Pricing Categories */}
         <div className="space-y-12 max-w-5xl mx-auto">
             <div>
-                <h3 className="font-playfair text-3xl font-bold text-foreground mb-8 text-center">
+                <h3 className="font-playfair text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
                     සිංහල Medium
                 </h3>
                 <div className="space-y-8">
@@ -189,7 +213,7 @@ export const PricingSection = () => {
             </div>
 
             <div className="border-t border-border pt-12">
-                <h3 className="font-playfair text-3xl font-bold text-foreground mb-8 text-center">
+                <h3 className="font-playfair text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
                     English Medium
                 </h3>
                 <div className="space-y-8">
