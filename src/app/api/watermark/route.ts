@@ -28,18 +28,18 @@ const getUserFromToken = async (req: NextRequest): Promise<UserRecord | null> =>
 
 
 export async function POST(req: NextRequest) {
-  const { pdfUrl } = await req.json();
-
-  if (!pdfUrl) {
-    return NextResponse.json({ error: 'Missing PDF URL.' }, { status: 400 });
-  }
-
-  const user = await getUserFromToken(req);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {    
+    const { pdfUrl } = await req.json();
+
+    if (!pdfUrl) {
+      return NextResponse.json({ error: 'Missing PDF URL.' }, { status: 400 });
+    }
+
+    const user = await getUserFromToken(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const watermarkText = `${user.displayName || 'No Name'} (${user.email || 'No Email'})`;
     
     const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
