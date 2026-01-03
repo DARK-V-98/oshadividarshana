@@ -3,10 +3,9 @@
 
 import { useState } from "react";
 import { useStorage } from "@/firebase";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+import { ref, uploadString, getDownloadURL, deleteObject } from "firebase/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Upload, FileText, XCircle, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,15 +23,24 @@ export default function FileUpload({
   currentFileUrl,
 }: FileUploadProps) {
   const storage = useStorage();
-  const [file, setFile] = useState<File | null>(null);
+  const [fileData, setFileData] = useState<{ name: string; dataUrl: string; } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        if (loadEvent.target?.result) {
+          setFileData({
+            name: file.name,
+            dataUrl: loadEvent.target.result as string,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -49,8 +57,6 @@ export default function FileUpload({
     } catch (error: any) {
         console.error("File deletion error:", error);
         if (error.code === 'storage/object-not-found') {
-            // If the file doesn't exist in storage, but we have a URL,
-            // we should still clear the URL from Firestore.
             onDelete();
             toast({ variant: 'default', title: "File Not Found in Storage", description: "Removing stale URL from record." });
         } else {
@@ -61,33 +67,24 @@ export default function FileUpload({
     }
   }
 
-  const handleUpload = () => {
-    if (!file || !storage) return;
-
-    const storageRef = ref(storage, filePath);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+  const handleUpload = async () => {
+    if (!fileData || !storage) return;
 
     setUploading(true);
+    const storageRef = ref(storage, filePath);
 
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setProgress(progress);
-      },
-      (error) => {
-        console.error("Upload error:", error);
-        toast({ variant: "destructive", title: "Upload Failed", description: error.message });
-        setUploading(false);
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        onUploadComplete(downloadURL);
-        setUploading(false);
-        setFile(null);
-        toast({ title: "Upload Complete", description: "File has been uploaded successfully." });
-      }
-    );
+    try {
+      const snapshot = await uploadString(storageRef, fileData.dataUrl, 'data_url');
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      onUploadComplete(downloadURL);
+      setFileData(null);
+      toast({ title: "Upload Complete", description: "File has been uploaded successfully." });
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({ variant: "destructive", title: "Upload Failed", description: "There was an issue uploading your file." });
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (currentFileUrl) {
@@ -108,22 +105,22 @@ export default function FileUpload({
 
   if (uploading) {
     return (
-      <div className="space-y-2">
-        <Progress value={progress} className="w-full" />
-        <p className="text-sm text-muted-foreground">{Math.round(progress)}% uploaded</p>
+      <div className="flex items-center justify-center space-y-2 p-2">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <p className="text-sm text-muted-foreground">Uploading...</p>
       </div>
     );
   }
 
-  if (file) {
+  if (fileData) {
       return (
         <div className="flex items-center gap-2">
-          <p className="text-sm truncate flex-1">{file.name}</p>
+          <p className="text-sm truncate flex-1">{fileData.name}</p>
           <Button onClick={handleUpload} size="sm">
             <Upload className="mr-2 h-4 w-4" />
             Upload
           </Button>
-          <Button onClick={() => setFile(null)} size="sm" variant="ghost">
+          <Button onClick={() => setFileData(null)} size="sm" variant="ghost">
             <XCircle className="h-4 w-4" />
           </Button>
         </div>
