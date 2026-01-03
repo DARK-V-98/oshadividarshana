@@ -138,11 +138,11 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                         <Link href={link.href} passHref>
-                           <NavigationMenuLink className={navLinkClasses}>
+                         <NavigationMenuLink asChild>
+                           <Link href={link.href} className={navLinkClasses}>
                              {link.label}
-                           </NavigationMenuLink>
-                         </Link>
+                           </Link>
+                         </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}
 
@@ -165,11 +165,11 @@ export const Navbar = () => {
                 
                 {navLinks.slice(1).map((link) => (
                      <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} passHref>
-                          <NavigationMenuLink className={navLinkClasses}>
+                        <NavigationMenuLink asChild>
+                           <Link href={link.href} className={navLinkClasses}>
                             {link.label}
-                          </NavigationMenuLink>
-                        </Link>
+                           </Link>
+                        </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}
 
@@ -263,40 +263,40 @@ export const Navbar = () => {
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   className="text-foreground hover:text-primary transition-colors py-2"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
                <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
                      <Button asChild variant="ghost" onClick={() => {router.push('/dashboard'); setIsOpen(false)}}>
                         <Link href="/dashboard">
-                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
                           Dashboard
                         </Link>
                     </Button>
                     {userProfile?.role === 'admin' && (
                        <Button asChild variant="ghost" onClick={() => {router.push('/dashboard'); setIsOpen(false)}}>
                           <Link href="/dashboard">
-                            <Shield className="w-4 h-4 mr-2" />
+                            <Shield className="mr-2 h-4 w-4" />
                             Admin
                           </Link>
                       </Button>
                     )}
                     <Button onClick={() => { handleSignOut(); setIsOpen(false);}} variant="outline">
-                       <LogOut className="w-4 h-4 mr-2" />
+                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
                     </Button>
                   </>
                 ) : (
                    <Button asChild>
-                    <Link href="/auth" onClick={() => setIsOpen(false)}>
+                    <Link href="/auth">
                       <Sparkles className="w-4 h-4 mr-2" />
                       Sign In
                     </Link>
@@ -318,8 +318,7 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link
-          href={props.href || ''}
+        <a
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -331,7 +330,7 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </Link>
+        </a>
       </NavigationMenuLink>
     </li>
   )
