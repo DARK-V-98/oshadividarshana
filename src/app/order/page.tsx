@@ -307,5 +307,4 @@ export default function OrderPage() {
       </Dialog>
     </main>
   );
-
-    
+}
