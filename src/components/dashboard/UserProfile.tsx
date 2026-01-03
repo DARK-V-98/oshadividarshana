@@ -103,7 +103,7 @@ export default function UserProfile() {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={photo || userProfile?.photoURL || ''} alt={userProfile?.displayName || 'User'} />
+                  <AvatarImage src={photo || userProfile?.photoURL || undefined} alt={userProfile?.displayName || 'User'} />
                   <AvatarFallback className="text-4xl">{getInitials(userProfile?.displayName)}</AvatarFallback>
                 </Avatar>
                 <label

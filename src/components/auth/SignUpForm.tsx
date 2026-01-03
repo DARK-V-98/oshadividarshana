@@ -113,7 +113,7 @@ export default function SignUpForm({ onFlip }: { onFlip: () => void }) {
           uid: user.uid,
           displayName: user.displayName,
           email: user.email,
-          photoURL: user.photoURL,
+          photoURL: user.photoURL || null,
           role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
         });
       }
