@@ -60,8 +60,14 @@ export default function OrderManagement() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to create user files.');
+                let errorMessage = 'Failed to create user files.';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    errorMessage = response.statusText || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
         } else {
             // If status is not 'completed', just update the status
