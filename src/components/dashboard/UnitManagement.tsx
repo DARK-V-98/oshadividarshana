@@ -386,6 +386,26 @@ const DeleteAllUnitsConfirmation = ({ onDeleted }: { onDeleted: () => void }) =>
     )
 }
 
+const UploadStatusIndicator = ({ unit }: { unit: Unit }) => {
+    const uploadedCount = [
+        unit.pdfUrlSinhalaNote,
+        unit.pdfUrlSinhalaAssignment,
+        unit.pdfUrlEnglishNote,
+        unit.pdfUrlEnglishAssignment
+    ].filter(Boolean).length;
+
+    return (
+        <div className="flex items-center gap-1" title={`${uploadedCount} of 4 files uploaded`}>
+            {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                    key={index}
+                    className={`h-2 w-2 rounded-full ${index < uploadedCount ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                />
+            ))}
+        </div>
+    );
+};
+
 export default function UnitManagement() {
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -489,7 +509,8 @@ export default function UnitManagement() {
                                                         <p className="font-medium">{unit.code}: {unit.title}</p>
                                                         <p className="text-sm text-muted-foreground">{unit.sinhalaTitle}</p>
                                                     </div>
-                                                    <div className="flex gap-2 self-end sm:self-center">
+                                                    <div className="flex items-center gap-2 self-end sm:self-center">
+                                                        <UploadStatusIndicator unit={unit} />
                                                         <UnitManager unit={unit} />
                                                         <AlertDialog>
                                                             <AlertDialogTrigger asChild>
@@ -512,3 +533,5 @@ export default function UnitManagement() {
      </div>
   );
 }
+
+    
