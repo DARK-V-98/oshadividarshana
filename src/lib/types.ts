@@ -1,3 +1,4 @@
+
 export type UserProfile = {
     uid: string;
     email: string;
@@ -12,4 +13,12 @@ export type Unit = {
     title: string;
     sinhalaTitle: string;
     category: string;
+    priceSinhalaNote: number | null;
+    priceSinhalaAssignment: number | null;
+    priceEnglishNote: number | null;
+    priceEnglishAssignment: number | null;
+    pdfUrlSinhalaNote: string | null;
+    pdfUrlSinhalaAssignment: string | null;
+    pdfUrlEnglishNote: string | null;
+    pdfUrlEnglishAssignment: string | null;
 };

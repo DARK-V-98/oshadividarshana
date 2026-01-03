@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -58,6 +59,42 @@
         "category": {
           "type": "string",
           "description": "The category of the unit (e.g., bridal, beauty, hair)."
+        },
+        "priceSinhalaNote": {
+          "type": "number",
+          "description": "Price for the Sinhala note PDF."
+        },
+        "priceSinhalaAssignment": {
+          "type": "number",
+          "description": "Price for the Sinhala assignment PDF."
+        },
+        "priceEnglishNote": {
+          "type": "number",
+          "description": "Price for the English note PDF."
+        },
+        "priceEnglishAssignment": {
+          "type": "number",
+          "description": "Price for the English assignment PDF."
+        },
+        "pdfUrlSinhalaNote": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the Sinhala note PDF."
+        },
+        "pdfUrlSinhalaAssignment": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the Sinhala assignment PDF."
+        },
+        "pdfUrlEnglishNote": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the English note PDF."
+        },
+        "pdfUrlEnglishAssignment": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the English assignment PDF."
         }
       },
       "required": [
@@ -85,7 +122,7 @@
       "schema": {
         "$ref": "#/backend/entities/Unit"
       },
-      "description": "Stores course units/modules."
+      "description": "Stores course units/modules with pricing and PDF links."
     }
   }
 }
