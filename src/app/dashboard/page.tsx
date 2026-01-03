@@ -46,11 +46,13 @@ export default function DashboardPage() {
       </div>
 
       <Tabs defaultValue="courses" className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-1'}`}>
           <TabsTrigger value="courses">My Courses</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="units">Unit Management</TabsTrigger>
+            <>
+              <TabsTrigger value="users">User Management</TabsTrigger>
+              <TabsTrigger value="units">Unit Management</TabsTrigger>
+            </>
           )}
         </TabsList>
         <TabsContent value="courses">
@@ -66,13 +68,15 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="users">
-            <UserManagement />
-        </TabsContent>
         {isAdmin && (
-          <TabsContent value="units">
-            <UnitManagement />
-          </TabsContent>
+          <>
+            <TabsContent value="users">
+                <UserManagement />
+            </TabsContent>
+            <TabsContent value="units">
+              <UnitManagement />
+            </TabsContent>
+          </>
         )}
       </Tabs>
     </main>

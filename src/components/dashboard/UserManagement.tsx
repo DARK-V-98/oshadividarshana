@@ -32,6 +32,7 @@ export default function UserManagement() {
   const { data: users, loading } = useCollection<UserProfile>("users");
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { userProfile } = useUser();
 
   const handleRoleChange = async (uid: string, role: "user" | "admin") => {
     if (!firestore) return;
@@ -55,6 +56,8 @@ export default function UserManagement() {
   const filteredUsers = users.filter((user) =>
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const isAdmin = userProfile?.role === 'admin';
 
   return (
     <Card>
@@ -97,6 +100,7 @@ export default function UserManagement() {
                       onValueChange={(value: "user" | "admin") =>
                         handleRoleChange(user.uid, value)
                       }
+                      disabled={!isAdmin}
                     >
                       <SelectTrigger className="w-[120px]">
                         <SelectValue placeholder="Select role" />
