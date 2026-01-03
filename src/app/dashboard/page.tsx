@@ -94,27 +94,30 @@ function DashboardPageContent() {
         </p>
       </div>
       
-      <div className="grid md:grid-cols-1 gap-8 items-start">
-         <div className="md:hidden grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-            {tabsToShow.map((tab) => (
-                <Card
-                    key={tab.value}
-                    onClick={() => setActiveTab(tab.value)}
-                    className={cn(
-                        "p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all",
-                        activeTab === tab.value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-                    )}
-                >
-                    <tab.icon className="h-6 w-6" />
-                    <span className="text-sm font-medium text-center">{tab.label}</span>
-                </Card>
-            ))}
-        </div>
-        
-        <div className="md:col-start-1">
-            {renderContent()}
+      <div className="md:hidden grid grid-cols-2 gap-4">
+        {tabsToShow.map((tab) => (
+            <Card
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={cn(
+                    "p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all",
+                    activeTab === tab.value ? "bg-primary text-primary-foreground" : "bg-card hover:bg-muted"
+                )}
+            >
+                <tab.icon className="h-6 w-6" />
+                <span className="text-sm font-medium text-center">{tab.label}</span>
+            </Card>
+        ))}
+        <div className="col-span-2 mt-8">
+            <div className="p-4 border rounded-xl">
+                 {renderContent()}
+            </div>
         </div>
       </div>
+        
+        <div className="hidden md:block">
+            {renderContent()}
+        </div>
     </main>
   );
 }
