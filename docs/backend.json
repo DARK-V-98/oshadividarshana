@@ -136,11 +136,7 @@
               "itemName": { "type": "string" },
               "price": { "type": "number" },
               "itemType": { "type": "string" },
-              "downloads": {
-                "type": "array",
-                "items": { "type": "string" },
-                "description": "Array of UIDs of users who have downloaded this item."
-              }
+              "userFileUrl": { "type": "string" }
             },
             "required": ["unitId", "itemName", "price", "itemType"]
           }

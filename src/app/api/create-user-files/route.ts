@@ -78,17 +78,28 @@ export async function POST(req: NextRequest) {
         for (const item of order.items) {
             const originalFileName = itemTypeToFileName(item.itemType);
             if (!originalFileName) continue;
-
+            
             const originalFilePath = `units/${item.unitId}/${originalFileName}`;
             const userFilePath = `user-content/${order.userId}/${order.id}/${item.unitId}-${item.itemType}.pdf`;
 
+            const originalFile = bucket.file(originalFilePath);
+            const [exists] = await originalFile.exists();
+            if (!exists) {
+                console.warn(`Original file not found, skipping copy: ${originalFilePath}`);
+                // Still add the item to the list, but without a URL
+                 updatedItems.push({
+                    ...item,
+                    userFileUrl: null,
+                });
+                continue;
+            }
+
             // Copy the file
-            await bucket.file(originalFilePath).copy(bucket.file(userFilePath));
+            await originalFile.copy(bucket.file(userFilePath));
 
             updatedItems.push({
                 ...item,
                 userFileUrl: userFilePath, // Store the path to the user's copy
-                downloaded: false, // Initialize downloaded flag
             });
         }
         

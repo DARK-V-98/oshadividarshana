@@ -1,5 +1,4 @@
 
-
 export type UserProfile = {
     uid: string;
     email: string;
@@ -33,7 +32,6 @@ export type CartItem = {
     title: string;
     sinhalaTitle: string;
     userFileUrl?: string | null; // Path to the user's copied file in Storage
-    downloaded: boolean; // Flag to indicate if the user has downloaded it
 };
 
 export type Order = {
