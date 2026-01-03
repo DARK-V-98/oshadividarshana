@@ -22,3 +22,11 @@ export type Unit = {
     pdfUrlEnglishNote: string | null;
     pdfUrlEnglishAssignment: string | null;
 };
+
+export type CartItem = {
+    unitId: string;
+    unitCode: string;
+    itemName: string;
+    price: number;
+    itemType: 'sinhalaNote' | 'sinhalaAssignment' | 'englishNote' | 'englishAssignment';
+};

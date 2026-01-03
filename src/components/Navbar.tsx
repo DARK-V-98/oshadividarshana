@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
-import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield } from "lucide-react";
+import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const navLinks = [
   { href: "/#home", label: "Home" },
   { href: "/#categories", label: "Courses" },
+  { href: "/order", label: "Order" },
   { href: "/#about", label: "About" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/#testimonials", label: "Reviews" },
@@ -153,7 +154,7 @@ export const Navbar = () => {
               </>
             )}
             {(!isClient || loading) && (
-                 <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />
+                 <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
             )}
           </div>
 

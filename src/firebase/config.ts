@@ -5,7 +5,7 @@ export const firebaseConfig = {
   authDomain: "cdesystem.firebaseapp.com",
   databaseURL: "https://cdesystem-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "cdesystem",
-  storageBucket: "cdesystem.appspot.com",
+  storageBucket: "cdesystem.firebasestorage.app",
   messagingSenderId: "379151186508",
   appId: "1:379151186508:web:1fc9e33a26562d66de52e9"
 };
