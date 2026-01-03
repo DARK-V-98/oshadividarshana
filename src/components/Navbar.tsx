@@ -1,5 +1,6 @@
 
 "use client";
+import * as React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
@@ -161,8 +162,10 @@ export const Navbar = () => {
           </NavigationMenu>
 
           {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-2 min-h-[40px]">
-            {isClient && !loading ? (
+          <div className="hidden md:flex items-center gap-2">
+            {!isClient || loading ? (
+              <div className="h-10 w-24 animate-pulse rounded-md bg-muted" />
+            ) : (
               <>
                 {user && userProfile ? (
                   <DropdownMenu>
@@ -210,8 +213,6 @@ export const Navbar = () => {
                   </Button>
                 )}
               </>
-            ) : (
-                 <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
             )}
           </div>
 
