@@ -223,8 +223,6 @@ const CategorySection = ({ category, medium }: { category: CategoryPricing; medi
 };
 
 export const PricingSection = () => {
-  const [activeMedium, setActiveMedium] = useState<MediumType>("sinhala");
-
   return (
     <section id="pricing" className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -247,59 +245,39 @@ export const PricingSection = () => {
           </p>
         </motion.div>
 
-        {/* Medium Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex justify-center mb-12"
-        >
-          <div className="inline-flex bg-card border border-border rounded-full p-1.5 shadow-lg">
-            {(["sinhala", "english"] as MediumType[]).map((medium) => (
-              <button
-                key={medium}
-                onClick={() => setActiveMedium(medium)}
-                className={`relative px-6 py-3 rounded-full font-medium transition-all ${
-                  activeMedium === medium
-                    ? "text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {activeMedium === medium && (
-                  <motion.div
-                    layoutId="activeMedium"
-                    className="absolute inset-0 bg-primary rounded-full"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-10">
-                  {medium === "sinhala" ? "සිංහල Medium" : "English Medium"}
-                </span>
-              </button>
-            ))}
-          </div>
-        </motion.div>
 
         {/* Pricing Categories */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeMedium}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-8 max-w-5xl mx-auto"
-          >
-            {pricingData.map((category) => (
-              <CategorySection
-                key={category.name}
-                category={category}
-                medium={activeMedium}
-              />
-            ))}
-          </motion.div>
-        </AnimatePresence>
+        <div className="space-y-12 max-w-5xl mx-auto">
+            <div>
+                <h3 className="font-playfair text-3xl font-bold text-foreground mb-8 text-center">
+                    සිංහල Medium
+                </h3>
+                <div className="space-y-8">
+                    {pricingData.map((category) => (
+                    <CategorySection
+                        key={`${category.name}-sinhala`}
+                        category={category}
+                        medium="sinhala"
+                    />
+                    ))}
+                </div>
+            </div>
+
+            <div className="border-t border-border pt-12">
+                <h3 className="font-playfair text-3xl font-bold text-foreground mb-8 text-center">
+                    English Medium
+                </h3>
+                <div className="space-y-8">
+                    {pricingData.map((category) => (
+                    <CategorySection
+                        key={`${category.name}-english`}
+                        category={category}
+                        medium="english"
+                    />
+                    ))}
+                </div>
+            </div>
+        </div>
 
         {/* Note */}
         <motion.div
