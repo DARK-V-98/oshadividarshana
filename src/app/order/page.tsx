@@ -66,9 +66,11 @@ export default function OrderPage() {
       let lastOrderCode = 1000;
       if (!querySnapshot.empty) {
           const lastOrder = querySnapshot.docs[0].data();
-          const codeNumber = parseInt(lastOrder.orderCode.split('-')[1]);
-          if (!isNaN(codeNumber)) {
-              lastOrderCode = codeNumber;
+          if (lastOrder.orderCode && lastOrder.orderCode.includes('-')) {
+            const codeNumber = parseInt(lastOrder.orderCode.split('-')[1]);
+            if (!isNaN(codeNumber)) {
+                lastOrderCode = codeNumber;
+            }
           }
       }
       const newOrderCode = `ORD-${lastOrderCode + 1}`;
