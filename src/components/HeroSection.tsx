@@ -72,7 +72,7 @@ export const HeroSection = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-8"
           >
             <BookOpen className="w-4 h-4" />
-            <span className="text-sm font-medium">NVQ Level 4 Certified</span>
+            <span className="text-sm font-medium">Professional Bridal Dresser & Beautician</span>
           </motion.div>
 
           {/* Main Heading */}
@@ -82,8 +82,7 @@ export const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
           >
-            Master the Art of{" "}
-            <span className="text-gradient">Bridal Beauty</span>
+            Oshadi Vidarshana
           </motion.h1>
 
           {/* Subheading */}
@@ -93,8 +92,7 @@ export const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-10"
           >
-            Your expert resource for NVQ Level 4 study materials and professional 
-            bridal services in Sri Lanka. Complete notes, assignments & bridal makeup.
+            NVQ Level 4 Notes & Bridal Services. Your expert resource for NVQ Level 4 study materials and professional bridal services in Sri Lanka.
           </motion.p>
 
           {/* CTA Buttons */}
