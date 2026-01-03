@@ -1,8 +1,10 @@
+
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Sparkles, Scissors, Package, FileText, ShoppingCart } from "lucide-react";
+import { Crown, Sparkles, Scissors, Package, FileText, ShoppingCart, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type MediumType = "sinhala" | "english";
 
@@ -305,8 +307,15 @@ export const PricingSection = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-center mt-12 space-y-2"
+          className="text-center mt-12 space-y-4 max-w-3xl mx-auto"
         >
+          <Alert variant="destructive" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-700 dark:text-yellow-400">
+            <AlertTriangle className="h-4 w-4 !text-yellow-600 dark:!text-yellow-400" />
+            <AlertTitle className="font-semibold !text-yellow-800 dark:!text-yellow-300">A Note on Usage</AlertTitle>
+            <AlertDescription>
+              These materials are created with love and care for your personal learning journey. Please do not resell or redistribute them. We take the protection of our intellectual property seriously and will pursue legal action against unauthorized distribution.
+            </AlertDescription>
+          </Alert>
           <p className="text-muted-foreground text-sm">
             All prices are in Sri Lankan Rupees (LKR)
           </p>

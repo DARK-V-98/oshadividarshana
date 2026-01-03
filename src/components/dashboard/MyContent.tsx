@@ -7,46 +7,35 @@ import { useStorage } from "@/firebase";
 import { ref, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2, Eye, AlertTriangle, FileText } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
-
-const itemTypeToFileName = (itemType: string): string | null => {
-    switch (itemType) {
-        case 'sinhalaNote': return 'sinhala-note.pdf';
-        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
-        case 'englishNote': return 'english-note.pdf';
-        case 'englishAssignment': return 'english-assignment.pdf';
-        default: return null;
-    }
-};
 
 
 const ViewButton = ({ item }: { item: CartItem }) => {
     const { toast } = useToast();
     const storage = useStorage();
     const [isGenerating, setIsGenerating] = useState(false);
+    const { user, userProfile } = useUser();
 
     const handleView = async () => {
-        if (!storage) {
-            toast({ variant: "destructive", title: "Storage Error", description: "Firebase Storage is not available." });
+        if (!storage || !user) {
+            toast({ variant: "destructive", title: "Error", description: "You are not authenticated." });
             return;
         }
 
-        const fileName = itemTypeToFileName(item.itemType);
-        if (!fileName) {
-            toast({ variant: "destructive", title: "Invalid Item", description: "Cannot determine the file for this item." });
+        if (!item.userFileUrl) {
+            toast({ variant: "destructive", title: "File Not Ready", description: "The file is not yet available. This may be because the admin has not approved the order." });
             return;
         }
-        
-        const filePath = `units/${item.unitId}/${fileName}`;
 
         setIsGenerating(true);
         try {
-            const fileRef = ref(storage, filePath);
+            const fileRef = ref(storage, item.userFileUrl);
             const downloadUrl = await getDownloadURL(fileRef);
             window.open(downloadUrl, '_blank');
             
@@ -150,7 +139,14 @@ export default function MyContent() {
           Here are all the study materials you have purchased. You can view them at any time.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <Alert variant="destructive" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-700 dark:text-yellow-400">
+            <AlertTriangle className="h-4 w-4 !text-yellow-600 dark:!text-yellow-400" />
+            <AlertTitle className="font-semibold !text-yellow-800 dark:!text-yellow-300">A Note on Usage</AlertTitle>
+            <AlertDescription>
+              These materials are created with love and care for your personal learning journey. Please do not resell or redistribute them. We take the protection of our intellectual property seriously and will pursue legal action against unauthorized distribution.
+            </AlertDescription>
+        </Alert>
         {purchasedItems.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <p>You haven't purchased any content yet, or no orders have been completed by an admin.</p>

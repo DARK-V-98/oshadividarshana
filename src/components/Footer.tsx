@@ -1,3 +1,4 @@
+
 "use client";
 import { motion } from "framer-motion";
 import { Heart, ExternalLink } from "lucide-react";
@@ -118,17 +119,6 @@ export const Footer = () => {
                 <ExternalLink className="w-3 h-3" />
               </span>
             </motion.a>
-
-            {/* Made with love */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex items-center gap-1 text-background/60 text-sm"
-            >
-              Made with <Heart className="w-4 h-4 text-primary fill-primary" /> in Sri Lanka
-            </motion.p>
           </div>
         </div>
       </div>
