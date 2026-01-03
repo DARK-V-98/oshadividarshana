@@ -5,7 +5,7 @@ import { useCollection } from "@/firebase/firestore/use-collection";
 import { useUser } from "@/firebase/auth/use-user";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, AlertTriangle, Package, History } from "lucide-react";
+import { Loader2, AlertTriangle, Package, History, Receipt } from "lucide-react";
 import type { Order } from "@/lib/types";
 import { format } from "date-fns";
 import {
@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 
 const OrderStatusBadge = ({ status }: { status: Order['status'] }) => {
@@ -95,6 +96,15 @@ const OrderList = ({ orders, title, description }: { orders: Order[], title: str
                                             ))}
                                         </TableBody>
                                     </Table>
+                                    <div className="mt-4 pt-4 border-t flex justify-end">
+                                        <Button
+                                            disabled={order.status !== 'completed'}
+                                            onClick={() => alert(`Generating receipt for ${order.orderCode}`)}
+                                        >
+                                            <Receipt className="mr-2 h-4 w-4" />
+                                            Generate Receipt
+                                        </Button>
+                                    </div>
                                </div>
                             </AccordionContent>
                         </AccordionItem>
@@ -147,4 +157,3 @@ export default function MyOrders() {
     </div>
   );
 }
-
