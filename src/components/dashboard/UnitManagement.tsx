@@ -659,7 +659,7 @@ export default function UnitManagement() {
         }
     };
 
-    const highestOrderIndex = units.reduce((max, u) => Math.max(max, u.orderIndex), 0);
+    const highestOrderIndex = units.reduce((max, u) => Math.max(max, u.orderIndex || 0), 0);
 
   return (
      <div className="grid grid-cols-1 gap-8">
@@ -740,3 +740,5 @@ export default function UnitManagement() {
      </div>
   );
 }
+
+    

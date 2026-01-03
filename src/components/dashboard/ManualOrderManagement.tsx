@@ -53,58 +53,60 @@ const GeneratedKeyHistory = () => {
             <CardContent>
                 {loading ? <Loader2 className="animate-spin"/> : (
                     <div className="w-full overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Order Code</TableHead>
-                                    <TableHead>Key</TableHead>
-                                    <TableHead>Value</TableHead>
-                                    <TableHead>Created</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Receipt</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                             <TableBody>
-                                {sortedKeys.map(key => (
-                                    <TableRow key={key.id}>
-                                        <TableCell className="font-semibold">{key.orderCode}</TableCell>
-                                        <TableCell>
-                                            <Button variant="ghost" size="sm" onClick={() => copyToClipboard(key.key)} className="font-mono">
-                                                {key.key} <Clipboard className="ml-2 h-4 w-4"/>
-                                            </Button>
-                                        </TableCell>
-                                        <TableCell>Rs. {key.total.toLocaleString()}</TableCell>
-                                        <TableCell>{format(key.createdAt.toDate(), 'PPp')}</TableCell>
-                                        <TableCell>{key.redeemedBy && key.redeemedAt ? `Redeemed on ${format(key.redeemedAt.toDate(), 'PP')}` : 'Not Redeemed'}</TableCell>
-                                         <TableCell>
-                                             <Dialog>
-                                                <DialogTrigger asChild>
-                                                        <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                    >
-                                                        <Receipt className="h-4 w-4" />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
-                                                    <DialogHeader>
-                                                    <DialogTitle>Receipt for Manual Order {key.orderCode}</DialogTitle>
-                                                    </DialogHeader>
-                                                    <ReceiptView order={{
-                                                        ...key, 
-                                                        status: 'completed',
-                                                        userDisplayName: key.redeemedBy || 'N/A',
-                                                        userEmail: 'N/A',
-                                                        userId: key.redeemedBy || 'N/A',
-                                                    }} />
-                                                </DialogContent>
-                                            </Dialog>
-                                         </TableCell>
+                        <div className="border rounded-md">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Order Code</TableHead>
+                                        <TableHead>Key</TableHead>
+                                        <TableHead>Value</TableHead>
+                                        <TableHead>Created</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Receipt</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {sortedKeys.map(key => (
+                                        <TableRow key={key.id}>
+                                            <TableCell className="font-semibold">{key.orderCode}</TableCell>
+                                            <TableCell>
+                                                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(key.key)} className="font-mono">
+                                                    {key.key} <Clipboard className="ml-2 h-4 w-4"/>
+                                                </Button>
+                                            </TableCell>
+                                            <TableCell>Rs. {key.total.toLocaleString()}</TableCell>
+                                            <TableCell>{format(key.createdAt.toDate(), 'PPp')}</TableCell>
+                                            <TableCell>{key.redeemedBy && key.redeemedAt ? `Redeemed on ${format(key.redeemedAt.toDate(), 'PP')}` : 'Not Redeemed'}</TableCell>
+                                            <TableCell>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                            <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8"
+                                                        >
+                                                            <Receipt className="h-4 w-4" />
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-3xl">
+                                                        <DialogHeader>
+                                                        <DialogTitle>Receipt for Manual Order {key.orderCode}</DialogTitle>
+                                                        </DialogHeader>
+                                                        <ReceiptView order={{
+                                                            ...key, 
+                                                            status: 'completed',
+                                                            userDisplayName: key.redeemedBy || 'N/A',
+                                                            userEmail: 'N/A',
+                                                            userId: key.redeemedBy || 'N/A',
+                                                        }} />
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
                 )}
             </CardContent>
@@ -307,3 +309,5 @@ export default function ManualOrderManagement() {
     </div>
   );
 }
+
+    

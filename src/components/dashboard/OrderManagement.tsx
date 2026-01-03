@@ -170,7 +170,7 @@ export default function OrderManagement() {
                 className="max-w-sm"
             />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -186,7 +186,7 @@ export default function OrderManagement() {
                     <Button
                         id="date"
                         variant={"outline"}
-                        className="w-[300px] justify-start text-left font-normal"
+                        className="w-full sm:w-[300px] justify-start text-left font-normal"
                     >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateRange?.from ? (
@@ -332,3 +332,5 @@ export default function OrderManagement() {
     </Card>
   );
 }
+
+    

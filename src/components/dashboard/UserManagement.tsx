@@ -145,57 +145,61 @@ export default function UserManagement() {
       </CardHeader>
       <CardContent>
         <div className="w-full overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Display Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+          <div className="border rounded-md">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center">
-                    Loading...
-                  </TableCell>
+                  <TableHead>Display Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
                 </TableRow>
-              ) : (
-                filteredUsers.map((user) => (
-                  <Dialog key={user.uid}>
-                    <DialogTrigger asChild>
-                        <TableRow className="cursor-pointer">
-                            <TableCell>{user.displayName}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                            <Select
-                                value={user.role}
-                                onValueChange={(value: "user" | "admin") =>
-                                handleRoleChange(user.uid, value)
-                                }
-                                disabled={!isAdmin}
-                                // Prevent dialog from opening when select is clicked
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <SelectTrigger className="w-[120px]">
-                                <SelectValue placeholder="Select role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            </TableCell>
-                        </TableRow>
-                    </DialogTrigger>
-                    <UserDetailsDialog user={user} />
-                 </Dialog>
-                ))
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <Dialog key={user.uid}>
+                      <DialogTrigger asChild>
+                          <TableRow className="cursor-pointer">
+                              <TableCell>{user.displayName}</TableCell>
+                              <TableCell>{user.email}</TableCell>
+                              <TableCell>
+                              <Select
+                                  value={user.role}
+                                  onValueChange={(value: "user" | "admin") =>
+                                  handleRoleChange(user.uid, value)
+                                  }
+                                  disabled={!isAdmin}
+                                  // Prevent dialog from opening when select is clicked
+                                  onClick={(e) => e.stopPropagation()}
+                              >
+                                  <SelectTrigger className="w-[120px]">
+                                  <SelectValue placeholder="Select role" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                              </TableCell>
+                          </TableRow>
+                      </DialogTrigger>
+                      <UserDetailsDialog user={user} />
+                  </Dialog>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
+
+    
