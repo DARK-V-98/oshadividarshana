@@ -13,6 +13,8 @@ import MyContent from "@/components/dashboard/MyContent";
 import MyOrders from "@/components/dashboard/MyOrders";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import SiteSettings from "@/components/dashboard/SiteSettings";
+import UserProfile from "@/components/dashboard/UserProfile";
+import ManualOrderManagement from "@/components/dashboard/ManualOrderManagement";
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();
@@ -44,9 +46,11 @@ export default function DashboardPage() {
   const adminTabs = [
     { value: "overview", label: "Overview" },
     { value: "admin-orders", label: "Order Management" },
+    { value: "manual-orders", label: "Manual Orders" },
     { value: "users", label: "User Management" },
     { value: "units", label: "Unit Management" },
     { value: "site-settings", label: "Site Settings" },
+    { value: "profile", label: "My Profile" },
     { value: "content", label: "My Unlocked Content" },
     { value: "orders", label: "My Orders" },
   ];
@@ -54,6 +58,7 @@ export default function DashboardPage() {
   const userTabs = [
     { value: "content", label: "My Unlocked Content" },
     { value: "orders", label: "My Orders" },
+    { value: "profile", label: "My Profile" },
   ];
 
   const tabsToShow = isAdmin ? adminTabs : userTabs;
@@ -70,18 +75,21 @@ export default function DashboardPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-7' : 'grid-cols-2'}`}>
+        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-3 md:grid-cols-5 lg:grid-cols-9' : 'grid-cols-3'}`}>
             {tabsToShow.map(tab => (
                 <TabsTrigger key={tab.value} value={tab.value} className="py-2">{tab.label}</TabsTrigger>
             ))}
         </TabsList>
         
-        {/* User Tabs */}
+        {/* Common Tabs */}
         <TabsContent value="content">
             <MyContent />
         </TabsContent>
          <TabsContent value="orders">
             <MyOrders />
+        </TabsContent>
+        <TabsContent value="profile">
+            <UserProfile />
         </TabsContent>
         
         {/* Admin Tabs */}
@@ -92,6 +100,9 @@ export default function DashboardPage() {
             </TabsContent>
             <TabsContent value="admin-orders">
                 <OrderManagement />
+            </TabsContent>
+            <TabsContent value="manual-orders">
+                <ManualOrderManagement />
             </TabsContent>
             <TabsContent value="users">
                 <UserManagement />

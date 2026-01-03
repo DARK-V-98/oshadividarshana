@@ -157,6 +157,44 @@
         }
       },
       "required": ["orderCode", "userId", "items", "total", "status", "createdAt"]
+    },
+    "ManualOrderKey": {
+      "title": "Manual Order Key",
+      "description": "Represents a redeemable key for a manual order.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The unique, redeemable key."
+        },
+        "orderCode": {
+          "type": "string",
+          "description": "A unique, human-readable code for the manual order (e.g., MAN-1001)."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/backend/entities/Order/properties/items/items"
+          }
+        },
+        "total": {
+          "type": "number",
+          "description": "The total value of the items in the key."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "redeemedBy": {
+          "type": "string",
+          "description": "The UID of the user who redeemed the key."
+        },
+        "redeemedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["key", "orderCode", "items", "total", "createdAt"]
     }
   },
   "auth": {
@@ -183,6 +221,12 @@
         "$ref": "#/backend/entities/Order"
       },
       "description": "Stores customer orders for study materials."
+    },
+    "/manualOrderKeys/{keyId}": {
+      "schema": {
+        "$ref": "#/backend/entities/ManualOrderKey"
+      },
+      "description": "Stores redeemable keys for manual orders."
     }
   }
 }

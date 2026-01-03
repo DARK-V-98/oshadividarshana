@@ -60,3 +60,14 @@ export type SiteSettings = {
         rating: number;
     }[];
 }
+
+export type ManualOrderKey = {
+    id: string;
+    key: string;
+    orderCode: string;
+    items: CartItem[];
+    total: number;
+    createdAt: any; // Firestore timestamp
+    redeemedBy: string | null;
+    redeemedAt: any | null; // Firestore timestamp
+}

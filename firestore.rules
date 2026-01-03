@@ -48,6 +48,23 @@ service cloud.firestore {
         allow update: if isAdmin(); // Admins can change status etc.
         allow delete: if isAdmin();
     }
+
+    // Admins can create and read manual order keys.
+    // Authenticated users can read a key they are attempting to redeem.
+    // Only an admin can mark a key as redeemed (as part of a batch write).
+    match /manualOrderKeys/{keyId} {
+      allow read, write: if isAdmin();
+      // Allow a user to update a key if they are redeeming it (part of a transaction)
+      allow update: if isAuthenticated() 
+                      && request.resource.data.redeemedBy == request.auth.uid
+                      && resource.data.redeemedBy == null; 
+    }
+
+    // Admins can manage site settings
+    match /settings/site {
+      allow read: if true; // Publicly readable for announcement banner
+      allow write: if isAdmin();
+    }
   }
 }
 
@@ -89,9 +106,10 @@ service firebase.storage {
                     userPurchasedItem(request.auth.uid, unitId, getItemType(fileName));
     }
     
-    // User-specific content folders are no longer used in this ruleset, but keeping for reference.
-    match /user-content/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Allow authenticated users to upload their own profile picture
+    match /user-content/{userId}/profile-picture {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true; // Profile pictures are public
     }
   }
 }

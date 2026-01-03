@@ -111,12 +111,11 @@ export default function OrderPage() {
       await addDoc(ordersRef, orderData);
 
       // Generate WhatsApp message
-      let message = `Hello! I'd like to place an order.\n\n*Order Code: ${newOrderCode}*\n\n`;
+      let message = `Hello! I'd like to place an order.\n\n*Order Code: ${newOrderCode}*\n\n*Items:*\n`;
       cart.forEach(item => {
-        message += `- ${item.itemName} (${item.unitCode}) - Rs. ${item.price}\n`;
+        message += `• ${item.itemName} (${item.unitCode}) - Rs. ${item.price}\n`;
       });
-      message += `\n*Total: Rs. ${total.toLocaleString()}*\n\n`;
-      message += "Please provide the bank details for payment. Thank you!";
+      message += `\n*Total Amount: Rs. ${total.toLocaleString()}*\n\nPlease provide the bank details for payment. Thank you!`;
       
       setWhatsappUrl(`https://wa.me/94754420805?text=${encodeURIComponent(message)}`);
 
