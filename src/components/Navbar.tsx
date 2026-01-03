@@ -98,7 +98,9 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
-            {user && userProfile ? (
+            {loading ? (
+              <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />
+            ) : user && userProfile ? (
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
