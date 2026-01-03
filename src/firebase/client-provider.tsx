@@ -20,6 +20,10 @@ import {
   getFirestore,
   type Firestore,
 } from 'firebase/firestore';
+import {
+  getStorage,
+  type FirebaseStorage
+} from 'firebase/storage';
 
 /**
  * Context for the Firebase app instance.
@@ -34,6 +38,7 @@ export const FirebaseAppContext = createContext<FirebaseApp | undefined>(
 export const FirebaseContext = createContext<{
   auth?: Auth;
   firestore?: Firestore;
+  storage?: FirebaseStorage;
 }>({});
 
 /**
@@ -49,6 +54,7 @@ export function FirebaseClientProvider({
   const [firebaseApp, setFirebaseApp] = useState<FirebaseApp>();
   const [auth, setAuth] = useState<Auth>();
   const [firestore, setFirestore] = useState<Firestore>();
+  const [storage, setStorage] = useState<FirebaseStorage>();
 
   useEffect(() => {
     try {
@@ -56,6 +62,7 @@ export function FirebaseClientProvider({
       setFirebaseApp(app);
       setAuth(getAuth(app));
       setFirestore(getFirestore(app));
+      setStorage(getStorage(app));
     } catch (e) {
       console.error(
         'Failed to initialize Firebase. This can happen if you are using Next.js with React Server Components.'
@@ -65,7 +72,7 @@ export function FirebaseClientProvider({
 
   return (
     <FirebaseAppContext.Provider value={firebaseApp}>
-      <FirebaseContext.Provider value={{ auth, firestore }}>
+      <FirebaseContext.Provider value={{ auth, firestore, storage }}>
         {children}
       </FirebaseContext.Provider>
     </FirebaseAppContext.Provider>

@@ -8,9 +8,12 @@ import { useCollection } from './firestore/use-collection';
 import { useDoc } from './firestore/use-doc';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
 const useAuth = (): Auth | undefined => useFirebase().auth;
 const useFirestore = (): Firestore | undefined => useFirebase().firestore;
+const useStorage = (): FirebaseStorage | undefined => useFirebase().storage;
+
 
 export {
   FirebaseProvider,
@@ -19,8 +22,10 @@ export {
   useUser,
   useAuth,
   useFirestore,
+  useStorage,
   useCollection,
   useDoc,
   getAuth,
-  getFirestore
+  getFirestore,
+  getStorage
 };

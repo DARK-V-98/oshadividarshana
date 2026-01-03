@@ -65,14 +65,7 @@ import {
   } from "@/components/ui/alert-dialog"
 import { Upload, FileText, XCircle, AlertTriangle, Trash2 } from "lucide-react";
 import type { Unit } from "@/lib/types";
-
-
-const unitFormSchema = z.object({
-  category: z.string().min(1, "Category is required."),
-  code: z.string().min(1, "Module code is required."),
-  title: z.string().min(1, "English title is required."),
-  sinhalaTitle: z.string().min(1, "Sinhala title is required."),
-});
+import FileUpload from "./FileUpload";
 
 const priceFormSchema = z.object({
     priceSinhalaNote: z.coerce.number().min(0, "Price must be non-negative."),
@@ -119,6 +112,17 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
             toast({ variant: "destructive", title: "Error", description: "Failed to update prices." });
         }
     };
+
+    const handleUploadComplete = async (field: keyof Unit, url: string) => {
+        if (!firestore) return;
+        const unitDocRef = doc(firestore, "units", unit.id);
+        try {
+            await updateDoc(unitDocRef, { [field]: url });
+            toast({ title: "Success", description: "File URL updated." });
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error", description: "Failed to update file URL." });
+        }
+    };
     
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -130,10 +134,6 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                     <DialogTitle>Manage Unit: {unit.code}</DialogTitle>
                     <DialogDescription>{unit.title}</DialogDescription>
                 </DialogHeader>
-                 <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                    <AlertTriangle className="h-5 w-5" />
-                    <p className="text-sm font-medium">PDF upload requires Firebase Storage setup. This feature is not yet active.</p>
-                </div>
                 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handlePriceUpdate)} className="space-y-6">
@@ -154,18 +154,13 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="flex items-center justify-between">
+                                <div className="space-y-1">
                                     <span className="text-sm font-medium">Note PDF:</span>
-                                    {unit.pdfUrlSinhalaNote ? (
-                                        <div className="flex items-center gap-2 text-green-600">
-                                            <FileText className="h-4 w-4" />
-                                            <span>Uploaded</span>
-                                        </div>
-                                    ) : (
-                                        <Button size="sm" variant="outline" type="button" disabled>
-                                            <Upload className="mr-2 h-4 w-4" /> Upload
-                                        </Button>
-                                    )}
+                                    <FileUpload 
+                                        filePath={`units/${unit.id}/sinhala-note.pdf`}
+                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlSinhalaNote', url)}
+                                        currentFileUrl={unit.pdfUrlSinhalaNote}
+                                    />
                                 </div>
 
                                 <FormField
@@ -181,18 +176,13 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                         </FormItem>
                                     )}
                                 />
-                                 <div className="flex items-center justify-between">
+                                <div className="space-y-1">
                                     <span className="text-sm font-medium">Assignment PDF:</span>
-                                    {unit.pdfUrlSinhalaAssignment ? (
-                                        <div className="flex items-center gap-2 text-green-600">
-                                            <FileText className="h-4 w-4" />
-                                            <span>Uploaded</span>
-                                        </div>
-                                    ) : (
-                                        <Button size="sm" variant="outline" type="button" disabled>
-                                            <Upload className="mr-2 h-4 w-4" /> Upload
-                                        </Button>
-                                    )}
+                                    <FileUpload 
+                                        filePath={`units/${unit.id}/sinhala-assignment.pdf`}
+                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlSinhalaAssignment', url)}
+                                        currentFileUrl={unit.pdfUrlSinhalaAssignment}
+                                    />
                                 </div>
                             </div>
                             
@@ -212,18 +202,13 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="flex items-center justify-between">
+                                <div className="space-y-1">
                                     <span className="text-sm font-medium">Note PDF:</span>
-                                    {unit.pdfUrlEnglishNote ? (
-                                        <div className="flex items-center gap-2 text-green-600">
-                                            <FileText className="h-4 w-4" />
-                                            <span>Uploaded</span>
-                                        </div>
-                                    ) : (
-                                        <Button size="sm" variant="outline" type="button" disabled>
-                                            <Upload className="mr-2 h-4 w-4" /> Upload
-                                        </Button>
-                                    )}
+                                     <FileUpload 
+                                        filePath={`units/${unit.id}/english-note.pdf`}
+                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlEnglishNote', url)}
+                                        currentFileUrl={unit.pdfUrlEnglishNote}
+                                    />
                                 </div>
 
                                 <FormField
@@ -239,18 +224,13 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="flex items-center justify-between">
+                                <div className="space-y-1">
                                     <span className="text-sm font-medium">Assignment PDF:</span>
-                                    {unit.pdfUrlEnglishAssignment ? (
-                                        <div className="flex items-center gap-2 text-green-600">
-                                            <FileText className="h-4 w-4" />
-                                            <span>Uploaded</span>
-                                        </div>
-                                    ) : (
-                                        <Button size="sm" variant="outline" type="button" disabled>
-                                            <Upload className="mr-2 h-4 w-4" /> Upload
-                                        </Button>
-                                    )}
+                                    <FileUpload 
+                                        filePath={`units/${unit.id}/english-assignment.pdf`}
+                                        onUploadComplete={(url) => handleUploadComplete('pdfUrlEnglishAssignment', url)}
+                                        currentFileUrl={unit.pdfUrlEnglishAssignment}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -384,6 +364,56 @@ export default function UnitManagement() {
   const { toast } = useToast();
   const { data: units, loading, error } = useCollection<Unit>("units");
 
+  const handleSeedUnits = () => {
+    if (!firestore) return;
+    if (units.length > 0) {
+        toast({
+            variant: "destructive",
+            title: "Already Seeded",
+            description: "Units have already been seeded.",
+        });
+        return;
+    }
+
+    const batch = writeBatch(firestore);
+    moduleCategories.forEach(category => {
+        const categoryName = category.name;
+        category.modules.forEach(module => {
+            const unitDocRef = doc(collection(firestore, "units"));
+            const newUnit: Omit<Unit, 'id'> = {
+                category: category.id,
+                code: module.code,
+                title: module.title,
+                sinhalaTitle: module.sinhala,
+                priceSinhalaNote: getPriceForUnit(categoryName, 'Note', 'sinhala'),
+                priceSinhalaAssignment: getPriceForUnit(categoryName, 'Assignment', 'sinhala'),
+                priceEnglishNote: getPriceForUnit(categoryName, 'Note', 'english'),
+                priceEnglishAssignment: getPriceForUnit(categoryName, 'Assignment', 'english'),
+                pdfUrlSinhalaNote: null,
+                pdfUrlSinhalaAssignment: null,
+                pdfUrlEnglishNote: null,
+                pdfUrlEnglishAssignment: null,
+            };
+            batch.set(unitDocRef, newUnit);
+        });
+    });
+
+    try {
+        batch.commit();
+        toast({
+            title: "Success",
+            description: "Units have been seeded successfully with default prices.",
+        });
+    } catch (error) {
+        console.error("Error seeding units:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to seed units.",
+        });
+    }
+  }
+
   return (
      <div className="grid grid-cols-1 gap-8">
         <div>
@@ -395,13 +425,9 @@ export default function UnitManagement() {
                             <CardDescription>Seed or view existing units. Click 'Manage' to edit prices and upload files.</CardDescription>
                         </div>
                         <div className="flex gap-2">
-                           <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button onClick={handleSeedUnits} variant="outline" size="sm" disabled={units.length > 0 && !loading}>
-                                    {loading ? 'Loading...' : units.length > 0 ? 'Already Seeded' : 'Seed Units & Prices'}
-                                    </Button>
-                                </AlertDialogTrigger>
-                           </AlertDialog>
+                            <Button onClick={handleSeedUnits} variant="outline" size="sm" disabled={units.length > 0 || loading}>
+                            {loading ? 'Loading...' : units.length > 0 ? 'Already Seeded' : 'Seed Units & Prices'}
+                            </Button>
                            <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button variant="destructive" size="sm" disabled={units.length === 0 || loading}>
@@ -465,54 +491,4 @@ export default function UnitManagement() {
         </div>
      </div>
   );
-
-  function handleSeedUnits() {
-    if (!firestore) return;
-    if (units.length > 0) {
-        toast({
-            variant: "destructive",
-            title: "Already Seeded",
-            description: "Units have already been seeded.",
-        });
-        return;
-    }
-
-    const batch = writeBatch(firestore);
-    moduleCategories.forEach(category => {
-        const categoryName = category.name;
-        category.modules.forEach(module => {
-            const unitDocRef = doc(collection(firestore, "units"));
-            const newUnit: Omit<Unit, 'id'> = {
-                category: category.id,
-                code: module.code,
-                title: module.title,
-                sinhalaTitle: module.sinhala,
-                priceSinhalaNote: getPriceForUnit(categoryName, 'Note', 'sinhala'),
-                priceSinhalaAssignment: getPriceForUnit(categoryName, 'Assignment', 'sinhala'),
-                priceEnglishNote: getPriceForUnit(categoryName, 'Note', 'english'),
-                priceEnglishAssignment: getPriceForUnit(categoryName, 'Assignment', 'english'),
-                pdfUrlSinhalaNote: null,
-                pdfUrlSinhalaAssignment: null,
-                pdfUrlEnglishNote: null,
-                pdfUrlEnglishAssignment: null,
-            };
-            batch.set(unitDocRef, newUnit);
-        });
-    });
-
-    try {
-        batch.commit();
-        toast({
-            title: "Success",
-            description: "Units have been seeded successfully with default prices.",
-        });
-    } catch (error) {
-        console.error("Error seeding units:", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to seed units.",
-        });
-    }
-  }
 }
