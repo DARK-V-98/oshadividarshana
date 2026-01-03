@@ -67,7 +67,9 @@ import { Upload, FileText, XCircle, AlertTriangle, Trash2 } from "lucide-react";
 import type { Unit } from "@/lib/types";
 import FileUpload from "./FileUpload";
 
-const priceFormSchema = z.object({
+const unitDetailsSchema = z.object({
+    title: z.string().min(3, "English title must be at least 3 characters."),
+    sinhalaTitle: z.string().min(3, "Sinhala title must be at least 3 characters."),
     priceSinhalaNote: z.coerce.number().min(0, "Price must be non-negative."),
     priceSinhalaAssignment: z.coerce.number().min(0, "Price must be non-negative."),
     priceEnglishNote: z.coerce.number().min(0, "Price must be non-negative."),
@@ -90,9 +92,11 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
     const firestore = useFirestore();
     const { toast } = useToast();
 
-    const form = useForm<z.infer<typeof priceFormSchema>>({
-        resolver: zodResolver(priceFormSchema),
+    const form = useForm<z.infer<typeof unitDetailsSchema>>({
+        resolver: zodResolver(unitDetailsSchema),
         defaultValues: {
+            title: unit.title || '',
+            sinhalaTitle: unit.sinhalaTitle || '',
             priceSinhalaNote: unit.priceSinhalaNote || 0,
             priceSinhalaAssignment: unit.priceSinhalaAssignment || 0,
             priceEnglishNote: unit.priceEnglishNote || 0,
@@ -100,16 +104,16 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
         },
     });
 
-    const handlePriceUpdate = async (values: z.infer<typeof priceFormSchema>) => {
+    const handleDetailsUpdate = async (values: z.infer<typeof unitDetailsSchema>) => {
         if (!firestore) return;
         const unitDocRef = doc(firestore, "units", unit.id);
         try {
             await updateDoc(unitDocRef, values);
-            toast({ title: "Success", description: "Prices updated successfully." });
+            toast({ title: "Success", description: "Unit details updated successfully." });
             setOpen(false);
         } catch (error) {
-            console.error("Error updating prices:", error);
-            toast({ variant: "destructive", title: "Error", description: "Failed to update prices." });
+            console.error("Error updating details:", error);
+            toast({ variant: "destructive", title: "Error", description: "Failed to update details." });
         }
     };
 
@@ -136,7 +140,35 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                 </DialogHeader>
                 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handlePriceUpdate)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(handleDetailsUpdate)} className="space-y-6">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>English Title</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="sinhalaTitle"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Sinhala Title</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Sinhala Medium */}
                             <div className="space-y-4 rounded-lg border p-4">
@@ -239,7 +271,7 @@ const UnitManager = ({ unit }: { unit: Unit }) => {
                             <DialogClose asChild>
                                 <Button type="button" variant="secondary">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit">Save Prices</Button>
+                            <Button type="submit">Save Changes</Button>
                         </DialogFooter>
                     </form>
                 </Form>

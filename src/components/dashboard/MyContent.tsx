@@ -85,14 +85,16 @@ export default function MyContent() {
   const purchasedItems = useMemo(() => {
     if (!completedOrders?.length || !allUnits?.length) return [];
     
-    const itemsWithDetails: (CartItem & { category: string })[] = [];
+    const itemsWithDetails: (CartItem & { category: string, title: string, sinhalaTitle: string })[] = [];
 
     completedOrders.forEach(order => {
       order.items.forEach(item => {
         const unit = allUnits.find(u => u.id === item.unitId);
         itemsWithDetails.push({ 
             ...item,
-            category: unit?.category || 'other'
+            category: unit?.category || 'other',
+            title: unit?.title || item.title,
+            sinhalaTitle: unit?.sinhalaTitle || item.sinhalaTitle,
         });
       });
     });
@@ -100,9 +102,9 @@ export default function MyContent() {
     // Deduplicate items
     const uniqueItems = Array.from(new Map(itemsWithDetails.map(item => [`${item.unitId}-${item.itemType}`, item])).values());
 
-    const itemsByCategory: Record<string, CartItem[]> = {};
+    const itemsByCategory: Record<string, (CartItem & { title: string, sinhalaTitle: string })[]> = {};
     uniqueItems.forEach(item => {
-        const category = item.category || 'other';
+        const category = (item as any).category || 'other';
         if (!itemsByCategory[category]) {
             itemsByCategory[category] = [];
         }
@@ -170,8 +172,9 @@ export default function MyContent() {
                                     <div className="flex items-center gap-4">
                                         <FileText className="h-6 w-6 text-primary" />
                                         <div>
-                                            <p className="font-medium">{item.itemName}</p>
-                                            <p className="text-sm text-muted-foreground">{item.unitCode}</p>
+                                            <p className="font-medium text-sm md:text-base">{item.title}</p>
+                                            <p className="text-muted-foreground text-xs md:text-sm">{item.sinhalaTitle}</p>
+                                            <p className="text-xs text-primary mt-1">{item.itemName.split(' - ')[1]}</p>
                                         </div>
                                     </div>
                                     <ViewButton item={item} />
@@ -187,4 +190,3 @@ export default function MyContent() {
     </Card>
   );
 }
-
