@@ -1,5 +1,7 @@
+
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { ArrowRight, BookOpen, Crown, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -10,7 +12,15 @@ export const HeroSection = () => {
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
     >
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-rose-soft via-background to-gold-soft" />
+      <Image 
+        src="/bg.jpg"
+        alt="Bridal makeup background"
+        layout="fill"
+        objectFit="cover"
+        className="absolute inset-0 z-0"
+        priority
+      />
+      <div className="absolute inset-0 bg-black/50 z-0"/>
       
       {/* Floating decorative elements */}
       <motion.div
@@ -31,7 +41,7 @@ export const HeroSection = () => {
 
       {/* Floating icons */}
       <motion.div
-        className="absolute top-32 right-1/4 text-primary/40"
+        className="absolute top-32 right-1/4 text-white/40"
         animate={{ y: [-10, 10, -10], rotate: [0, 10, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -45,7 +55,7 @@ export const HeroSection = () => {
         <Sparkles className="w-10 h-10" />
       </motion.div>
       <motion.div
-        className="absolute top-1/2 left-10 text-primary/30"
+        className="absolute top-1/2 left-10 text-white/30"
         animate={{ y: [-8, 8, -8] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -70,7 +80,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
+            className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
           >
             Master the Art of{" "}
             <span className="text-gradient">Bridal Beauty</span>
@@ -81,7 +91,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
+            className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-10"
           >
             Your expert resource for NVQ Level 4 study materials and professional 
             bridal services in Sri Lanka. Complete notes, assignments & bridal makeup.
@@ -108,7 +118,7 @@ export const HeroSection = () => {
               asChild
               variant="outline"
               size="lg"
-              className="border-primary/30 hover:bg-primary/5 px-8 py-6 text-lg"
+              className="border-primary/30 hover:bg-primary/5 text-white hover:text-white px-8 py-6 text-lg"
             >
               <a href="#pricing">View Pricing</a>
             </Button>
@@ -119,7 +129,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto"
+            className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto text-white"
           >
             {[
               { value: "50+", label: "Modules" },
@@ -127,19 +137,16 @@ export const HeroSection = () => {
               { value: "4.9", label: "Rating", icon: Star },
             ].map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="font-playfair text-3xl md:text-4xl font-bold text-foreground flex items-center justify-center gap-1">
+                <div className="font-playfair text-3xl md:text-4xl font-bold flex items-center justify-center gap-1">
                   {stat.value}
                   {stat.icon && <Star className="w-5 h-5 text-gold fill-gold" />}
                 </div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                <div className="text-sm text-white/80 mt-1">{stat.label}</div>
               </div>
             ))}
           </motion.div>
         </div>
       </div>
-
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 };

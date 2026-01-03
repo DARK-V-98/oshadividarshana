@@ -4,7 +4,8 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
-import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield } from "lucide-react";
+import Image from 'next/image';
+import { Menu, X, Sparkles, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
@@ -110,9 +111,7 @@ export const Navbar = () => {
             href="/"
             className="flex items-center gap-2"
           >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-dark flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary-foreground fill-primary-foreground" />
-            </div>
+            <Image src="/ov.png" alt="Oshadi Vidarshana Logo" width={40} height={40} className="rounded-full" />
             <span className="font-playfair text-xl font-semibold text-foreground">
               Oshadi
             </span>
@@ -123,11 +122,11 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                        <NavigationMenuLink asChild>
-                            <Link href={link.href} className={navigationMenuTriggerStyle()}>
+                        <Link href={link.href} legacyBehavior passHref>
+                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                 {link.label}
-                            </Link>
-                        </NavigationMenuLink>
+                            </NavigationMenuLink>
+                        </Link>
                     </NavigationMenuItem>
                 ))}
 
@@ -148,13 +147,13 @@ export const Navbar = () => {
                     </NavigationMenuContent>
                 </NavigationMenuItem>
                 
-                {navLinks.slice(1).map((link) => (
+                {navLinks.slice(2).map((link) => ( // Changed from slice(1) to slice(2) to avoid duplicating "Order"
                      <NavigationMenuItem key={link.href}>
-                        <NavigationMenuLink asChild>
-                             <Link href={link.href} className={navigationMenuTriggerStyle()}>
+                        <Link href={link.href} legacyBehavior passHref>
+                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                 {link.label}
-                            </Link>
-                        </NavigationMenuLink>
+                            </NavigationMenuLink>
+                        </Link>
                     </NavigationMenuItem>
                 ))}
 
