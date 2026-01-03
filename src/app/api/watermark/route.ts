@@ -1,48 +1,63 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { getAuth } from 'firebase-admin/auth';
-import { initAdmin } from '@/firebase/admin';
-import { UserRecord } from 'firebase-admin/auth';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fetch from 'node-fetch';
 
-// This function needs to be defined outside of the POST handler
-// if you want to reuse it or keep the handler cleaner.
-const getUserFromToken = async (req: NextRequest): Promise<UserRecord | null> => {
-    const adminApp = await initAdmin();
-    const auth = getAuth(adminApp);
-    const token = req.headers.get('Authorization')?.split('Bearer ')[1];
-    
-    if (!token) {
-        return null;
-    }
+// Initialize Firebase Admin SDK
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  : undefined;
 
-    try {
-        const decodedToken = await auth.verifyIdToken(token);
-        const user = await auth.getUser(decodedToken.uid);
-        return user;
-    } catch (error) {
-        console.error("Token verification failed:", error);
-        return null;
+function initAdmin() {
+  if (!getApps().length) {
+    if (!serviceAccount) {
+        throw new Error('Missing FIREBASE_SERVICE_ACCOUNT environment variable.');
     }
+    initializeApp({
+      credential: cert(serviceAccount),
+    });
+  }
 }
 
+async function getUserFromToken(req: NextRequest) {
+  initAdmin();
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  const idToken = authHeader.split('Bearer ')[1];
+  if (!idToken) {
+    return null;
+  }
+  try {
+    const decodedToken = await getAuth().verifyIdToken(idToken);
+    return decodedToken;
+  } catch (error) {
+    console.error('Error verifying auth token:', error);
+    return null;
+  }
+}
 
 export async function POST(req: NextRequest) {
-  try {    
-    const { pdfUrl } = await req.json();
-
-    if (!pdfUrl) {
-      return NextResponse.json({ error: 'Missing PDF URL.' }, { status: 400 });
-    }
-
+  try {
     const user = await getUserFromToken(req);
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const watermarkText = `${user.displayName || 'No Name'} (${user.email || 'No Email'})`;
-    
+    const { pdfUrl } = await req.json();
+    if (!pdfUrl) {
+      return new NextResponse(JSON.stringify({ error: 'Missing PDF URL' }), { status: 400 });
+    }
+
+    const watermarkText = `${user.name || 'User'} (${user.email})`;
+
+    // Fetch the original PDF
     const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
+
+    // Load the PDF
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const pages = pdfDoc.getPages();
@@ -50,41 +65,28 @@ export async function POST(req: NextRequest) {
     for (const page of pages) {
       const { width, height } = page.getSize();
       page.drawText(watermarkText, {
-        x: 50,
-        y: height / 2 + 300,
-        font: helveticaFont,
-        size: 50,
-        color: rgb(0.95, 0.1, 0.1),
-        opacity: 0.1,
-        rotate: { type: 'degrees', angle: -45 },
-      });
-       page.drawText(watermarkText, {
-        x: 50,
+        x: width / 2,
         y: height / 2,
         font: helveticaFont,
         size: 50,
-        color: rgb(0.95, 0.1, 0.1),
-        opacity: 0.1,
+        color: rgb(0.75, 0.75, 0.75),
+        opacity: 0.5,
         rotate: { type: 'degrees', angle: -45 },
-      });
-       page.drawText(watermarkText, {
-        x: width/2,
-        y: height / 2 - 300,
-        font: helveticaFont,
-        size: 50,
-        color: rgb(0.95, 0.1, 0.1),
-        opacity: 0.1,
-        rotate: { type: 'degrees', angle: -45 },
+        xSkew: {type: 'degrees', angle: 0},
+        ySkew: {type: 'degrees', angle: 0},
       });
     }
 
+    // Serialize the PDFDocument to bytes (a Uint8Array)
     const pdfBytes = await pdfDoc.save();
-    const base64Pdf = Buffer.from(pdfBytes).toString('base64');
+    
+    // Return as base64 data URI
+    const base64 = Buffer.from(pdfBytes).toString('base64');
+    return NextResponse.json({ watermarkedPdf: `data:application/pdf;base64,${base64}` });
 
-    return NextResponse.json({ watermarkedPdf: `data:application/pdf;base64,${base64Pdf}` });
-
-  } catch (error: any) {
-    console.error('Watermark API Error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to process PDF.' }, { status: 500 });
+  } catch (error) {
+    console.error('Error watermarking PDF:', error);
+    return new NextResponse(JSON.stringify({ error: 'Failed to watermark PDF' }), { status: 500 });
   }
 }
+
