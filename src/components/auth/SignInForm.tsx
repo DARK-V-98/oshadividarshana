@@ -67,9 +67,11 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
       if (error instanceof FirebaseError) {
         switch (error.code) {
           case "auth/user-not-found":
+            description = "No account found with this email. Please sign up.";
+            break;
           case "auth/wrong-password":
           case "auth/invalid-credential":
-            description = "Invalid email or password. Please try again.";
+            description = "Invalid password. Please try again.";
             break;
           case "auth/user-disabled":
             description = "This user account has been disabled.";
