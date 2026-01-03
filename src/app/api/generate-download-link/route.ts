@@ -31,10 +31,20 @@ async function getUserFromToken(req: NextRequest) {
     }
 }
 
+// Map itemType to the file name
+const itemTypeToFileName = (itemType: string): string | null => {
+    switch (itemType) {
+        case 'sinhalaNote': return 'sinhala-note.pdf';
+        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
+        case 'englishNote': return 'english-note.pdf';
+        case 'englishAssignment': return 'english-assignment.pdf';
+        default: return null;
+    }
+}
 
 export async function POST(req: NextRequest) {
     try {
-        initAdmin(); // Ensure admin is initialized
+        initAdmin();
         const user = await getUserFromToken(req);
 
         if (!user) {
@@ -68,45 +78,31 @@ export async function POST(req: NextRequest) {
         
         const item = order.items[itemIndex];
         
-        // Check if user has already downloaded
         if (item.downloads && item.downloads.includes(user.uid)) {
             return NextResponse.json({ message: 'You have already downloaded this file.' }, { status: 403 });
         }
 
-        const unitDoc = await db.collection('units').doc(unitId).get();
-        if (!unitDoc.exists) {
-            return NextResponse.json({ message: 'Unit data not found.' }, { status: 404 });
-        }
-        const unit = unitDoc.data();
-        if(!unit) {
-             return NextResponse.json({ message: 'Unit data not found.' }, { status: 404 });
+        const fileName = itemTypeToFileName(itemType);
+        if (!fileName) {
+            return NextResponse.json({ message: 'Invalid item type specified.' }, { status: 400 });
         }
 
-        let pdfUrl: string | null = null;
-        switch (itemType) {
-            case 'sinhalaNote': pdfUrl = unit.pdfUrlSinhalaNote; break;
-            case 'sinhalaAssignment': pdfUrl = unit.pdfUrlSinhalaAssignment; break;
-            case 'englishNote': pdfUrl = unit.pdfUrlEnglishNote; break;
-            case 'englishAssignment': pdfUrl = unit.pdfUrlEnglishAssignment; break;
-        }
-
-        if (!pdfUrl) {
-            return NextResponse.json({ message: 'File not available for download.' }, { status: 404 });
-        }
-
-        // Generate a signed URL for the download
-        const fileUrl = new URL(pdfUrl);
-        const filePath = decodeURIComponent(fileUrl.pathname.split('/o/')[1].split('?')[0]);
+        // Construct the file path directly, ensuring it matches the upload path
+        const filePath = `units/${unitId}/${fileName}`;
         
         const bucket = getStorage().bucket();
         const file = bucket.file(filePath);
         
+        const [exists] = await file.exists();
+        if (!exists) {
+            return NextResponse.json({ message: 'File not available for download.' }, { status: 404 });
+        }
+
         const [signedUrl] = await file.getSignedUrl({
             action: 'read',
             expires: Date.now() + 15 * 60 * 1000, // 15 minutes
         });
 
-        // Update the order item to mark as downloaded for this user
         const updatedItems = [...order.items];
         const updatedItem = { ...updatedItems[itemIndex] };
         if (!updatedItem.downloads) {
@@ -119,8 +115,8 @@ export async function POST(req: NextRequest) {
         
         return NextResponse.json({ downloadUrl: signedUrl });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Download link generation error:', error);
-        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+        return NextResponse.json({ message: error.message || 'An internal server error occurred.' }, { status: 500 });
     }
 }
