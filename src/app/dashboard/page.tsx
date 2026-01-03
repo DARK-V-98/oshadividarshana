@@ -3,7 +3,7 @@
 
 import { useUser } from "@/firebase/auth/use-user";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Loader2, Package, Users, Settings, User, BarChart, ShoppingCart, KeyRound, BookOpen, FileText } from "lucide-react";
 import UserManagement from "@/components/dashboard/UserManagement";
 import UnitManagement from "@/components/dashboard/UnitManagement";
@@ -17,8 +17,7 @@ import ManualOrderManagement from "@/components/dashboard/ManualOrderManagement"
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-
-export default function DashboardPage() {
+function DashboardPageContent() {
   const { user, userProfile, loading } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,24 +94,8 @@ export default function DashboardPage() {
         </p>
       </div>
       
-      <div className="grid md:grid-cols-[280px_1fr] gap-8 items-start">
-        <nav className="hidden md:flex flex-col gap-2 sticky top-24">
-            {tabsToShow.map(tab => (
-                 <button
-                    key={tab.value}
-                    onClick={() => setActiveTab(tab.value)}
-                    className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                        activeTab === tab.value && "bg-muted text-primary font-medium"
-                    )}
-                >
-                    <tab.icon className="h-5 w-5" />
-                    {tab.label}
-                </button>
-            ))}
-        </nav>
-
-        <div className="md:hidden grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid md:grid-cols-1 gap-8 items-start">
+         <div className="md:hidden grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
             {tabsToShow.map((tab) => (
                 <Card
                     key={tab.value}
@@ -128,10 +111,19 @@ export default function DashboardPage() {
             ))}
         </div>
         
-        <div className="md:col-start-2">
+        <div className="md:col-start-1">
             {renderContent()}
         </div>
       </div>
     </main>
   );
+}
+
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-16 w-16 animate-spin" /></div>}>
+      <DashboardPageContent />
+    </Suspense>
+  )
 }
