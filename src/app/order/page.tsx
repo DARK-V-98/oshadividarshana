@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore } from '@/firebase';
@@ -12,7 +12,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, ShoppingCart, AlertTriangle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Loader2, ShoppingCart, AlertTriangle, CheckCircle } from 'lucide-react';
 import { moduleCategories } from '@/lib/data';
 import type { Unit, CartItem } from '@/lib/types';
 import { Label } from '@/components/ui/label';
@@ -33,6 +41,11 @@ export default function OrderPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
+
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [orderCode, setOrderCode] = useState('');
 
   const handleCartChange = (checked: boolean | string, unit: Unit, itemType: CartItem['itemType'], price: number, itemName: string) => {
     setCart(prevCart => {
@@ -63,7 +76,7 @@ export default function OrderPage() {
 
   const handlePlaceOrder = async () => {
     if (!firestore || !user || !userProfile || cart.length === 0) return;
-
+    setIsPlacingOrder(true);
     try {
       // Get the last order to generate a new order code
       const ordersRef = collection(firestore, 'orders');
@@ -80,6 +93,7 @@ export default function OrderPage() {
           }
       }
       const newOrderCode = `ORD-${lastOrderCode + 1}`;
+      setOrderCode(newOrderCode);
 
       // Create order document
       const orderData = {
@@ -103,15 +117,14 @@ export default function OrderPage() {
       message += `\n*Total: Rs. ${total.toLocaleString()}*\n\n`;
       message += "Please provide the bank details for payment. Thank you!";
       
-      const whatsappUrl = `https://wa.me/94754420805?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      setWhatsappUrl(`https://wa.me/94754420805?text=${encodeURIComponent(message)}`);
 
       toast({
         title: 'Order Submitted!',
         description: 'Your order has been created. Please complete the process on WhatsApp.',
       });
-      setCart([]); // Clear cart
-      router.push('/dashboard');
+      
+      setShowConfirmation(true);
 
     } catch (error) {
         console.error("Error placing order:", error);
@@ -120,8 +133,16 @@ export default function OrderPage() {
             title: 'Order Failed',
             description: 'There was a problem creating your order. Please try again.',
         });
+    } finally {
+        setIsPlacingOrder(false);
     }
   };
+
+  const closeConfirmationDialog = () => {
+    setShowConfirmation(false);
+    setCart([]); // Clear cart
+    router.push('/dashboard');
+  }
 
   const isLoading = unitsLoading || userLoading;
 
@@ -253,14 +274,38 @@ export default function OrderPage() {
                         <span>Total</span>
                         <span>Rs. {total.toLocaleString()}</span>
                     </div>
-                    <Button size="lg" disabled={cart.length === 0 || !user} onClick={handlePlaceOrder}>
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        Place Order via WhatsApp
+                    <Button size="lg" disabled={cart.length === 0 || !user || isPlacingOrder} onClick={handlePlaceOrder}>
+                        {isPlacingOrder ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ShoppingCart className="mr-2 h-5 w-5" />}
+                        Place Order
                     </Button>
                 </CardFooter>
             </Card>
         </div>
       </div>
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                    <CheckCircle className="text-green-500" />
+                    Order Placed Successfully!
+                </DialogTitle>
+                <DialogDescription className="pt-2">
+                    Your order with code <strong>{orderCode}</strong> has been submitted. To complete your purchase, please send the order details to us on WhatsApp to receive payment information.
+                </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-start gap-2">
+                <Button asChild className="w-full sm:w-auto" size="lg">
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                        <ShoppingCart className="mr-2 h-5 w-5" /> Send via WhatsApp
+                    </a>
+                </Button>
+                <Button onClick={closeConfirmationDialog} variant="outline" className="w-full sm:w-auto">
+                    Go to Dashboard
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
-}
+
+    
