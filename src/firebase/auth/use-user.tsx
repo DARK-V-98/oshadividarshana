@@ -14,32 +14,31 @@ export function useUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth || !firestore) {
+    if (!auth) {
       setLoading(false);
       return;
     }
 
     const unsubscribeAuth = onAuthStateChanged(auth, (userAuth) => {
+      setLoading(true);
       if (userAuth) {
         setUser(userAuth);
-        const userDocRef = doc(firestore, "users", userAuth.uid);
-        
-        const unsubscribeProfile = onSnapshot(userDocRef, (doc) => {
-          if (doc.exists()) {
-            setUserProfile(doc.data() as UserProfile);
-          } else {
-            console.log("No such user profile!");
-            setUserProfile(null);
-          }
-          setLoading(false);
-        }, (error) => {
+        if (firestore) {
+          const userDocRef = doc(firestore, "users", userAuth.uid);
+          const unsubscribeProfile = onSnapshot(userDocRef, (snapshot) => {
+            if (snapshot.exists()) {
+              setUserProfile(snapshot.data() as UserProfile);
+            } else {
+              setUserProfile(null);
+            }
+            setLoading(false);
+          }, (error) => {
             console.error("Error fetching user profile:", error);
             setUserProfile(null);
             setLoading(false);
-        });
-
-        // Return the profile listener's unsubscribe function
-        return () => unsubscribeProfile();
+          });
+          return unsubscribeProfile; // This is the cleanup function for the profile listener
+        }
       } else {
         setUser(null);
         setUserProfile(null);
