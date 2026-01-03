@@ -67,10 +67,9 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <motion.a
+          <Link
             href="/#home"
             className="flex items-center gap-2"
-            whileHover={{ scale: 1.02 }}
           >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-rose-dark flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground fill-primary-foreground" />
@@ -78,7 +77,7 @@ export const Navbar = () => {
             <span className="font-playfair text-xl font-semibold text-foreground">
               Oshadi
             </span>
-          </motion.a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -215,3 +214,4 @@ export const Navbar = () => {
     </motion.nav>
   );
 };
+

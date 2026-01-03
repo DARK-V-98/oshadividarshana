@@ -1,14 +1,16 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { doc, onSnapshot, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useFirebase } from "@/firebase/client-provider";
+import type { UserProfile } from "@/lib/types";
 
 export function useUser() {
   const { auth, firestore } = useFirebase();
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,27 +19,27 @@ export function useUser() {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (userAuth) => {
       if (userAuth) {
         setUser(userAuth);
         const userDocRef = doc(firestore, "users", userAuth.uid);
         
-        // Use onSnapshot for real-time updates to user profile
-        const unsubProfile = onSnapshot(userDocRef, (doc) => {
+        const unsubscribeProfile = onSnapshot(userDocRef, (doc) => {
           if (doc.exists()) {
-            setUserProfile(doc.data());
+            setUserProfile(doc.data() as UserProfile);
           } else {
-             // Handle case where user is authenticated but profile doesn't exist
             console.log("No such user profile!");
             setUserProfile(null);
           }
           setLoading(false);
         }, (error) => {
             console.error("Error fetching user profile:", error);
+            setUserProfile(null);
             setLoading(false);
         });
 
-        return () => unsubProfile();
+        // Return the profile listener's unsubscribe function
+        return () => unsubscribeProfile();
       } else {
         setUser(null);
         setUserProfile(null);
@@ -45,7 +47,7 @@ export function useUser() {
       }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, [auth, firestore]);
 
   return { user, userProfile, loading };
