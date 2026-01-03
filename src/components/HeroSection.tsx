@@ -116,7 +116,7 @@ export const HeroSection = () => {
               asChild
               variant="outline"
               size="lg"
-              className="border-primary/30 hover:bg-primary/5 text-white hover:text-white px-8 py-6 text-lg"
+              className="border-gold text-gold hover:bg-gold/10 hover:text-gold px-8 py-6 text-lg"
             >
               <a href="#pricing">View Pricing</a>
             </Button>
