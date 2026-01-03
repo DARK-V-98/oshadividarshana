@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -99,9 +100,9 @@ export const Navbar = () => {
               </>
             ) : (
               <Button asChild>
-                <Link href="/signup">
+                <Link href="/auth">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Get Started
+                  Sign In
                 </Link>
               </Button>
             )}
@@ -138,7 +139,7 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
-               <div className="flex flex-col gap-2">
+               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {user ? (
                   <>
                      <Button asChild variant="ghost" onClick={() => {router.push('/dashboard'); setIsOpen(false)}}>
@@ -153,10 +154,10 @@ export const Navbar = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button asChild>
-                    <Link href="/signup" onClick={() => setIsOpen(false)}>
+                   <Button asChild>
+                    <Link href="/auth" onClick={() => setIsOpen(false)}>
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Get Started
+                      Sign In
                     </Link>
                   </Button>
                 )}
