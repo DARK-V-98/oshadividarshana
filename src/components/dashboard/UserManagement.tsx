@@ -54,6 +54,7 @@ export default function UserManagement() {
   };
 
   const filteredUsers = users.filter((user) =>
+    user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
@@ -66,7 +67,7 @@ export default function UserManagement() {
         <CardDescription>View and manage user permissions.</CardDescription>
         <div className="mt-4">
             <Input
-                placeholder="Search by email..."
+                placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="max-w-sm"
@@ -74,48 +75,50 @@ export default function UserManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Display Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+        <div className="w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={3} className="text-center">
-                  Loading...
-                </TableCell>
+                <TableHead>Display Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
               </TableRow>
-            ) : (
-              filteredUsers.map((user) => (
-                <TableRow key={user.uid}>
-                  <TableCell>{user.displayName}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={user.role}
-                      onValueChange={(value: "user" | "admin") =>
-                        handleRoleChange(user.uid, value)
-                      }
-                      disabled={!isAdmin}
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center">
+                    Loading...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filteredUsers.map((user) => (
+                  <TableRow key={user.uid}>
+                    <TableCell>{user.displayName}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Select
+                        value={user.role}
+                        onValueChange={(value: "user" | "admin") =>
+                          handleRoleChange(user.uid, value)
+                        }
+                        disabled={!isAdmin}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

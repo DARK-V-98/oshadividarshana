@@ -68,34 +68,41 @@ const OrderList = ({ orders, title, description }: { orders: Order[], title: str
                     {orders.map(order => (
                         <AccordionItem value={order.id} key={order.id}>
                             <AccordionTrigger>
-                                <div className="flex justify-between w-full pr-4 items-center">
-                                    <div className="flex flex-col text-left">
+                                <div className="grid grid-cols-3 md:grid-cols-4 gap-2 text-sm w-full pr-4 text-left items-center">
+                                    <div className="flex flex-col">
                                         <span className="font-semibold">{order.orderCode}</span>
-                                        <span className="text-sm text-muted-foreground">{format(order.createdAt.toDate(), "PPP")}</span>
+                                        <span className="text-xs text-muted-foreground">{format(order.createdAt.toDate(), "PP")}</span>
                                     </div>
-                                    <OrderStatusBadge status={order.status} />
-                                    <span className="font-semibold">Rs. {order.total.toLocaleString()}</span>
+                                    <div className="hidden md:block">
+                                        <OrderStatusBadge status={order.status} />
+                                    </div>
+                                    <span className="font-semibold text-right md:text-left">Rs. {order.total.toLocaleString()}</span>
+                                    <div className="block md:hidden text-right">
+                                         <OrderStatusBadge status={order.status} />
+                                    </div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4 bg-muted/50 rounded-lg">
                                     <h4 className="font-semibold mb-2">Items:</h4>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Item Name</TableHead>
-                                                <TableHead className="text-right">Price</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {order.items.map((item, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{item.itemName} ({item.unitCode})</TableCell>
-                                                    <TableCell className="text-right">Rs. {item.price}</TableCell>
+                                    <div className="w-full overflow-x-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Item Name</TableHead>
+                                                    <TableHead className="text-right">Price</TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {order.items.map((item, index) => (
+                                                    <TableRow key={index}>
+                                                        <TableCell>{item.itemName} ({item.unitCode})</TableCell>
+                                                        <TableCell className="text-right">Rs. {item.price}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                     <div className="mt-4 pt-4 border-t flex justify-end">
                                         <Button
                                             disabled={order.status !== 'completed'}

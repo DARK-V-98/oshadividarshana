@@ -48,14 +48,14 @@ export default function DashboardPage() {
       </div>
 
       <Tabs defaultValue="content" className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-2'}`}>
-          <TabsTrigger value="content">My Unlocked Content</TabsTrigger>
-          <TabsTrigger value="orders">My Orders</TabsTrigger>
+        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5' : 'grid-cols-2'}`}>
+          <TabsTrigger value="content" className="py-2">My Unlocked Content</TabsTrigger>
+          <TabsTrigger value="orders" className="py-2">My Orders</TabsTrigger>
           {isAdmin && (
             <>
-              <TabsTrigger value="admin-orders">Order Management</TabsTrigger>
-              <TabsTrigger value="users">User Management</TabsTrigger>
-              <TabsTrigger value="units">Unit Management</TabsTrigger>
+              <TabsTrigger value="admin-orders" className="py-2">Order Management</TabsTrigger>
+              <TabsTrigger value="users" className="py-2">User Management</TabsTrigger>
+              <TabsTrigger value="units" className="py-2">Unit Management</TabsTrigger>
             </>
           )}
         </TabsList>

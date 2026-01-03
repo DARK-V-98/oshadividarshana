@@ -451,20 +451,20 @@ export default function UnitManagement() {
         <div>
             <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <CardTitle>Manage Units</CardTitle>
                             <CardDescription>Seed or view existing units. Click 'Manage' to edit prices and upload files.</CardDescription>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-shrink-0">
                             <Button onClick={handleSeedUnits} variant="outline" size="sm" disabled={units.length > 0 || loading}>
                             {loading ? 'Loading...' : units.length > 0 ? 'Already Seeded' : 'Seed Units & Prices'}
                             </Button>
                            <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button variant="destructive" size="sm" disabled={units.length === 0 || loading}>
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete All
+                                        <Trash2 className="mr-0 sm:mr-2 h-4 w-4" />
+                                        <span className="hidden sm:inline">Delete All</span>
                                     </Button>
                                 </AlertDialogTrigger>
                                 <DeleteAllUnitsConfirmation onDeleted={() => {}} />
@@ -487,32 +487,34 @@ export default function UnitManagement() {
                                         <span className="font-semibold">{category.name} ({categoryUnits.length})</span>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Code</TableHead>
-                                                    <TableHead>Title</TableHead>
-                                                    <TableHead className="text-right">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {categoryUnits.map((unit) => (
-                                                    <TableRow key={unit.id}>
-                                                        <TableCell className="font-medium">{unit.code}</TableCell>
-                                                        <TableCell>{unit.title}</TableCell>
-                                                        <TableCell className="text-right space-x-2">
-                                                            <UnitManager unit={unit} />
-                                                            <AlertDialog>
-                                                                <AlertDialogTrigger asChild>
-                                                                    <Button variant="destructive" size="sm">Delete</Button>
-                                                                </AlertDialogTrigger>
-                                                                <DeleteUnitConfirmation unitId={unit.id} onDeleted={() => {}} />
-                                                            </AlertDialog>
-                                                        </TableCell>
+                                        <div className="w-full overflow-x-auto">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Code</TableHead>
+                                                        <TableHead>Title</TableHead>
+                                                        <TableHead className="text-right">Actions</TableHead>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {categoryUnits.map((unit) => (
+                                                        <TableRow key={unit.id}>
+                                                            <TableCell className="font-medium">{unit.code}</TableCell>
+                                                            <TableCell>{unit.title}</TableCell>
+                                                            <TableCell className="text-right space-x-2">
+                                                                <UnitManager unit={unit} />
+                                                                <AlertDialog>
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <Button variant="destructive" size="sm">Delete</Button>
+                                                                    </AlertDialogTrigger>
+                                                                    <DeleteUnitConfirmation unitId={unit.id} onDeleted={() => {}} />
+                                                                </AlertDialog>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
                                     </AccordionContent>
                                 </AccordionItem>
                             )})}
