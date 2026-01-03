@@ -1,11 +1,12 @@
+
 "use client";
 
 import { useState } from "react";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { doc, updateDoc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
+import { useUser } from "@/firebase/auth/use-user";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,16 +22,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { UserProfile } from "@/lib/types";
 
 
 export default function UserManagement() {
   const firestore = useFirestore();
+  const { userProfile: currentUserProfile } = useUser();
   const { data: users, loading } = useCollection<UserProfile>("users");
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  
+  const isAdmin = currentUserProfile?.role === 'admin';
 
   const handleRoleChange = async (uid: string, role: "user" | "admin") => {
     if (!firestore) return;
@@ -59,6 +63,7 @@ export default function UserManagement() {
     <Card>
       <CardHeader>
         <CardTitle>User Management</CardTitle>
+        <CardDescription>View user roles. Admins can manage user permissions.</CardDescription>
         <div className="mt-4">
             <Input
                 placeholder="Search by email..."
@@ -95,6 +100,7 @@ export default function UserManagement() {
                       onValueChange={(value: "user" | "admin") =>
                         handleRoleChange(user.uid, value)
                       }
+                      disabled={!isAdmin}
                     >
                       <SelectTrigger className="w-[120px]">
                         <SelectValue placeholder="Select role" />
