@@ -4,7 +4,7 @@
 import { useUser } from "@/firebase/auth/use-user";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader2, Package, Users, Settings, User, BarChart, ShoppingCart, KeyRound, BookOpen, FileText, Shield } from "lucide-react";
+import { Loader2, Package, Users, Settings, User, BarChart, ShoppingCart, KeyRound, BookOpen, FileText } from "lucide-react";
 import UserManagement from "@/components/dashboard/UserManagement";
 import UnitManagement from "@/components/dashboard/UnitManagement";
 import OrderManagement from "@/components/dashboard/OrderManagement";
@@ -14,8 +14,7 @@ import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import SiteSettings from "@/components/dashboard/SiteSettings";
 import UserProfile from "@/components/dashboard/UserProfile";
 import ManualOrderManagement from "@/components/dashboard/ManualOrderManagement";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 
@@ -35,11 +34,6 @@ export default function DashboardPage() {
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
-
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return "U";
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  }
 
   if (loading || !userProfile) {
     return (
@@ -89,69 +83,53 @@ export default function DashboardPage() {
   }
 
   return (
-    <SidebarProvider>
-        <Sidebar>
-            <SidebarHeader>
-                 <div className="flex items-center gap-2">
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={userProfile.photoURL || ''} alt={userProfile.displayName || 'User'} />
-                        <AvatarFallback>{getInitials(userProfile.displayName)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                        <span className="font-semibold text-sm truncate">{userProfile.displayName}</span>
-                        <span className="text-xs text-muted-foreground truncate">{userProfile.email}</span>
-                    </div>
-                </div>
-            </SidebarHeader>
-            <SidebarContent>
-                <SidebarMenu>
-                    {tabsToShow.map(tab => (
-                        <SidebarMenuItem key={tab.value}>
-                            <SidebarMenuButton
-                                onClick={() => setActiveTab(tab.value)}
-                                isActive={activeTab === tab.value}
-                                className="justify-start w-full"
-                            >
-                                <tab.icon className="h-5 w-5 mr-3" />
-                                <span>{tab.label}</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    ))}
-                    {isAdmin && (
-                         <SidebarMenuItem>
-                            <SidebarMenuButton
-                                onClick={() => router.push('/dashboard?tab=overview')}
-                                isActive={false}
-                                className="justify-start w-full text-primary hover:text-primary mt-4"
-                            >
-                                <Shield className="h-5 w-5 mr-3" />
-                                <span>Admin View</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
+    <main className="container my-12 md:my-24 min-h-screen">
+       <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-playfair">
+          Dashboard
+        </h1>
+        <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+          Welcome back, {userProfile.displayName}!
+        </p>
+      </div>
+      
+      <div className="grid md:grid-cols-[280px_1fr] gap-8 items-start">
+        <nav className="hidden md:flex flex-col gap-2 sticky top-24">
+            {tabsToShow.map(tab => (
+                 <button
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
+                    className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                        activeTab === tab.value && "bg-muted text-primary font-medium"
                     )}
-                </SidebarMenu>
-            </SidebarContent>
-        </Sidebar>
-        <SidebarInset>
-            <main className="container my-12 md:my-16 min-h-screen">
-                <div className="md:hidden flex items-center gap-4 mb-8">
-                     <SidebarTrigger />
-                     <h1 className="text-2xl font-bold tracking-tighter font-playfair">
-                        {tabsToShow.find(t => t.value === activeTab)?.label}
-                    </h1>
-                </div>
-                <div className="hidden md:block text-center mb-12">
-                    <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-playfair">
-                    Dashboard
-                    </h1>
-                    <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-                    Welcome back, {userProfile.displayName}!
-                    </p>
-                </div>
-                
-                {renderContent()}
-            </main>
-        </SidebarInset>
-    </SidebarProvider>
+                >
+                    <tab.icon className="h-5 w-5" />
+                    {tab.label}
+                </button>
+            ))}
+        </nav>
+
+        <div className="md:hidden grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+            {tabsToShow.map((tab) => (
+                <Card
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
+                    className={cn(
+                        "p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all",
+                        activeTab === tab.value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                    )}
+                >
+                    <tab.icon className="h-6 w-6" />
+                    <span className="text-sm font-medium text-center">{tab.label}</span>
+                </Card>
+            ))}
+        </div>
+        
+        <div className="md:col-start-2">
+            {renderContent()}
+        </div>
+      </div>
+    </main>
   );
 }
