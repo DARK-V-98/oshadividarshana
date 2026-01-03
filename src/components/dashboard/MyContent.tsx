@@ -10,7 +10,6 @@ import { Loader2, Download, AlertTriangle, FileText } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
 import { useMemo, useState } from "react";
 import Link from 'next/link';
-import { watermarkPdf } from "@/ai/flows/watermark-flow";
 import { useToast } from "@/hooks/use-toast";
 
 type PurchasedItem = CartItem & {
@@ -20,6 +19,7 @@ type PurchasedItem = CartItem & {
 const DownloadButton = ({item}: {item: PurchasedItem}) => {
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
+    const { getIdToken } = useUser();
 
     const handleDownload = async () => {
         if (!item.pdfUrl) {
@@ -32,10 +32,29 @@ const DownloadButton = ({item}: {item: PurchasedItem}) => {
         if (isNote) {
             setLoading(true);
             try {
-                const result = await watermarkPdf({ pdfUrl: item.pdfUrl });
+                const token = await getIdToken();
+                if (!token) {
+                    throw new Error("Authentication token not found.");
+                }
+
+                const response = await fetch('/api/watermark', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ pdfUrl: item.pdfUrl }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to watermark PDF.');
+                }
+                
+                const { watermarkedPdf } = await response.json();
                 
                 const link = document.createElement('a');
-                link.href = result.watermarkedPdf;
+                link.href = watermarkedPdf;
                 link.download = `${item.unitCode}_${item.itemName.replace(/\s/g, '_')}_watermarked.pdf`;
                 document.body.appendChild(link);
                 link.click();
@@ -68,13 +87,11 @@ const DownloadButton = ({item}: {item: PurchasedItem}) => {
 export default function MyContent() {
   const { user, loading: userLoading } = useUser();
   
-  // Fetch all completed orders for the current user
   const { data: orders, loading: ordersLoading } = useCollection<Order>(
     user ? 'orders' : undefined,
     user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined
   );
 
-  // Fetch all units once
   const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
   
   const purchasedItems = useMemo(() => {

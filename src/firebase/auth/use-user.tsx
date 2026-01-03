@@ -14,6 +14,11 @@ export function useUser() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const getIdToken = useCallback(async () => {
+    if (!auth?.currentUser) return null;
+    return auth.currentUser.getIdToken();
+  }, [auth]);
+
   useEffect(() => {
     if (!auth || !firestore) {
         setLoading(false);
@@ -23,7 +28,6 @@ export function useUser() {
     let profileUnsubscribe: Unsubscribe | undefined;
 
     const authUnsubscribe = onAuthStateChanged(auth, (userAuth) => {
-      // If the user logs out, clean up everything.
       if (!userAuth) {
         if (profileUnsubscribe) {
           profileUnsubscribe();
@@ -35,12 +39,10 @@ export function useUser() {
         return;
       }
 
-      // If the user is logged in, set the user object and listen for profile changes.
       setUser(userAuth);
       
       const userDocRef = doc(firestore, "users", userAuth.uid);
       
-      // Clean up previous listener before starting a new one
       if (profileUnsubscribe) {
         profileUnsubscribe();
       }
@@ -50,7 +52,6 @@ export function useUser() {
           if (snapshot.exists()) {
             setUserProfile(snapshot.data() as UserProfile);
           } else {
-            // This can happen if the user doc hasn't been created yet
             setUserProfile(null); 
           }
           setLoading(false);
@@ -63,7 +64,6 @@ export function useUser() {
       );
     });
 
-    // Cleanup function for the useEffect hook
     return () => {
       authUnsubscribe();
       if (profileUnsubscribe) {
@@ -72,5 +72,5 @@ export function useUser() {
     };
   }, [auth, firestore]);
 
-  return { user, userProfile, loading };
+  return { user, userProfile, loading, getIdToken };
 }
