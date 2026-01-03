@@ -92,4 +92,16 @@
   .text-gradient {
     @apply bg-gradient-to-r from-primary via-rose-medium to-primary bg-clip-text text-transparent;
   }
+  .no-print {
+    display: initial;
+  }
+}
+
+@media print {
+  body {
+    background-color: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
 }

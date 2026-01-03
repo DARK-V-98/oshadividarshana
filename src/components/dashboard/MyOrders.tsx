@@ -99,7 +99,7 @@ const OrderList = ({ orders, title, description }: { orders: Order[], title: str
                                     <div className="mt-4 pt-4 border-t flex justify-end">
                                         <Button
                                             disabled={order.status !== 'completed'}
-                                            onClick={() => alert(`Generating receipt for ${order.orderCode}`)}
+                                            onClick={() => window.open(`/receipt/${order.id}`, '_blank')}
                                         >
                                             <Receipt className="mr-2 h-4 w-4" />
                                             Generate Receipt

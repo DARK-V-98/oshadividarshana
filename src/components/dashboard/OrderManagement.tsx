@@ -33,7 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { Order } from "@/lib/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, Receipt } from "lucide-react";
 
 export default function OrderManagement() {
   const firestore = useFirestore();
@@ -110,25 +110,35 @@ export default function OrderManagement() {
                                 <p><strong>Order ID:</strong> {order.orderCode}</p>
                                 <p><strong>User:</strong> {order.userDisplayName} ({order.userEmail})</p>
                                 <p><strong>Date:</strong> {format(order.createdAt.toDate(), "PPP p")}</p>
-                                <div className="my-2">
-                                    <strong>Status:</strong>
-                                    <Select
-                                        value={order.status}
-                                        onValueChange={(value: Order['status']) =>
-                                            handleStatusChange(order.id, value)
-                                        }
-                                        disabled={processingOrder === order.id}
-                                        >
-                                        <SelectTrigger className="w-[180px] mt-1">
-                                            {processingOrder === order.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <SelectValue placeholder="Change status" />}
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="processing">Processing</SelectItem>
-                                            <SelectItem value="completed">Completed</SelectItem>
-                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                <div className="my-2 flex items-end gap-4">
+                                    <div>
+                                        <strong>Status:</strong>
+                                        <Select
+                                            value={order.status}
+                                            onValueChange={(value: Order['status']) =>
+                                                handleStatusChange(order.id, value)
+                                            }
+                                            disabled={processingOrder === order.id}
+                                            >
+                                            <SelectTrigger className="w-[180px] mt-1">
+                                                {processingOrder === order.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <SelectValue placeholder="Change status" />}
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="processing">Processing</SelectItem>
+                                                <SelectItem value="completed">Completed</SelectItem>
+                                                <SelectItem value="rejected">Rejected</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        disabled={order.status !== 'completed'}
+                                        onClick={() => window.open(`/receipt/${order.id}`, '_blank')}
+                                    >
+                                        <Receipt className="mr-2 h-4 w-4" />
+                                        Generate Receipt
+                                    </Button>
                                 </div>
                                 <h4 className="font-semibold mt-4 mb-2">Items:</h4>
                                 <Table>
