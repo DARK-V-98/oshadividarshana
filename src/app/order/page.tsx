@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore } from '@/firebase';
@@ -18,10 +18,11 @@ import type { Unit, CartItem } from '@/lib/types';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
 
 export default function OrderPage() {
   const { data: units, loading: unitsLoading, error: unitsError } = useCollection<Unit>('units');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { cart, setCart } = useCart();
   const { user, userProfile, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();

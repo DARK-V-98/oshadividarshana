@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, Sparkles, LogOut, LayoutDashboard, Shield } from "lucide-react";
+import { Menu, X, Sparkles, LogOut, LayoutDashboard, Shield, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/CartContext";
 
 
 const navLinks = [
@@ -69,6 +70,7 @@ export const Navbar = () => {
   const { user, userProfile, loading } = useUser();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const { cart } = useCart();
 
   useEffect(() => {
     setIsClient(true);
@@ -122,9 +124,9 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                         <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                             <Link href={link.href}>{link.label}</Link>
-                        </NavigationMenuLink>
+                         </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}
 
@@ -158,6 +160,17 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
+             <Link href="/order" className="relative">
+                <Button variant="ghost" size="icon">
+                    <ShoppingCart className="h-5 w-5" />
+                </Button>
+                {isClient && cart.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                        {cart.length}
+                    </span>
+                )}
+             </Link>
+
             {isClient && !loading && (
               <>
                 {user && userProfile ? (

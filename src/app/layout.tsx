@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
 import { FirebaseProvider } from '@/firebase';
+import { CartProvider } from '@/context/CartContext';
 
 export const metadata: Metadata = {
   title: 'Oshadi Vidarshana | NVQ Level 4 Study Materials & Bridal Services',
@@ -26,11 +27,13 @@ export default function RootLayout({
       </head>
       <body className={cn("min-h-screen bg-background font-poppins antialiased")}>
         <FirebaseProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-          <FloatingWhatsApp />
-          <Toaster />
+          <CartProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <FloatingWhatsApp />
+            <Toaster />
+          </CartProvider>
         </FirebaseProvider>
       </body>
     </html>
