@@ -11,6 +11,17 @@ import UnitManagement from "@/components/dashboard/UnitManagement";
 import OrderManagement from "@/components/dashboard/OrderManagement";
 import MyContent from "@/components/dashboard/MyContent";
 import MyOrders from "@/components/dashboard/MyOrders";
+import type { Metadata } from 'next';
+
+// Metadata for the dashboard page.
+const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Manage your orders, view purchased content, and access your account settings.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();

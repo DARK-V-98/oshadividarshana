@@ -4,10 +4,9 @@
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import * as admin from 'firebase-admin';
 import { notFound } from 'next/navigation';
-import { format } from 'date-fns';
-import { Receipt } from 'lucide-react';
 import type { Order } from '@/lib/types';
 import ReceiptClient from '@/components/ReceiptClient';
+import type { Metadata } from 'next';
 
 function initAdmin() {
   if (admin.apps.length > 0) {
@@ -43,6 +42,25 @@ async function getOrder(orderId: string): Promise<Order | null> {
   } as Order;
 }
 
+export async function generateMetadata({ params }: { params: { orderId: string } }): Promise<Metadata> {
+  const order = await getOrder(params.orderId);
+  
+  if (!order) {
+    return {
+      title: 'Receipt Not Found',
+    };
+  }
+
+  return {
+    title: `Receipt for Order ${order.orderCode}`,
+    description: `View and print the receipt for your order ${order.orderCode}.`,
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
+
 
 export default async function ReceiptPage({ params }: { params: { orderId: string } }) {
   const order = await getOrder(params.orderId);
@@ -53,4 +71,3 @@ export default async function ReceiptPage({ params }: { params: { orderId: strin
 
   return <ReceiptClient order={order} />;
 }
-

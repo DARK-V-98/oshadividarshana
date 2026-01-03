@@ -19,6 +19,12 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import type { Metadata } from 'next';
+
+const metadata: Metadata = {
+  title: 'Order Course Materials',
+  description: 'Select and order NVQ Level 4 notes and assignments for Bridal, Beauty, and Hair Dressing courses. Secure your study materials today.',
+};
 
 export default function OrderPage() {
   const { data: units, loading: unitsLoading, error: unitsError } = useCollection<Unit>('units');

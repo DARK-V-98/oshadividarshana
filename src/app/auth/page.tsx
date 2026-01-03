@@ -8,6 +8,15 @@ import { useRouter } from "next/navigation";
 import SignUpForm from "@/components/auth/SignUpForm";
 import SignInForm from "@/components/auth/SignInForm";
 import { Loader2 } from "lucide-react";
+import type { Metadata } from 'next';
+
+// Although metadata can't be exported from a client component,
+// we can define it here for reference or future conversion.
+// For now, layout.tsx will handle the base metadata.
+const metadata: Metadata = {
+  title: 'Sign In / Sign Up',
+  description: 'Access your student dashboard to manage orders and view purchased content, or create a new account.',
+};
 
 export default function AuthPage() {
   const [isFlipped, setIsFlipped] = useState(false);
