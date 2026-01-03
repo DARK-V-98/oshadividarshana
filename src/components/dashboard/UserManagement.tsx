@@ -29,12 +29,9 @@ import type { UserProfile } from "@/lib/types";
 
 export default function UserManagement() {
   const firestore = useFirestore();
-  const { userProfile: currentUserProfile } = useUser();
   const { data: users, loading } = useCollection<UserProfile>("users");
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  
-  const isAdmin = currentUserProfile?.role === 'admin';
 
   const handleRoleChange = async (uid: string, role: "user" | "admin") => {
     if (!firestore) return;
@@ -63,7 +60,7 @@ export default function UserManagement() {
     <Card>
       <CardHeader>
         <CardTitle>User Management</CardTitle>
-        <CardDescription>View user roles. Admins can manage user permissions.</CardDescription>
+        <CardDescription>View and manage user permissions.</CardDescription>
         <div className="mt-4">
             <Input
                 placeholder="Search by email..."
@@ -100,7 +97,6 @@ export default function UserManagement() {
                       onValueChange={(value: "user" | "admin") =>
                         handleRoleChange(user.uid, value)
                       }
-                      disabled={!isAdmin}
                     >
                       <SelectTrigger className="w-[120px]">
                         <SelectValue placeholder="Select role" />
