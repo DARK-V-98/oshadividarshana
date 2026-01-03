@@ -25,15 +25,54 @@
         },
         "role": {
           "type": "string",
-          "enum": ["user", "admin"],
+          "enum": [
+            "user",
+            "admin"
+          ],
           "description": "The role of the user."
         }
       },
-      "required": ["uid", "email", "role"]
+      "required": [
+        "uid",
+        "email",
+        "role"
+      ]
+    },
+    "Unit": {
+      "title": "Unit",
+      "description": "Represents a course module or unit.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The unique code for the unit (e.g., BD-M01)."
+        },
+        "title": {
+          "type": "string",
+          "description": "The English title of the unit."
+        },
+        "sinhalaTitle": {
+          "type": "string",
+          "description": "The Sinhala title of the unit."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of the unit (e.g., bridal, beauty, hair)."
+        }
+      },
+      "required": [
+        "code",
+        "title",
+        "sinhalaTitle",
+        "category"
+      ]
     }
   },
   "auth": {
-    "providers": ["email", "google.com"]
+    "providers": [
+      "email",
+      "google.com"
+    ]
   },
   "firestore": {
     "/users/{userId}": {
@@ -41,6 +80,12 @@
         "$ref": "#/backend/entities/UserProfile"
       },
       "description": "Stores user profile information."
+    },
+    "/units/{unitId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Unit"
+      },
+      "description": "Stores course units/modules."
     }
   }
 }
