@@ -11,17 +11,6 @@ import UnitManagement from "@/components/dashboard/UnitManagement";
 import OrderManagement from "@/components/dashboard/OrderManagement";
 import MyContent from "@/components/dashboard/MyContent";
 import MyOrders from "@/components/dashboard/MyOrders";
-import type { Metadata } from 'next';
-
-// Metadata for the dashboard page.
-const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Manage your orders, view purchased content, and access your account settings.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();
@@ -59,7 +48,7 @@ export default function DashboardPage() {
       </div>
 
       <Tabs defaultValue="content" className="w-full">
-        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-1 sm:grid-cols-3 md:grid-cols-5' : 'grid-cols-2'}`}>
+        <TabsList className={`grid w-full h-auto ${isAdmin ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5' : 'grid-cols-2'}`}>
           <TabsTrigger value="content" className="py-2">My Unlocked Content</TabsTrigger>
           <TabsTrigger value="orders" className="py-2">My Orders</TabsTrigger>
           {isAdmin && (
