@@ -33,6 +33,11 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, userProfile, loading } = useUser();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,7 +103,7 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
-            {loading ? (
+            {!isClient || loading ? (
               <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />
             ) : user && userProfile ? (
                <DropdownMenu>
