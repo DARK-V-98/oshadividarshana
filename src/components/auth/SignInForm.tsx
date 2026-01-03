@@ -9,6 +9,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  FirebaseError,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -62,10 +63,25 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Sign in error:", error);
+      let description = "An unexpected error occurred. Please try again.";
+      if (error instanceof FirebaseError) {
+        switch (error.code) {
+          case "auth/user-not-found":
+          case "auth/wrong-password":
+          case "auth/invalid-credential":
+            description = "Invalid email or password. Please try again.";
+            break;
+          case "auth/user-disabled":
+            description = "This user account has been disabled.";
+            break;
+          default:
+            description = error.message;
+        }
+      }
       toast({
         variant: "destructive",
         title: "Sign in failed",
-        description: error.message,
+        description: description,
       });
     }
   };
@@ -93,10 +109,14 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Google sign in error:", error);
+      let description = "An unexpected error occurred during Google Sign-In.";
+      if (error instanceof FirebaseError) {
+        description = error.message;
+      }
       toast({
         variant: "destructive",
         title: "Google sign in failed",
-        description: error.message,
+        description: description,
       });
     }
   };

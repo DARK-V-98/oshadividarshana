@@ -9,6 +9,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   updateProfile,
+  FirebaseError,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -70,10 +71,12 @@ export default function SignUpForm({ onFlip }: { onFlip: () => void }) {
       
       await updateProfile(user, { displayName: values.name });
 
+      // Create user document in Firestore with a default role
       await setDoc(doc(firestore, "users", user.uid), {
         uid: user.uid,
         displayName: values.name,
         email: user.email,
+        photoURL: user.photoURL,
         role: values.email === ADMIN_EMAIL ? 'admin' : 'user',
       });
       
@@ -81,10 +84,18 @@ export default function SignUpForm({ onFlip }: { onFlip: () => void }) {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Sign up error:", error);
+      let description = "An unexpected error occurred. Please try again.";
+      if (error instanceof FirebaseError) {
+        if (error.code === 'auth/email-already-in-use') {
+          description = "An account with this email already exists. Please sign in instead.";
+        } else {
+          description = error.message;
+        }
+      }
       toast({
         variant: "destructive",
         title: "Sign up failed",
-        description: error.message,
+        description: description,
       });
     }
   };
@@ -105,17 +116,21 @@ export default function SignUpForm({ onFlip }: { onFlip: () => void }) {
           email: user.email,
           photoURL: user.photoURL,
           role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
-        }, { merge: true });
+        });
       }
 
       toast({ title: "Signed in with Google successfully!" });
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Google sign in error:", error);
+      let description = "An unexpected error occurred during Google Sign-In.";
+      if (error instanceof FirebaseError) {
+        description = error.message;
+      }
       toast({
         variant: "destructive",
         title: "Google sign in failed",
-        description: error.message,
+        description: description,
       });
     }
   };
