@@ -1,21 +1,28 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, Heart } from "lucide-react";
+import Link from 'next/link';
+import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/firebase/auth/use-user";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+
 
 const navLinks = [
-  { href: "#home", label: "Home" },
-  { href: "#categories", label: "Courses" },
-  { href: "#about", label: "About" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#testimonials", label: "Reviews" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#home", label: "Home" },
+  { href: "/#categories", label: "Courses" },
+  { href: "/#about", label: "About" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/#testimonials", label: "Reviews" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, userProfile } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +31,12 @@ export const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleSignOut = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    router.push('/');
+  };
 
   return (
     <motion.nav
@@ -40,7 +53,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <motion.a
-            href="#home"
+            href="/#home"
             className="flex items-center gap-2"
             whileHover={{ scale: 1.02 }}
           >
@@ -70,17 +83,30 @@ export const Navbar = () => {
           </div>
 
           {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button
-              asChild
-              className="bg-primary hover:bg-rose-dark text-primary-foreground shadow-lg hover:shadow-xl transition-all"
-            >
-              <a href="https://wa.me/94754420805" target="_blank" rel="noopener noreferrer">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Get Started
-              </a>
-            </Button>
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <>
+                <Button asChild variant="ghost" onClick={() => router.push('/dashboard')}>
+                   <Link href="/dashboard">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                   </Link>
+                </Button>
+                <Button onClick={handleSignOut} variant="outline">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button asChild>
+                <Link href="/signup">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Get Started
+                </Link>
+              </Button>
+            )}
           </div>
+
 
           {/* Mobile Menu Button */}
           <button
@@ -112,15 +138,29 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
-              <Button
-                asChild
-                className="bg-primary hover:bg-rose-dark text-primary-foreground w-full"
-              >
-                <a href="https://wa.me/94754420805" target="_blank" rel="noopener noreferrer">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get Started
-                </a>
-              </Button>
+               <div className="flex flex-col gap-2">
+                {user ? (
+                  <>
+                     <Button asChild variant="ghost" onClick={() => {router.push('/dashboard'); setIsOpen(false)}}>
+                        <Link href="/dashboard">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          Dashboard
+                        </Link>
+                    </Button>
+                    <Button onClick={() => { handleSignOut(); setIsOpen(false);}} variant="outline">
+                       <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <Button asChild>
+                    <Link href="/signup" onClick={() => setIsOpen(false)}>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Get Started
+                    </Link>
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

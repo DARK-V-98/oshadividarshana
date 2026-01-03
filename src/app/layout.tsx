@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
+import { FirebaseProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Oshadi Vidarshana | NVQ Level 4 Study Materials & Bridal Services',
@@ -24,11 +25,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("min-h-screen bg-background font-poppins antialiased")}>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <FloatingWhatsApp />
-        <Toaster />
+        <FirebaseProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+          <FloatingWhatsApp />
+          <Toaster />
+        </FirebaseProvider>
       </body>
     </html>
   );
