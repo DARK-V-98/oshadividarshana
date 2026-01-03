@@ -123,7 +123,7 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} legacyBehavior passHref>
+                        <Link href={link.href} passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                 {link.label}
                             </NavigationMenuLink>
@@ -150,7 +150,7 @@ export const Navbar = () => {
                 
                 {navLinks.slice(1).map((link) => (
                      <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} legacyBehavior passHref>
+                        <Link href={link.href} passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                 {link.label}
                             </NavigationMenuLink>
@@ -212,6 +212,7 @@ export const Navbar = () => {
                 )}
               </>
             )}
+            {!isClient && <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />}
           </div>
 
 
