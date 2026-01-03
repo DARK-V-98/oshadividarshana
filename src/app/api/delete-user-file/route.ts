@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as admin from 'firebase-admin';
 import { getStorage } from 'firebase-admin/storage';
-import { FieldValue } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin SDK
 function initAdmin() {
@@ -31,17 +30,6 @@ async function getUserFromToken(req: NextRequest) {
     }
 }
 
-// Map itemType to the file name
-const itemTypeToFileName = (itemType: string): string | null => {
-    switch (itemType) {
-        case 'sinhalaNote': return 'sinhala-note.pdf';
-        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
-        case 'englishNote': return 'english-note.pdf';
-        case 'englishAssignment': return 'english-assignment.pdf';
-        default: return null;
-    }
-}
-
 export async function POST(req: NextRequest) {
     try {
         initAdmin();
@@ -56,7 +44,7 @@ export async function POST(req: NextRequest) {
         if (!orderId || !unitId || !itemType) {
             return NextResponse.json({ message: 'Missing required parameters.' }, { status: 400 });
         }
-
+        
         const db = admin.firestore();
         const orderRef = db.collection('orders').doc(orderId);
         const orderDoc = await orderRef.get();
@@ -66,57 +54,38 @@ export async function POST(req: NextRequest) {
         }
 
         const order = orderDoc.data();
-        if (!order || order.userId !== user.uid || order.status !== 'completed') {
+        if (!order || order.userId !== user.uid) {
             return NextResponse.json({ message: 'You do not have access to this item.' }, { status: 403 });
         }
 
         const itemIndex = order.items.findIndex((item: any) => item.unitId === unitId && item.itemType === itemType);
-
         if (itemIndex === -1) {
             return NextResponse.json({ message: 'Item not found in order.' }, { status: 404 });
         }
         
         const item = order.items[itemIndex];
-        
-        if (item.downloads && item.downloads.includes(user.uid)) {
-            return NextResponse.json({ message: 'You have already downloaded this file.' }, { status: 403 });
+        if (!item.userFileUrl) {
+            return NextResponse.json({ message: 'File has no user-specific copy.' }, { status: 400 });
         }
 
-        const fileName = itemTypeToFileName(itemType);
-        if (!fileName) {
-            return NextResponse.json({ message: 'Invalid item type specified.' }, { status: 400 });
-        }
-
-        // Construct the file path directly, ensuring it matches the upload path
-        const filePath = `units/${unitId}/${fileName}`;
-        
+        // Delete the file from storage
         const bucket = getStorage().bucket();
-        const file = bucket.file(filePath);
-        
-        const [exists] = await file.exists();
-        if (!exists) {
-            return NextResponse.json({ message: 'File not available for download.' }, { status: 404 });
-        }
+        await bucket.file(item.userFileUrl).delete();
 
-        const [signedUrl] = await file.getSignedUrl({
-            action: 'read',
-            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-        });
-
+        // Update the item in the order to mark as downloaded
         const updatedItems = [...order.items];
-        const updatedItem = { ...updatedItems[itemIndex] };
-        if (!updatedItem.downloads) {
-            updatedItem.downloads = [];
-        }
-        updatedItem.downloads.push(user.uid);
-        updatedItems[itemIndex] = updatedItem;
+        updatedItems[itemIndex] = { ...item, downloaded: true };
         
         await orderRef.update({ items: updatedItems });
         
-        return NextResponse.json({ downloadUrl: signedUrl });
+        return NextResponse.json({ message: 'File successfully deleted after download.' });
 
     } catch (error: any) {
-        console.error('Download link generation error:', error);
+        console.error('File deletion error:', error);
+        // If the file was already deleted, it's not a critical server error.
+        if (error.code === 404) {
+             return NextResponse.json({ message: 'File was already deleted.' }, { status: 200 });
+        }
         return NextResponse.json({ message: error.message || 'An internal server error occurred.' }, { status: 500 });
     }
 }

@@ -3,8 +3,9 @@
 
 import { useState } from "react";
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { doc, updateDoc, writeBatch } from "firebase/firestore";
-import { useFirestore } from "@/firebase";
+import { doc, updateDoc } from "firebase/firestore";
+import { useFirestore, useAuth } from "@/firebase";
+import { useUser } from "@/firebase/auth/use-user";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,35 +30,74 @@ import {
     AccordionTrigger,
   } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { Order } from "@/lib/types";
+import { Loader2 } from "lucide-react";
 
 export default function OrderManagement() {
   const firestore = useFirestore();
+  const { idToken } = useUser();
   const { data: orders, loading } = useCollection<Order>("orders");
   const [searchTerm, setSearchTerm] = useState("");
+  const [processingOrder, setProcessingOrder] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleStatusChange = async (orderId: string, status: Order['status']) => {
-    if (!firestore) return;
-    const orderDocRef = doc(firestore, "orders", orderId);
-    try {
-      await updateDoc(orderDocRef, { status });
-      toast({
-        title: "Success",
-        description: "Order status updated successfully.",
-      });
-    } catch (error) {
-      console.error("Error updating status:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update order status.",
-      });
+    if (!firestore || !idToken) return;
+
+    if (status === 'completed') {
+        setProcessingOrder(orderId);
+        try {
+            const response = await fetch('/api/create-user-files', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ orderId }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create user files.');
+            }
+
+            toast({
+                title: "Success",
+                description: "User files created and order status updated.",
+            });
+
+        } catch (error: any) {
+            console.error("Error creating user files:", error);
+            toast({
+                variant: "destructive",
+                title: "File Creation Failed",
+                description: error.message,
+            });
+        } finally {
+            setProcessingOrder(null);
+        }
+    } else {
+        const orderDocRef = doc(firestore, "orders", orderId);
+        try {
+            await updateDoc(orderDocRef, { status });
+            toast({
+              title: "Success",
+              description: "Order status updated successfully.",
+            });
+        } catch (error) {
+            console.error("Error updating status:", error);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to update order status.",
+            });
+        }
     }
   };
 
-  const filteredOrders = orders.filter((order) =>
+  const filteredOrders = (orders || []).filter((order) =>
     order.orderCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.userDisplayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -109,9 +149,10 @@ export default function OrderManagement() {
                                         onValueChange={(value: Order['status']) =>
                                             handleStatusChange(order.id, value)
                                         }
+                                        disabled={processingOrder === order.id}
                                         >
                                         <SelectTrigger className="w-[180px] mt-1">
-                                            <SelectValue placeholder="Change status" />
+                                            {processingOrder === order.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <SelectValue placeholder="Change status" />}
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="pending">Pending</SelectItem>

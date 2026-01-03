@@ -32,7 +32,8 @@ export type CartItem = {
     itemType: 'sinhalaNote' | 'sinhalaAssignment' | 'englishNote' | 'englishAssignment';
     title: string;
     sinhalaTitle: string;
-    downloads?: string[]; // Array of user UIDs who have downloaded
+    userFileUrl?: string | null; // Path to the user's copied file in Storage
+    downloaded: boolean; // Flag to indicate if the user has downloaded it
 };
 
 export type Order = {

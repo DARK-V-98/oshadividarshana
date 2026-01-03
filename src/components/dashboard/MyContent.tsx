@@ -11,63 +11,59 @@ import type { Order, CartItem, Unit } from "@/lib/types";
 import { useMemo, useState } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-type PurchasedItem = CartItem & {
-    pdfUrl: string | null;
-    orderId: string;
-};
-
-const DownloadButton = ({ item, userId, idToken, onDownloadSuccess }: { item: PurchasedItem; userId: string; idToken: string | null, onDownloadSuccess: () => void; }) => {
+const DownloadButton = ({ item, userId, idToken, onDownloadSuccess }: { item: CartItem; userId: string; idToken: string | null, onDownloadSuccess: (item: CartItem) => void; }) => {
     const { toast } = useToast();
     const [isDownloading, setIsDownloading] = useState(false);
-
-    const hasDownloaded = useMemo(() => {
-        return item.downloads?.includes(userId);
-    }, [item.downloads, userId]);
+    const storage = getStorage();
 
     const handleDownload = async () => {
-        if (!item.pdfUrl) {
+        if (!item.userFileUrl) {
             toast({ variant: "destructive", title: "Download Failed", description: "File not available." });
             return;
         }
 
         if (!idToken) {
-            toast({ variant: "destructive", title: "Authentication Error", description: "Could not authenticate your request. Please sign in again." });
+            toast({ variant: "destructive", title: "Authentication Error", description: "Please sign in again." });
             return;
         }
 
         setIsDownloading(true);
         try {
-            const response = await fetch('/api/generate-download-link', {
+            // Get the download URL for the user-specific file
+            const fileRef = ref(storage, item.userFileUrl);
+            const downloadUrl = await getDownloadURL(fileRef);
+
+            // Trigger the download
+            window.open(downloadUrl, '_blank');
+            toast({ title: "Download started!", description: "Your file is downloading." });
+
+            // Call the delete API
+            await fetch('/api/delete-user-file', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                  },
-                body: JSON.stringify({ 
-                    orderId: item.orderId,
+                body: JSON.stringify({
+                    orderId: (item as any).orderId, // We'll need to pass orderId to the item
                     unitId: item.unitId,
                     itemType: item.itemType
                 }),
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to generate download link.');
-            }
+            onDownloadSuccess(item);
 
-            const { downloadUrl } = await response.json();
-            window.open(downloadUrl, '_blank');
-            toast({ title: "Download started!", description: "Your file is downloading. This is a one-time download." });
-            onDownloadSuccess();
         } catch (error: any) {
+            console.error("Download error:", error);
             toast({ variant: "destructive", title: "Download Failed", description: error.message });
         } finally {
             setIsDownloading(false);
         }
     };
 
-    if (hasDownloaded) {
+    if (item.downloaded) {
         return (
             <Button size="sm" disabled>
                 <Lock className="mr-2 h-4 w-4" />
@@ -77,59 +73,50 @@ const DownloadButton = ({ item, userId, idToken, onDownloadSuccess }: { item: Pu
     }
 
     return (
-        <Button onClick={handleDownload} size="sm" disabled={!item.pdfUrl || isDownloading}>
-            {isDownloading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <Download className="mr-2 h-4 w-4" />
-            )}
+        <Button onClick={handleDownload} size="sm" disabled={!item.userFileUrl || isDownloading}>
+            {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             Download
         </Button>
     );
 };
 
 export default function MyContent() {
-  const { user, idToken, getIdToken, loading: userLoading } = useUser();
-  const [refreshKey, setRefreshKey] = useState(0); // Add this state
+  const { user, idToken, loading: userLoading } = useUser();
   
-  const { data: orders, loading: ordersLoading } = useCollection<Order>(
+  const [localOrders, setLocalOrders] = useState<Order[]>([]);
+
+  const { data: fetchedOrders, loading: ordersLoading } = useCollection<Order>(
     user ? 'orders' : undefined,
-    user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined,
-    [refreshKey] // Add refreshKey to dependencies
+    user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined
   );
 
-  const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
-  
+  useEffect(() => {
+    if (fetchedOrders) {
+      setLocalOrders(fetchedOrders);
+    }
+  }, [fetchedOrders]);
+
+
   const purchasedItems = useMemo(() => {
-    if (!orders?.length || !allUnits?.length) return [];
+    if (!localOrders?.length) return [];
     
-    const itemsWithUrls = new Map<string, PurchasedItem>();
+    const itemsWithUrls: (CartItem & { orderId: string, category: string })[] = [];
 
-    orders.forEach(order => {
+    localOrders.forEach(order => {
       order.items.forEach(item => {
-        const unit = allUnits.find(u => u.id === item.unitId);
-        if (!unit) return;
-
-        let pdfUrl: string | null = null;
-        switch (item.itemType) {
-            case 'sinhalaNote': pdfUrl = unit.pdfUrlSinhalaNote; break;
-            case 'sinhalaAssignment': pdfUrl = unit.pdfUrlSinhalaAssignment; break;
-            case 'englishNote': pdfUrl = unit.pdfUrlEnglishNote; break;
-            case 'englishAssignment': pdfUrl = unit.pdfUrlEnglishAssignment; break;
-        }
-
-        const uniqueKey = `${item.unitId}-${item.itemType}`;
-        // We only want to show the item if it hasn't been added yet, to avoid duplicates across multiple orders
-        if (!itemsWithUrls.has(uniqueKey)) {
-             itemsWithUrls.set(uniqueKey, { ...item, pdfUrl, orderId: order.id });
+        if(item.userFileUrl) { // Only show items that have a user file created
+            itemsWithUrls.push({ 
+                ...item, 
+                orderId: order.id,
+                category: allUnits.find(u => u.id === item.unitId)?.category || 'other'
+            });
         }
       });
     });
 
-    const itemsByCategory: Record<string, PurchasedItem[]> = {};
+    const itemsByCategory: Record<string, (CartItem & { orderId: string })[]> = {};
     itemsWithUrls.forEach(item => {
-        const unit = allUnits.find(u => u.id === item.unitId);
-        const category = unit?.category || 'other';
+        const category = item.category || 'other';
         if (!itemsByCategory[category]) {
             itemsByCategory[category] = [];
         }
@@ -141,7 +128,21 @@ export default function MyContent() {
         items: items.sort((a,b) => a.unitCode.localeCompare(b.unitCode)),
     }));
 
-  }, [orders, allUnits]);
+  }, [localOrders]);
+
+  const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
+
+  const handleDownloadSuccess = (downloadedItem: CartItem) => {
+    // Update the local state to reflect that the item has been downloaded
+    setLocalOrders(prevOrders => prevOrders.map(order => ({
+        ...order,
+        items: order.items.map(item => 
+            item.unitId === downloadedItem.unitId && item.itemType === downloadedItem.itemType
+            ? { ...item, downloaded: true }
+            : item
+        )
+    })));
+  };
 
   const isLoading = userLoading || ordersLoading || unitsLoading;
   
@@ -166,17 +167,10 @@ export default function MyContent() {
     );
   }
 
-  const handleDownloadSuccess = () => {
-    // This function will be called after a successful download API call.
-    // It refreshes the user's token and forces a re-fetch of the orders data.
-    getIdToken();
-    setRefreshKey(prev => prev + 1);
-  };
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>My Content</CardTitle>
+        <CardTitle>My Unlocked Content</CardTitle>
         <CardDescription>
           Here are all the study materials you have purchased. Downloads are limited to one time per item.
         </CardDescription>
@@ -184,7 +178,7 @@ export default function MyContent() {
       <CardContent>
         {purchasedItems.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
-            <p>You haven't purchased any content yet.</p>
+            <p>You haven't purchased any content yet, or no orders are marked as 'completed'.</p>
             <Button asChild variant="link">
                 <Link href="/order">Browse materials</Link>
             </Button>
