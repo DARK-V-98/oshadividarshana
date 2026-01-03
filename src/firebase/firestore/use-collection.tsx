@@ -1,6 +1,6 @@
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   collection,
   onSnapshot,
@@ -19,20 +19,25 @@ export function useCollection<T>(path: string | undefined, options?: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Memoize the where clause to prevent re-renders
+  const whereClause = useMemo(() => options?.where, [options?.where && options.where[2]]);
+
   useEffect(() => {
-    if (!firestore || !path) {
+    // Exit early if firestore, path, or the value in the where clause is not ready
+    if (!firestore || !path || (whereClause && whereClause[2] === undefined)) {
         setLoading(false);
         setData([]);
         return;
     };
 
     let q: Query<DocumentData>;
-    if (options?.where) {
-      q = query(collection(firestore, path), where(...options.where));
+    if (whereClause) {
+      q = query(collection(firestore, path), where(...whereClause));
     } else {
       q = query(collection(firestore, path));
     }
     
+    setLoading(true);
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -41,14 +46,14 @@ export function useCollection<T>(path: string | undefined, options?: {
         setLoading(false);
       },
       (err) => {
+        console.error("useCollection error:", err);
         setError(err);
         setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  // Ensure where clause is stable or memoized if it's an array/object
-  }, [firestore, path, options?.where]);
+  }, [firestore, path, whereClause]);
 
   return { data, loading, error };
 }
