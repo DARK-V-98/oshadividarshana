@@ -16,8 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import ReceiptView from "./ReceiptView";
 
 
 const OrderStatusBadge = ({ status }: { status: Order['status'] }) => {
@@ -97,13 +105,20 @@ const OrderList = ({ orders, title, description }: { orders: Order[], title: str
                                         </Table>
                                     </div>
                                     <div className="mt-4 pt-4 border-t flex justify-end">
-                                        <Button
-                                            disabled={order.status !== 'completed'}
-                                            onClick={() => window.open(`/receipt/${order.id}`, '_blank')}
-                                        >
-                                            <Receipt className="mr-2 h-4 w-4" />
-                                            Generate Receipt
-                                        </Button>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button disabled={order.status !== 'completed'}>
+                                                    <Receipt className="mr-2 h-4 w-4" />
+                                                    View Receipt
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-3xl">
+                                                <DialogHeader>
+                                                    <DialogTitle>Receipt for Order {order.orderCode}</DialogTitle>
+                                                </DialogHeader>
+                                                <ReceiptView order={order} />
+                                            </DialogContent>
+                                        </Dialog>
                                     </div>
                                </div>
                             </AccordionContent>
