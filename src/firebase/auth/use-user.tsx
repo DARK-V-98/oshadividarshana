@@ -3,9 +3,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
+import { doc, onSnapshot, Unsubscribe, getDoc, setDoc } from "firebase/firestore";
 import { useAuth, useFirestore } from "@/firebase";
 import type { UserProfile } from "@/lib/types";
+
+const ADMIN_EMAIL = "tikfese@gmail.com";
 
 export function useUser() {
   const auth = useAuth();
@@ -59,11 +61,25 @@ export function useUser() {
       }
 
       profileUnsubscribe = onSnapshot(userDocRef, 
-        (snapshot) => {
+        async (snapshot) => {
           if (snapshot.exists()) {
             setUserProfile(snapshot.data() as UserProfile);
           } else {
-            setUserProfile(null); 
+             // If user profile doesn't exist, create it
+            console.log("User profile not found, creating a new one.");
+            const newUserProfile: UserProfile = {
+                uid: userAuth.uid,
+                email: userAuth.email || '',
+                displayName: userAuth.displayName || 'New User',
+                photoURL: userAuth.photoURL || '',
+                role: userAuth.email === ADMIN_EMAIL ? 'admin' : 'user',
+            };
+            try {
+                await setDoc(userDocRef, newUserProfile);
+                setUserProfile(newUserProfile);
+            } catch (e) {
+                console.error("Error creating user profile:", e);
+            }
           }
           setLoading(false);
         }, 
