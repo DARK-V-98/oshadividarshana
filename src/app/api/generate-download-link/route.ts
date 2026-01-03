@@ -17,7 +17,6 @@ function initAdmin() {
 }
 
 async function getUserFromToken(req: NextRequest) {
-    initAdmin();
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return null;
@@ -35,7 +34,7 @@ async function getUserFromToken(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        initAdmin();
+        initAdmin(); // Ensure admin is initialized
         const user = await getUserFromToken(req);
 
         if (!user) {
