@@ -10,12 +10,20 @@ function initAdmin() {
     if (admin.apps.length > 0) {
         return admin.app();
     }
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string);
+    const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountString) {
+        throw new Error('The FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set.');
+    }
+    const serviceAccount = typeof serviceAccountString === 'string' 
+        ? JSON.parse(serviceAccountString) 
+        : serviceAccountString;
+
     return admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     });
 }
+
 
 async function getUserFromToken(req: NextRequest) {
     const authHeader = req.headers.get('Authorization');
@@ -104,6 +112,9 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error('Download link generation error:', error);
-        return NextResponse.json({ message: error.message || 'An internal server error occurred.' }, { status: 500 });
+        return new NextResponse(
+            JSON.stringify({ message: error.message || 'An internal server error occurred.' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
     }
 }
