@@ -3,11 +3,20 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
-import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, User as UserIcon, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 const navLinks = [
@@ -38,6 +47,11 @@ export const Navbar = () => {
     await signOut(auth);
     router.push('/');
   };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "U";
+    return name.split(' ').map(n => n[0]).join('');
+  }
 
   return (
     <motion.nav
@@ -85,19 +99,43 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
-            {user ? (
-              <>
-                <Button asChild variant="ghost" onClick={() => router.push('/dashboard')}>
-                   <Link href="/dashboard">
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
-                   </Link>
-                </Button>
-                <Button onClick={handleSignOut} variant="outline">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              </>
+            {user && userProfile ? (
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={userProfile.photoURL || ''} alt={userProfile.displayName || 'User'} />
+                      <AvatarFallback>{getInitials(userProfile.displayName)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userProfile.displayName}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {userProfile.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                  {userProfile.role === 'admin' && (
+                     <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Admin</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button asChild>
                 <Link href="/auth">
@@ -148,6 +186,14 @@ export const Navbar = () => {
                           Dashboard
                         </Link>
                     </Button>
+                    {userProfile?.role === 'admin' && (
+                       <Button asChild variant="ghost" onClick={() => {router.push('/dashboard'); setIsOpen(false)}}>
+                          <Link href="/dashboard">
+                            <Shield className="w-4 h-4 mr-2" />
+                            Admin
+                          </Link>
+                      </Button>
+                    )}
                     <Button onClick={() => { handleSignOut(); setIsOpen(false);}} variant="outline">
                        <LogOut className="w-4 h-4 mr-2" />
                       Sign Out
