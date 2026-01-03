@@ -40,7 +40,8 @@ const GeneratedKeyHistory = () => {
     const { toast } = useToast();
 
     const sortedKeys = useMemo(() => {
-        return (keys || []).sort((a,b) => b.createdAt.toDate() - a.createdAt.toDate());
+        if (!keys) return [];
+        return [...keys].sort((a,b) => b.createdAt.toDate() - a.createdAt.toDate());
     }, [keys]);
     
     return (
@@ -74,7 +75,7 @@ const GeneratedKeyHistory = () => {
                                         </TableCell>
                                         <TableCell>Rs. {key.total.toLocaleString()}</TableCell>
                                         <TableCell>{format(key.createdAt.toDate(), 'PPp')}</TableCell>
-                                        <TableCell>{key.redeemedBy ? `Redeemed on ${format(key.redeemedAt.toDate(), 'PP')}` : 'Not Redeemed'}</TableCell>
+                                        <TableCell>{key.redeemedBy && key.redeemedAt ? `Redeemed on ${format(key.redeemedAt.toDate(), 'PP')}` : 'Not Redeemed'}</TableCell>
                                          <TableCell>
                                              <Dialog>
                                                 <DialogTrigger asChild>
@@ -160,7 +161,7 @@ export default function ManualOrderManagement() {
         }
         const newOrderCode = `MAN-${lastOrderCodeNum + 1}`;
 
-        const keyData: Omit<ManualOrderKey, 'id'> = {
+        const keyData: Omit<ManualOrderKey, 'id' | 'createdAt'> & { createdAt: any } = {
             key: newKey,
             orderCode: newOrderCode,
             items: cart,
@@ -187,6 +188,10 @@ export default function ManualOrderManagement() {
   if (unitsLoading) {
     return <Loader2 className="h-8 w-8 animate-spin" />;
   }
+  
+  if (unitsError) {
+    return <div className="text-destructive">Error loading units: {unitsError.message}</div>
+  }
 
   return (
     <div className="space-y-8">
@@ -198,54 +203,54 @@ export default function ManualOrderManagement() {
                         <CardDescription>Select units to include in a manual order and generate a redeemable key.</CardDescription>
                     </CardHeader>
                      <CardContent>
-                        <Accordion type="multiple" defaultValue={moduleCategories.map(c => c.id)} className="w-full">
+                        <Accordion type="multiple" defaultValue={['bridal']} className="w-full">
                         {moduleCategories.map(category => {
-                        const categoryUnits = units.filter(u => u.category === category.id).sort((a,b) => a.code.localeCompare(b.code));
-                        if (categoryUnits.length === 0) return null;
+                            const categoryUnits = (units || []).filter(u => u.category === category.id).sort((a,b) => a.code.localeCompare(b.code));
+                            if (categoryUnits.length === 0) return null;
 
-                        return (
-                            <AccordionItem value={category.id} key={category.id}>
-                                <AccordionTrigger><h2 className="text-xl font-semibold">{category.name}</h2></AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="grid grid-cols-1 gap-4">
-                                    {categoryUnits.map(unit => (
-                                        <Card key={unit.id} className="p-4">
-                                            <h3 className="font-semibold">{unit.code} - {unit.title}</h3>
-                                            <p className="text-sm text-muted-foreground mb-4">{unit.sinhalaTitle}</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                                <div className="space-y-3">
-                                                    <h4 className="font-medium text-center text-sm border-b pb-2">Sinhala Medium</h4>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Checkbox id={`sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaNote', unit.priceSinhalaNote || 0, `${unit.title} - Sinhala Note`)} />
-                                                        <Label htmlFor={`sn-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
-                                                        <span className="text-sm font-semibold">Rs. {unit.priceSinhalaNote || 0}</span>
+                            return (
+                                <AccordionItem value={category.id} key={category.id}>
+                                    <AccordionTrigger><h2 className="text-xl font-semibold">{category.name}</h2></AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="grid grid-cols-1 gap-4">
+                                        {categoryUnits.map(unit => (
+                                            <Card key={unit.id} className="p-4">
+                                                <h3 className="font-semibold">{unit.code} - {unit.title}</h3>
+                                                <p className="text-sm text-muted-foreground mb-4">{unit.sinhalaTitle}</p>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                                    <div className="space-y-3">
+                                                        <h4 className="font-medium text-center text-sm border-b pb-2">Sinhala Medium</h4>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`man-sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaNote', unit.priceSinhalaNote || 0, `${unit.title} - Sinhala Note`)} disabled={!unit.pdfUrlSinhalaNote} />
+                                                            <Label htmlFor={`man-sn-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlSinhalaNote && "text-muted-foreground/50")}>Note</Label>
+                                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlSinhalaNote && "text-muted-foreground/50")}>Rs. {unit.priceSinhalaNote || 0}</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`man-sa-${unit.id}`} checked={isChecked(unit.id, 'sinhalaAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaAssignment', unit.priceSinhalaAssignment || 0, `${unit.title} - Sinhala Assignment`)} disabled={!unit.pdfUrlSinhalaAssignment} />
+                                                            <Label htmlFor={`man-sa-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlSinhalaAssignment && "text-muted-foreground/50")}>Assignment</Label>
+                                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlSinhalaAssignment && "text-muted-foreground/50")}>Rs. {unit.priceSinhalaAssignment || 0}</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Checkbox id={`sa-${unit.id}`} checked={isChecked(unit.id, 'sinhalaAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaAssignment', unit.priceSinhalaAssignment || 0, `${unit.title} - Sinhala Assignment`)} />
-                                                        <Label htmlFor={`sa-${unit.id}`} className="flex-1 text-sm font-normal">Assignment</Label>
-                                                        <span className="text-sm font-semibold">Rs. {unit.priceSinhalaAssignment || 0}</span>
+                                                    <div className="space-y-3">
+                                                        <h4 className="font-medium text-center text-sm border-b pb-2">English Medium</h4>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`man-en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishNote', unit.priceEnglishNote || 0, `${unit.title} - English Note`)} disabled={!unit.pdfUrlEnglishNote} />
+                                                            <Label htmlFor={`man-en-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlEnglishNote && "text-muted-foreground/50")}>Note</Label>
+                                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlEnglishNote && "text-muted-foreground/50")}>Rs. {unit.priceEnglishNote || 0}</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`man-ea-${unit.id}`} checked={isChecked(unit.id, 'englishAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishAssignment', unit.priceEnglishAssignment || 0, `${unit.title} - English Assignment`)} disabled={!unit.pdfUrlEnglishAssignment} />
+                                                            <Label htmlFor={`man-ea-${unit.id}`} className={cn("flex-1 text-sm font-normal", !unit.pdfUrlEnglishAssignment && "text-muted-foreground/50")}>Assignment</Label>
+                                                            <span className={cn("text-sm font-semibold", !unit.pdfUrlEnglishAssignment && "text-muted-foreground/50")}>Rs. {unit.priceEnglishAssignment || 0}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="space-y-3">
-                                                    <h4 className="font-medium text-center text-sm border-b pb-2">English Medium</h4>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Checkbox id={`en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishNote', unit.priceEnglishNote || 0, `${unit.title} - English Note`)} />
-                                                        <Label htmlFor={`en-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
-                                                        <span className="text-sm font-semibold">Rs. {unit.priceEnglishNote || 0}</span>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Checkbox id={`ea-${unit.id}`} checked={isChecked(unit.id, 'englishAssignment')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishAssignment', unit.priceEnglishAssignment || 0, `${unit.title} - English Assignment`)} />
-                                                        <Label htmlFor={`ea-${unit.id}`} className="flex-1 text-sm font-normal">Assignment</Label>
-                                                        <span className="text-sm font-semibold">Rs. {unit.priceEnglishAssignment || 0}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        )})}
+                                            </Card>
+                                        ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            )})}
                         </Accordion>
                     </CardContent>
                 </Card>
