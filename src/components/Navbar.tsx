@@ -122,7 +122,7 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} passHref legacyBehavior>
+                        <Link href={link.href} legacyBehavior passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                 {link.label}
                             </NavigationMenuLink>
@@ -149,7 +149,7 @@ export const Navbar = () => {
                 
                 {navLinks.slice(1).map((link) => (
                      <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} passHref legacyBehavior>
+                        <Link href={link.href} legacyBehavior passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                 {link.label}
                             </NavigationMenuLink>
