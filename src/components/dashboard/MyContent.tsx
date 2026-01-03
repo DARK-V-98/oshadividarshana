@@ -8,7 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, AlertTriangle, FileText, Lock } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
@@ -89,6 +89,8 @@ export default function MyContent() {
     user ? 'orders' : undefined,
     user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined
   );
+  
+  const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
 
   useEffect(() => {
     if (fetchedOrders) {
@@ -98,17 +100,18 @@ export default function MyContent() {
 
 
   const purchasedItems = useMemo(() => {
-    if (!localOrders?.length) return [];
+    if (!localOrders?.length || !allUnits?.length) return [];
     
     const itemsWithUrls: (CartItem & { orderId: string, category: string })[] = [];
 
     localOrders.forEach(order => {
       order.items.forEach(item => {
         if(item.userFileUrl) { // Only show items that have a user file created
+            const unit = allUnits.find(u => u.id === item.unitId);
             itemsWithUrls.push({ 
                 ...item, 
                 orderId: order.id,
-                category: allUnits.find(u => u.id === item.unitId)?.category || 'other'
+                category: unit?.category || 'other'
             });
         }
       });
@@ -128,9 +131,8 @@ export default function MyContent() {
         items: items.sort((a,b) => a.unitCode.localeCompare(b.unitCode)),
     }));
 
-  }, [localOrders]);
+  }, [localOrders, allUnits]);
 
-  const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
 
   const handleDownloadSuccess = (downloadedItem: CartItem) => {
     // Update the local state to reflect that the item has been downloaded
