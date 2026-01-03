@@ -6,24 +6,24 @@ import { useUser } from "@/firebase/auth/use-user";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, AlertTriangle, FileText } from "lucide-react";
+import { Loader2, Eye, AlertTriangle, FileText } from "lucide-react";
 import type { Order, CartItem, Unit } from "@/lib/types";
 import { useMemo, useState, useEffect } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 
-const DownloadButton = ({ item, orderId }: { item: CartItem, orderId: string }) => {
+const ViewButton = ({ item, orderId }: { item: CartItem, orderId: string }) => {
     const { toast } = useToast();
     const { idToken } = useUser();
-    const [isDownloading, setIsDownloading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
-    const handleDownload = async () => {
+    const handleView = async () => {
         if (!idToken) {
             toast({ variant: "destructive", title: "Authentication Error", description: "Could not authenticate user. Please sign in again." });
             return;
         }
 
-        setIsDownloading(true);
+        setIsGenerating(true);
         try {
             const response = await fetch('/api/generate-download-link', {
                 method: 'POST',
@@ -40,25 +40,24 @@ const DownloadButton = ({ item, orderId }: { item: CartItem, orderId: string }) 
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to generate download link.");
+                throw new Error(errorData.message || "Failed to generate view link.");
             }
 
             const { downloadUrl } = await response.json();
             window.open(downloadUrl, '_blank');
-            toast({ title: "Download started!", description: "Your file should begin downloading shortly." });
-
+            
         } catch (error: any) {
-            console.error("Download error:", error);
-            toast({ variant: "destructive", title: "Download Failed", description: error.message });
+            console.error("View link error:", error);
+            toast({ variant: "destructive", title: "Failed to Open", description: error.message });
         } finally {
-            setIsDownloading(false);
+            setIsGenerating(false);
         }
     };
 
     return (
-        <Button onClick={handleDownload} size="sm" disabled={isDownloading}>
-            {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            Download
+        <Button onClick={handleView} size="sm" disabled={isGenerating}>
+            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
+            View
         </Button>
     );
 };
@@ -141,7 +140,7 @@ export default function MyContent() {
       <CardHeader>
         <CardTitle>My Unlocked Content</CardTitle>
         <CardDescription>
-          Here are all the study materials you have purchased. You can download them at any time.
+          Here are all the study materials you have purchased. You can view them at any time.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -170,7 +169,7 @@ export default function MyContent() {
                                             <p className="text-sm text-muted-foreground">{item.unitCode}</p>
                                         </div>
                                     </div>
-                                    <DownloadButton item={item} orderId={item.orderId} />
+                                    <ViewButton item={item} orderId={item.orderId} />
                                 </div>
                             ))}
                         </div>
