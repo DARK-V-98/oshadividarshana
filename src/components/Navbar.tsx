@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
-import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield, ChevronDown } from "lucide-react";
+import { Menu, X, Sparkles, Heart, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { getAuth, signOut } from "firebase/auth";
@@ -123,11 +123,11 @@ export const Navbar = () => {
             <NavigationMenuList>
                 {navLinks.slice(0, 1).map((link) => (
                     <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild>
+                            <Link href={link.href} className={navigationMenuTriggerStyle()}>
                                 {link.label}
-                            </NavigationMenuLink>
-                        </Link>
+                            </Link>
+                        </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}
 
@@ -150,11 +150,11 @@ export const Navbar = () => {
                 
                 {navLinks.slice(1).map((link) => (
                      <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild>
+                             <Link href={link.href} className={navigationMenuTriggerStyle()}>
                                 {link.label}
-                            </NavigationMenuLink>
-                        </Link>
+                            </Link>
+                        </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}
 
