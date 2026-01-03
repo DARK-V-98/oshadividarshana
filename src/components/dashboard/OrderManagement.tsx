@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { doc, updateDoc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
-import { useUser } from "@/firebase/auth/use-user";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,11 +28,20 @@ import {
     AccordionItem,
     AccordionTrigger,
   } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { Order } from "@/lib/types";
 import { Loader2, Receipt } from "lucide-react";
+import ReceiptView from "./ReceiptView";
+
 
 export default function OrderManagement() {
   const firestore = useFirestore();
@@ -41,7 +49,6 @@ export default function OrderManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [processingOrder, setProcessingOrder] = useState<string | null>(null);
   const { toast } = useToast();
-  const { idToken } = useUser();
 
   const handleStatusChange = async (orderId: string, status: Order['status']) => {
     if (!firestore) return;
@@ -139,14 +146,23 @@ export default function OrderManagement() {
                                               </SelectContent>
                                           </Select>
                                       </div>
-                                      <Button
-                                          size="sm"
-                                          disabled={order.status !== 'completed'}
-                                          onClick={() => window.open(`/receipt/${order.id}`, '_blank')}
-                                      >
-                                          <Receipt className="mr-2 h-4 w-4" />
-                                          Generate Receipt
-                                      </Button>
+                                       <Dialog>
+                                            <DialogTrigger asChild>
+                                                 <Button
+                                                    size="sm"
+                                                    disabled={order.status !== 'completed'}
+                                                >
+                                                    <Receipt className="mr-2 h-4 w-4" />
+                                                    View Receipt
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-3xl">
+                                                <DialogHeader>
+                                                <DialogTitle>Receipt for Order {order.orderCode}</DialogTitle>
+                                                </DialogHeader>
+                                                <ReceiptView order={order} />
+                                            </DialogContent>
+                                        </Dialog>
                                   </div>
                                   <h4 className="font-semibold mt-4 mb-2">Items:</h4>
                                   <div className="w-full overflow-x-auto">
