@@ -8,33 +8,54 @@ import {
   where,
   type Query,
   type DocumentData,
+  type WhereFilterOp,
 } from "firebase/firestore";
 import { useFirebase } from "@/firebase/client-provider";
 
+type WhereClause = [string, WhereFilterOp, any];
+
 export function useCollection<T>(path: string | undefined, options?: {
-  where?: [string, "==", any];
-}, dependencies: any[] = []) { // Add dependencies array
+  where?: WhereClause | WhereClause[];
+}) {
   const { firestore } = useFirebase();
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Memoize the where clause to prevent re-renders
-  const whereClause = useMemo(() => options?.where, [options?.where ? options.where[2] : undefined]);
+  // Memoize the where clauses to prevent re-renders
+  const whereClauses = useMemo(() => {
+    if (!options?.where) return [];
+    // Ensure it's always an array of arrays
+    if (Array.isArray(options.where[0])) {
+      return options.where as WhereClause[];
+    }
+    return [options.where] as WhereClause[];
+  }, [options?.where]);
 
   useEffect(() => {
-    // Exit early if firestore, path, or the value in the where clause is not ready
-    if (!firestore || !path || (whereClause && whereClause[2] === undefined)) {
+    // Exit early if firestore or path is not ready
+    if (!firestore || !path) {
         setLoading(false);
         setData([]);
         return;
     };
+    
+    // Check if any where clause value is undefined
+    const isReady = whereClauses.every(clause => clause[2] !== undefined);
+    if (!isReady) {
+      setLoading(false);
+      setData([]);
+      return;
+    }
 
     let q: Query<DocumentData>;
-    if (whereClause) {
-      q = query(collection(firestore, path), where(...whereClause));
+    const collectionRef = collection(firestore, path);
+    
+    if (whereClauses.length > 0) {
+        const queryConstraints = whereClauses.map(clause => where(...clause));
+        q = query(collectionRef, ...queryConstraints);
     } else {
-      q = query(collection(firestore, path));
+        q = query(collectionRef);
     }
     
     setLoading(true);
@@ -54,7 +75,7 @@ export function useCollection<T>(path: string | undefined, options?: {
 
     return () => unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firestore, path, whereClause, ...dependencies]); // Add dependencies to useEffect
+  }, [firestore, path, JSON.stringify(whereClauses)]); // Deep comparison for whereClauses
 
   return { data, loading, error };
 }
