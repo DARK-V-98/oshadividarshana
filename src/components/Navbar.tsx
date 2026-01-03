@@ -147,7 +147,7 @@ export const Navbar = () => {
                     </NavigationMenuContent>
                 </NavigationMenuItem>
                 
-                {navLinks.slice(2).map((link) => ( // Changed from slice(1) to slice(2) to avoid duplicating "Order"
+                {navLinks.slice(1).map((link) => (
                      <NavigationMenuItem key={link.href}>
                         <Link href={link.href} legacyBehavior passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -211,7 +211,7 @@ export const Navbar = () => {
                 )}
               </>
             )}
-            {!isClient && <div className="h-10 w-20 animate-pulse rounded-md bg-muted" />}
+            {(!isClient || loading) && <div className="h-10 w-20 rounded-md bg-muted animate-pulse" />}
           </div>
 
 
