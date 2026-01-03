@@ -1,5 +1,6 @@
 
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -15,7 +16,9 @@ service cloud.firestore {
 
     // Helper function to check if the user is an admin
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Check if the user document exists and has the admin role.
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Users can read their own profile, admins can read any profile.
@@ -36,7 +39,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Users can create orders.
+    // Users can create their own orders.
     // Users can read their own orders.
     // Admins can read all orders and update their status.
     match /orders/{orderId} {
@@ -50,24 +53,43 @@ service cloud.firestore {
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Only admins can write to the units folder
-    match /units/{unitId}/{fileName} {
-      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      
-      // Allow a user to read a file if they have a completed order containing that item.
-      allow read: if request.auth != null && exists(
-          /databases/$(database)/documents/orders/{orderId}
-      ) where 
-          get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid &&
-          get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed' &&
-          (unitId + '-' + 'sinhalaNote') in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => item.unitId + '-' + item.itemType) ||
-          (unitId + '-' + 'sinhalaAssignment') in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => item.unitId + '-' + item.itemType) ||
-          (unitId + '-' + 'englishNote') in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => item.unitId + '-' + item.itemType) ||
-          (unitId + '-' + 'englishAssignment') in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => item.unitId + '-' + item.itemType)
+    
+    // Helper function to find a completed order for the current user
+    function userHasCompletedOrder(userId) {
+      return exists(/databases/$(database)/documents/orders/{orderId} where 
+          get(/databases/$(database)/documents/orders/$(orderId)).data.userId == userId &&
+          get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed'
+      );
+    }
 
+    // Helper function to check if an item exists in ANY of the user's completed orders
+    function userPurchasedItem(userId, unitId, itemType) {
+        return exists(/databases/$(database)/documents/orders/{orderId} where
+            get(/databases/$(database)/documents/orders/$(orderId)).data.userId == userId &&
+            get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed' &&
+            [unitId, itemType] in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => [item.unitId, item.itemType])
+        );
     }
     
-    // Allow users to read their own content if needed (not used in current flow)
+    // Admins can write (upload/update/delete) any file in the units folder.
+    match /units/{unitId}/{fileName} {
+      allow write: if request.auth != null && isAdmin();
+      
+      // Determine the item type from the file name.
+      function getItemType(name) {
+        return name == 'sinhala-note.pdf' ? 'sinhalaNote' :
+               name == 'sinhala-assignment.pdf' ? 'sinhalaAssignment' :
+               name == 'english-note.pdf' ? 'englishNote' :
+               name == 'english-assignment.pdf' ? 'englishAssignment' :
+               'unknown';
+      }
+
+      // Allow a user to read a file if they have purchased that specific item in any completed order.
+      allow read: if request.auth != null && 
+                    userPurchasedItem(request.auth.uid, unitId, getItemType(fileName));
+    }
+    
+    // User-specific content folders are no longer used in this ruleset, but keeping for reference.
     match /user-content/{userId}/{allPaths=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }

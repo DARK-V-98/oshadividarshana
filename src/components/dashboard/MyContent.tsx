@@ -15,12 +15,21 @@ import { useMemo, useState } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 
+const itemTypeToFileName = (itemType: string): string | null => {
+    switch (itemType) {
+        case 'sinhalaNote': return 'sinhala-note.pdf';
+        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
+        case 'englishNote': return 'english-note.pdf';
+        case 'englishAssignment': return 'english-assignment.pdf';
+        default: return null;
+    }
+};
 
 const ViewButton = ({ item }: { item: CartItem }) => {
     const { toast } = useToast();
     const storage = useStorage();
     const [isGenerating, setIsGenerating] = useState(false);
-    const { user, userProfile } = useUser();
+    const { user } = useUser();
 
     const handleView = async () => {
         if (!storage || !user) {
@@ -28,25 +37,28 @@ const ViewButton = ({ item }: { item: CartItem }) => {
             return;
         }
 
-        if (!item.userFileUrl) {
-            toast({ variant: "destructive", title: "File Not Ready", description: "The file is not yet available. This may be because the admin has not approved the order." });
+        const originalFileName = itemTypeToFileName(item.itemType);
+        if (!originalFileName) {
+            toast({ variant: "destructive", title: "Invalid Item", description: "The item type is not recognized." });
             return;
         }
 
+        const filePath = `units/${item.unitId}/${originalFileName}`;
+        
         setIsGenerating(true);
         try {
-            const fileRef = ref(storage, item.userFileUrl);
+            const fileRef = ref(storage, filePath);
             const downloadUrl = await getDownloadURL(fileRef);
             window.open(downloadUrl, '_blank');
             
         } catch (error: any) {
             console.error("Download URL error:", error);
              if (error.code === 'storage/object-not-found') {
-                 toast({ variant: "destructive", title: "File Not Found", description: "The requested file does not exist. Please contact support." });
+                 toast({ variant: "destructive", title: "File Not Found", description: "The file is not available yet. Please contact support if the issue persists." });
             } else if (error.code === 'storage/unauthorized') {
-                toast({ variant: "destructive", title: "Permission Denied", description: "You do not have permission to access this file. Please ensure your order is complete." });
+                toast({ variant: "destructive", title: "Permission Denied", description: "You do not have permission to access this file. Please ensure your order has been marked as 'Completed'." });
             } else {
-                toast({ variant: "destructive", title: "Failed to Open", description: "An unexpected error occurred." });
+                toast({ variant: "destructive", title: "Failed to Open", description: "An unexpected error occurred while trying to access the file." });
             }
         } finally {
             setIsGenerating(false);

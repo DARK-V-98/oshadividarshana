@@ -31,7 +31,6 @@ export type CartItem = {
     itemType: 'sinhalaNote' | 'sinhalaAssignment' | 'englishNote' | 'englishAssignment';
     title: string;
     sinhalaTitle: string;
-    userFileUrl?: string | null; // Path to the user's copied file in Storage
 };
 
 export type Order = {

@@ -44,36 +44,13 @@ export default function OrderManagement() {
   const { idToken } = useUser();
 
   const handleStatusChange = async (orderId: string, status: Order['status']) => {
-    if (!firestore || !idToken) return;
+    if (!firestore) return;
     
     setProcessingOrder(orderId);
     
     try {
-        if (status === 'completed') {
-             const response = await fetch('/api/create-user-files', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                },
-                body: JSON.stringify({ orderId }),
-            });
-
-            if (!response.ok) {
-                let errorMessage = 'Failed to create user files.';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (e) {
-                    errorMessage = response.statusText || errorMessage;
-                }
-                throw new Error(errorMessage);
-            }
-        } else {
-            // If status is not 'completed', just update the status
-            const orderDocRef = doc(firestore, "orders", orderId);
-            await updateDoc(orderDocRef, { status });
-        }
+        const orderDocRef = doc(firestore, "orders", orderId);
+        await updateDoc(orderDocRef, { status });
         
         toast({
           title: "Success",
