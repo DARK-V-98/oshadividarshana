@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserManagement from "@/components/dashboard/UserManagement";
 import UnitManagement from "@/components/dashboard/UnitManagement";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DashboardPage() {
   const { user, userProfile, loading } = useUser();
@@ -33,7 +34,7 @@ export default function DashboardPage() {
   const isAdmin = userProfile.role === 'admin';
 
   return (
-    <main className="container my-12 md:my-24">
+    <main className="container my-12 md:my-24 min-h-screen">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-playfair">
           Dashboard
@@ -43,26 +44,40 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {isAdmin ? (
-         <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="users">User Management</TabsTrigger>
-                <TabsTrigger value="units">Unit Management</TabsTrigger>
-            </TabsList>
+      <Tabs defaultValue="courses" className="w-full">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-1'}`}>
+          <TabsTrigger value="courses">My Courses</TabsTrigger>
+          {isAdmin && (
+            <>
+              <TabsTrigger value="users">User Management</TabsTrigger>
+              <TabsTrigger value="units">Unit Management</TabsTrigger>
+            </>
+          )}
+        </TabsList>
+        <TabsContent value="courses">
+          <Card>
+            <CardHeader>
+              <CardTitle>My Courses</CardTitle>
+              <CardDescription>Your purchased study materials will appear here.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center text-muted-foreground py-8">
+                <p>No courses purchased yet.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        {isAdmin && (
+          <>
             <TabsContent value="users">
-                <UserManagement />
+              <UserManagement />
             </TabsContent>
             <TabsContent value="units">
-                <UnitManagement />
+              <UnitManagement />
             </TabsContent>
-        </Tabs>
-      ) : (
-        <div className="text-center p-8 border rounded-lg bg-card">
-            <h2 className="text-2xl font-bold font-playfair mb-2">My Courses</h2>
-            <p className="text-muted-foreground">Your purchased study materials will appear here.</p>
-            {/* User-specific content will go here in the future */}
-        </div>
-      )}
+          </>
+        )}
+      </Tabs>
     </main>
   );
 }
