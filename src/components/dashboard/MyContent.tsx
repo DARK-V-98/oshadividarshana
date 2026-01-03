@@ -3,6 +3,8 @@
 
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { useUser } from "@/firebase/auth/use-user";
+import { useStorage } from "@/firebase";
+import { ref, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -12,43 +14,51 @@ import { useMemo, useState, useEffect } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 
-const ViewButton = ({ item, orderId }: { item: CartItem, orderId: string }) => {
+const itemTypeToFileName = (itemType: string): string | null => {
+    switch (itemType) {
+        case 'sinhalaNote': return 'sinhala-note.pdf';
+        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
+        case 'englishNote': return 'english-note.pdf';
+        case 'englishAssignment': return 'english-assignment.pdf';
+        default: return null;
+    }
+};
+
+
+const ViewButton = ({ item }: { item: CartItem }) => {
     const { toast } = useToast();
-    const { idToken } = useUser();
+    const storage = useStorage();
     const [isGenerating, setIsGenerating] = useState(false);
 
     const handleView = async () => {
-        if (!idToken) {
-            toast({ variant: "destructive", title: "Authentication Error", description: "Could not authenticate user. Please sign in again." });
+        if (!storage) {
+            toast({ variant: "destructive", title: "Storage Error", description: "Firebase Storage is not available." });
             return;
         }
 
+        const fileName = itemTypeToFileName(item.itemType);
+        if (!fileName) {
+            toast({ variant: "destructive", title: "Invalid Item", description: "Cannot determine the file for this item." });
+            return;
+        }
+        
+        const filePath = `units/${item.unitId}/${fileName}`;
+
         setIsGenerating(true);
         try {
-            const response = await fetch('/api/generate-download-link', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                },
-                body: JSON.stringify({
-                    orderId,
-                    unitId: item.unitId,
-                    itemType: item.itemType,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to generate view link.");
-            }
-
-            const { downloadUrl } = await response.json();
+            const fileRef = ref(storage, filePath);
+            const downloadUrl = await getDownloadURL(fileRef);
             window.open(downloadUrl, '_blank');
             
         } catch (error: any) {
-            console.error("View link error:", error);
-            toast({ variant: "destructive", title: "Failed to Open", description: error.message });
+            console.error("Download URL error:", error);
+             if (error.code === 'storage/object-not-found') {
+                 toast({ variant: "destructive", title: "File Not Found", description: "The requested file does not exist. Please contact support." });
+            } else if (error.code === 'storage/unauthorized') {
+                toast({ variant: "destructive", title: "Permission Denied", description: "You do not have permission to access this file. Please ensure your order is complete." });
+            } else {
+                toast({ variant: "destructive", title: "Failed to Open", description: "An unexpected error occurred." });
+            }
         } finally {
             setIsGenerating(false);
         }
@@ -65,38 +75,33 @@ const ViewButton = ({ item, orderId }: { item: CartItem, orderId: string }) => {
 
 export default function MyContent() {
   const { user, loading: userLoading } = useUser();
-  const [localOrders, setLocalOrders] = useState<Order[]>([]);
-
-  const { data: fetchedOrders, loading: ordersLoading } = useCollection<Order>(
+  
+  const { data: completedOrders, loading: ordersLoading } = useCollection<Order>(
     user ? 'orders' : undefined,
     user ? { where: [['userId', '==', user.uid], ['status', '==', 'completed']] } : undefined
   );
   const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
   
-  useEffect(() => {
-    if (fetchedOrders) {
-      setLocalOrders(fetchedOrders);
-    }
-  }, [fetchedOrders]);
-
   const purchasedItems = useMemo(() => {
-    if (!localOrders?.length || !allUnits?.length) return [];
+    if (!completedOrders?.length || !allUnits?.length) return [];
     
-    const itemsWithDetails: (CartItem & { orderId: string, category: string })[] = [];
+    const itemsWithDetails: (CartItem & { category: string })[] = [];
 
-    localOrders.forEach(order => {
+    completedOrders.forEach(order => {
       order.items.forEach(item => {
         const unit = allUnits.find(u => u.id === item.unitId);
         itemsWithDetails.push({ 
-            ...item, 
-            orderId: order.id,
+            ...item,
             category: unit?.category || 'other'
         });
       });
     });
 
-    const itemsByCategory: Record<string, (CartItem & { orderId: string })[]> = {};
-    itemsWithDetails.forEach(item => {
+    // Deduplicate items
+    const uniqueItems = Array.from(new Map(itemsWithDetails.map(item => [`${item.unitId}-${item.itemType}`, item])).values());
+
+    const itemsByCategory: Record<string, CartItem[]> = {};
+    uniqueItems.forEach(item => {
         const category = item.category || 'other';
         if (!itemsByCategory[category]) {
             itemsByCategory[category] = [];
@@ -109,7 +114,7 @@ export default function MyContent() {
         items: items.sort((a,b) => a.unitCode.localeCompare(b.unitCode)),
     }));
 
-  }, [localOrders, allUnits]);
+  }, [completedOrders, allUnits]);
 
 
   const isLoading = userLoading || ordersLoading || unitsLoading;
@@ -169,7 +174,7 @@ export default function MyContent() {
                                             <p className="text-sm text-muted-foreground">{item.unitCode}</p>
                                         </div>
                                     </div>
-                                    <ViewButton item={item} orderId={item.orderId} />
+                                    <ViewButton item={item} />
                                 </div>
                             ))}
                         </div>
@@ -182,3 +187,4 @@ export default function MyContent() {
     </Card>
   );
 }
+
