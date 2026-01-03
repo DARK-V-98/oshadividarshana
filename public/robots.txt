@@ -1,7 +1,5 @@
+# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-Disallow: /dashboard/
-Disallow: /auth/
-Disallow: /receipt/
 
 Sitemap: https://www.oshadividarshana.online/sitemap.xml
