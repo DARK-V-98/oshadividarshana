@@ -25,6 +25,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -101,10 +102,10 @@ export const Navbar = () => {
     "focus:bg-accent/10 focus:outline-none"
   );
   
-  const navTriggerClasses = cn(
-    "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
+  const navTriggerClasses = cn(navigationMenuTriggerStyle(),
+    "bg-transparent",
     scrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
-    "focus:bg-accent/10 focus:outline-none"
+    "focus:bg-accent/10 focus:outline-none data-[state=open]:bg-accent/10"
   );
 
 
