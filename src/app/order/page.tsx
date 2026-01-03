@@ -212,9 +212,9 @@ export default function OrderPage() {
                             <Card key={unit.id} className="p-4">
                                 <h3 className="font-semibold">{unit.code} - {unit.title}</h3>
                                 <p className="text-sm text-muted-foreground mb-4">{unit.sinhalaTitle}</p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium text-center text-sm border-b pb-1">Sinhala Medium</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-center text-sm border-b pb-2">Sinhala Medium</h4>
                                         <div className="flex items-center space-x-2">
                                             <Checkbox id={`sn-${unit.id}`} checked={isChecked(unit.id, 'sinhalaNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'sinhalaNote', unit.priceSinhalaNote || 0, `${unit.title} - Sinhala Note`)} />
                                             <Label htmlFor={`sn-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
@@ -226,8 +226,8 @@ export default function OrderPage() {
                                             <span className="text-sm font-semibold">Rs. {unit.priceSinhalaAssignment || 0}</span>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium text-center text-sm border-b pb-1">English Medium</h4>
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-center text-sm border-b pb-2">English Medium</h4>
                                         <div className="flex items-center space-x-2">
                                             <Checkbox id={`en-${unit.id}`} checked={isChecked(unit.id, 'englishNote')} onCheckedChange={(c) => handleCartChange(c, unit, 'englishNote', unit.priceEnglishNote || 0, `${unit.title} - English Note`)}/>
                                             <Label htmlFor={`en-${unit.id}`} className="flex-1 text-sm font-normal">Note</Label>
@@ -308,3 +308,5 @@ export default function OrderPage() {
     </main>
   );
 }
+
+    
