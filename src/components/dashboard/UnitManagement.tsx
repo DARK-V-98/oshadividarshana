@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useFirestore } from "@/firebase";
@@ -41,6 +42,12 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+  } from "@/components/ui/accordion";
 import type { Unit } from "@/lib/types";
 
 
@@ -68,6 +75,16 @@ export default function UnitManagement() {
 
   const handleSeedUnits = async () => {
     if (!firestore) return;
+    // Check if units already exist to prevent duplicates
+    if (units.length > 0) {
+        toast({
+            variant: "destructive",
+            title: "Already Seeded",
+            description: "Units have already been seeded.",
+        });
+        return;
+    }
+
     const batch = writeBatch(firestore);
 
     moduleCategories.forEach(category => {
@@ -141,9 +158,9 @@ export default function UnitManagement() {
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                        <SelectItem value="bridal">Bridal Dresser</SelectItem>
-                                        <SelectItem value="beauty">Beauty</SelectItem>
-                                        <SelectItem value="hair">Hair Dresser</SelectItem>
+                                            {moduleCategories.map(cat => (
+                                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -203,39 +220,52 @@ export default function UnitManagement() {
                             <CardTitle>Manage Units</CardTitle>
                             <CardDescription>Seed or view existing units.</CardDescription>
                         </div>
-                        <Button onClick={handleSeedUnits} variant="outline" size="sm">Seed Units</Button>
+                        <Button onClick={handleSeedUnits} variant="outline" size="sm" disabled={units.length > 0}>
+                          {units.length > 0 ? 'Already Seeded' : 'Seed Units'}
+                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Code</TableHead>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Category</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="text-center">
-                                    Loading...
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                units.map((unit) => (
-                                    <TableRow key={unit.id}>
-                                    <TableCell>{unit.code}</TableCell>
-                                    <TableCell>{unit.title}</TableCell>
-                                    <TableCell className="capitalize">{unit.category}</TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                    {loading ? (
+                        <p>Loading units...</p>
+                    ) : (
+                        <Accordion type="single" collapsible className="w-full">
+                            {moduleCategories.map((category) => {
+                                const categoryUnits = units.filter(u => u.category === category.id);
+                                if(categoryUnits.length === 0) return null;
+                                
+                                return (
+                                <AccordionItem value={category.id} key={category.id}>
+                                    <AccordionTrigger>
+                                        <span className="font-semibold">{category.name} ({categoryUnits.length})</span>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Code</TableHead>
+                                                    <TableHead>Title</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {categoryUnits.map((unit) => (
+                                                    <TableRow key={unit.id}>
+                                                        <TableCell className="font-medium">{unit.code}</TableCell>
+                                                        <TableCell>{unit.title}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            )})}
+                        </Accordion>
+                    )}
                 </CardContent>
             </Card>
         </div>
      </div>
   );
 }
+
+    
