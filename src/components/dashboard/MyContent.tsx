@@ -131,7 +131,7 @@ export default function MyContent() {
             {purchasedItems.map(({ categoryId, items }) => (
                 <AccordionItem value={categoryId} key={categoryId}>
                     <AccordionTrigger>
-                        <h3 className="text-lg font-semibold">{categoryId.charAt(0).toUpperCase() + categoryId.slice(1)}</h3>
+                        <h3 className="text-lg font-semibold capitalize">{categoryId.replace('-', ' ')}</h3>
                     </AccordionTrigger>
                     <AccordionContent>
                         <div className="grid gap-4">
