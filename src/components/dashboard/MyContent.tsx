@@ -161,7 +161,7 @@ export default function MyContent() {
         </Alert>
         {purchasedItems.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
-            <p>You haven't purchased any content yet, or no orders have been completed by an admin.</p>
+            <p>You haven't purchased any content yet.</p>
             <Button asChild variant="link">
                 <Link href="/order">Browse materials</Link>
             </Button>
