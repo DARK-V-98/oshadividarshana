@@ -72,9 +72,10 @@ export default function FileUpload({
 
     setUploading(true);
     const storageRef = ref(storage, filePath);
+    const base64String = fileData.dataUrl.split(',')[1];
 
     try {
-      const snapshot = await uploadString(storageRef, fileData.dataUrl, 'data_url');
+      const snapshot = await uploadString(storageRef, base64String, 'base64', { contentType: 'application/pdf' });
       const downloadURL = await getDownloadURL(snapshot.ref);
       onUploadComplete(downloadURL);
       setFileData(null);
