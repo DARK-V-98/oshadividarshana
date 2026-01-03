@@ -107,7 +107,7 @@ export default function SignInForm({ onFlip }: { onFlip: () => void }) {
 
       toast({ title: "Signed in with Google successfully!" });
       router.push("/dashboard");
-    } catch (error: any) => {
+    } catch (error: any) {
       console.error("Google sign in error:", error);
       let description = "An unexpected error occurred during Google Sign-In.";
       if (error && error.code) {
