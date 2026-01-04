@@ -1,30 +1,15 @@
 
+'use client';
+
 import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, KeyRound, ShoppingCart, CheckCircle } from 'lucide-react';
+import { FileText, KeyRound, ShoppingCart, CheckCircle, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-export const metadata: Metadata = {
-  title: 'How to Unlock Your Content',
-  description: 'Step-by-step guides on how to access your purchased course materials through direct orders or by using an unlock key.',
-};
-
-const Step = ({ icon, title, description }: { icon: React.ElementType, title: string, description: string }) => {
-    const Icon = icon;
-    return (
-        <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Icon className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-                <h3 className="font-semibold text-lg">{title}</h3>
-                <p className="text-muted-foreground">{description}</p>
-            </div>
-        </div>
-    )
-}
+import { useToast } from '@/hooks/use-toast';
 
 export default function HowToUnlockPage() {
+  const { toast } = useToast();
+
   const orderInstructionsText = `How to Get Your Content (Standard Order):
 
 1. Sign In: Create an account or sign in at https://www.oshadividarshana.online/auth
@@ -46,12 +31,26 @@ export default function HowToUnlockPage() {
   const copyToClipboard = async (text: string) => {
     try {
         await navigator.clipboard.writeText(text);
-        // You can add a toast notification here if you have one set up
-        alert("Instructions copied to clipboard!");
+        toast({ title: "Instructions copied to clipboard!" });
     } catch (err) {
         console.error('Failed to copy text: ', err);
     }
   };
+  
+const Step = ({ icon, title, description }: { icon: React.ElementType, title: string, description: string }) => {
+    const Icon = icon;
+    return (
+        <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Icon className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+                <h3 className="font-semibold text-lg">{title}</h3>
+                <p className="text-muted-foreground">{description}</p>
+            </div>
+        </div>
+    )
+}
 
   return (
     <main className="container my-12 md:my-24">
