@@ -337,16 +337,16 @@ export default function MyContent() {
                         <AccordionContent>
                             <div className="grid gap-4">
                                 {items.map((item, index) => (
-                                    <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                                        <div className="flex items-center gap-4">
-                                            <FileText className="h-6 w-6 text-primary" />
+                                    <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg bg-muted/50 gap-4">
+                                        <div className="flex items-start gap-4">
+                                            <FileText className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                                             <div>
-                                                <p className="font-medium text-sm md:text-base">{(item as any).title}</p>
-                                                <p className="text-muted-foreground text-xs md:text-sm">{(item as any).sinhalaTitle}</p>
+                                                <p className="font-medium">{(item as any).title}</p>
+                                                <p className="text-muted-foreground text-sm">{(item as any).sinhalaTitle}</p>
                                                 <p className="text-xs text-primary mt-1">{item.itemName.split(' - ')[1]}</p>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-2">
+                                        <div className="flex flex-col items-end gap-2 self-end sm:self-center">
                                             {(item as any).expiryDate && <Countdown expiryDate={(item as any).expiryDate} />}
                                             <ViewButton item={item} expiryDate={(item as any).expiryDate} />
                                         </div>
@@ -363,3 +363,5 @@ export default function MyContent() {
     </Card>
   );
 }
+
+    
