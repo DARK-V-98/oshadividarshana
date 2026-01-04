@@ -17,7 +17,7 @@ export default function HowToUnlockPage() {
 3. WhatsApp Confirmation: After placing the order, you will be prompted to send the order details via WhatsApp.
 4. Make Payment: You will receive bank details for payment on WhatsApp. Complete the payment.
 5. Order Completion: Once your payment is confirmed, your order status will be set to "Completed" by the admin.
-6. Access Content: Go to your Dashboard -> My Unlocked Content. You will have 6 hours to view and download your files.`;
+6. Access Content: Go to your Dashboard -> My Unlocked Content. You will have 6 hours to view and download your files. After this period, access will expire.`;
 
   const orderInstructionsTextSinhala = `Standard Order සඳහා උපදෙස්:
 
@@ -40,7 +40,7 @@ Order සම්පූර්ණ කිරීම:
 
 Content ලබාගන්න:
 Dashboard → My Unlocked Content වෙත පිවිසෙන්න.
-ඔබට ඔබගේ Files පැය 6ක් (6 hours) තුළ බැලීමට හා Download කිරීමට හැකියාව ඇත.`;
+ඔබට ඔබගේ Files පැය 6ක් (6 hours) තුළ බැලීමට හා Download කිරීමට හැකියාව ඇත. මෙම කාලය අවසන් වූ පසු, ප්‍රවේශය කල් ඉකුත් වේ.`;
 
 
   const keyInstructionsTextEnglish = `How to Get Your Content (Using an Unlock Key):
@@ -49,7 +49,7 @@ Dashboard → My Unlocked Content වෙත පිවිසෙන්න.
 2. Receive Key: You will receive a special Unlock Key from the admin after manual payment.
 3. Go to Dashboard: Navigate to your Dashboard -> My Unlocked Content.
 4. Unlock Content: Enter the key in the "Have an Unlock Key?" section and click "Unlock".
-5. Access Content: Your content will appear immediately. Your 6-hour access timer starts now.`;
+5. Access Content: Your content will appear immediately. Your 6-hour access timer starts now. After 6 hours, access will expire.`;
   
   const keyInstructionsTextSinhala = `Unlock Key සඳහා උපදෙස්:
 
@@ -69,7 +69,7 @@ Content Unlock කරන්න:
 
 Content භාවිතා කරන්න:
 Unlock කළ Content එක ඔබට වහාම පෙන්වයි.
-මෙහිදී ඔබගේ පැය 6ක (6 hours) ප්‍රවේශ කාලය එම මොහොතේ සිට ආරම්භ වේ.`;
+මෙහිදී ඔබගේ පැය 6ක (6 hours) ප්‍රවේශ කාලය එම මොහොතේ සිට ආරම්භ වේ. පැය 6කට පසු, ප්‍රවේශය කල් ඉකුත් වේ.`;
 
 
   const copyToClipboard = async (text: string, lang: 'English' | 'Sinhala') => {
@@ -133,7 +133,7 @@ const Step = ({ icon, title, description }: { icon: React.ElementType, title: st
                         <Step 
                             icon={Unlock}
                             title="Step 3: Access Your Content"
-                            description="Go to your Dashboard and find your files under 'My Unlocked Content'. A 6-hour countdown will begin once the order is marked as completed."
+                            description="Go to your Dashboard and find your files under 'My Unlocked Content'. A 6-hour countdown will begin once the order is marked as completed. Access expires after 6 hours."
                         />
                         <Button onClick={() => copyToClipboard(orderInstructionsTextEnglish, 'English')} variant="secondary" className="w-full">
                             Copy English Instructions
@@ -153,7 +153,7 @@ const Step = ({ icon, title, description }: { icon: React.ElementType, title: st
                         <Step 
                             icon={Unlock}
                             title="පියවර 3: Content වෙත පිවිසෙන්න"
-                            description="Dashboard වෙත ගොස් 'My Unlocked Content' යටතේ ඇති ඔබගේ files බලන්න. Order එක completed වූ මොහොතේ සිට පැය 6ක countdown එකක් ආරම්භ වේ."
+                            description="Dashboard වෙත ගොස් 'My Unlocked Content' යටතේ ඇති ඔබගේ files බලන්න. Order එක completed වූ මොහොතේ සිට පැය 6ක countdown එකක් ආරම්භ වේ. පැය 6කට පසු ප්‍රවේශය අවලංගු වේ."
                         />
                         <Button onClick={() => copyToClipboard(orderInstructionsTextSinhala, 'Sinhala')} variant="secondary" className="w-full">
                             උපදෙස් කොපි කරගන්න
@@ -188,7 +188,7 @@ const Step = ({ icon, title, description }: { icon: React.ElementType, title: st
                         <Step 
                             icon={Unlock}
                             title="Step 3: Redeem the Key"
-                            description="Enter the key into the 'Have an Unlock Key?' box and click 'Unlock'. Your 6-hour access timer will start immediately."
+                            description="Enter the key into the 'Have an Unlock Key?' box and click 'Unlock'. Your 6-hour access timer will start immediately and expire after 6 hours."
                         />
                         <Button onClick={() => copyToClipboard(keyInstructionsTextEnglish, 'English')} variant="secondary" className="w-full">
                             Copy English Instructions
@@ -208,7 +208,7 @@ const Step = ({ icon, title, description }: { icon: React.ElementType, title: st
                         <Step 
                             icon={Unlock}
                             title="පියවර 3: Key එක Redeem කරන්න"
-                            description="'Have an Unlock Key?' කොටුවේ Key එක ඇතුළත් කර 'Unlock' ක්ලික් කරන්න. ඔබගේ පැය 6ක ප්‍රවේශ කාලය වහාම ආරම්භ වනු ඇත."
+                            description="'Have an Unlock Key?' කොටුවේ Key එක ඇතුළත් කර 'Unlock' ක්ලික් කරන්න. ඔබගේ පැය 6ක ප්‍රවේශ කාලය වහාම ආරම්භ වන අතර, පැය 6කට පසු එය අවලංගු වේ."
                         />
                         <Button onClick={() => copyToClipboard(keyInstructionsTextSinhala, 'Sinhala')} variant="secondary" className="w-full">
                            උපදෙස් කොපි කරගන්න
@@ -221,3 +221,5 @@ const Step = ({ icon, title, description }: { icon: React.ElementType, title: st
     </main>
   );
 }
+
+    
