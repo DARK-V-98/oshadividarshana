@@ -55,24 +55,24 @@ export default function ReceiptView({ order }: { order: Order }) {
   return (
     <div>
         <div ref={receiptRef} className="p-4 md:p-8 bg-card text-card-foreground shadow-lg rounded-lg">
-            <header className="flex justify-between items-start pb-4 border-b">
+            <header className="flex flex-col sm:flex-row justify-between items-start pb-4 border-b gap-4">
             <div>
-                <h1 className="text-3xl font-bold font-playfair text-primary">Receipt / Invoice</h1>
+                <h1 className="text-2xl md:text-3xl font-bold font-playfair text-primary">Receipt / Invoice</h1>
                 <p className="text-muted-foreground">Order: {order.orderCode}</p>
             </div>
-            <div className="text-right">
-                <h2 className="text-xl font-semibold font-playfair">Oshadi Vidarshana</h2>
+            <div className="text-left sm:text-right">
+                <h2 className="text-lg md:text-xl font-semibold font-playfair">Oshadi Vidarshana</h2>
                 <p className="text-sm text-muted-foreground">NVQ Level 4 Certified</p>
             </div>
             </header>
 
-            <section className="grid md:grid-cols-2 gap-8 my-6">
+            <section className="grid sm:grid-cols-2 gap-8 my-6 text-sm">
             <div>
                 <h3 className="font-semibold mb-2 text-muted-foreground">BILL TO</h3>
                 <p className="font-medium">{order.userDisplayName}</p>
                 <p>{order.userEmail}</p>
             </div>
-            <div className="text-left md:text-right">
+            <div className="text-left sm:text-right">
                 <h3 className="font-semibold mb-2 text-muted-foreground">RECEIPT DETAILS</h3>
                 <p><span className="font-medium">Receipt #:</span> {order.orderCode}</p>
                 <p><span className="font-medium">Date Issued:</span> {format(createdAtDate, 'PPP')}</p>
@@ -81,7 +81,7 @@ export default function ReceiptView({ order }: { order: Order }) {
 
             <section>
             <div className="w-full overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full text-left text-sm">
                 <thead className="bg-muted">
                     <tr>
                     <th className="p-3 font-semibold">Item Description</th>
@@ -93,7 +93,7 @@ export default function ReceiptView({ order }: { order: Order }) {
                     <tr key={index} className="border-b">
                         <td className="p-3">
                         {item.itemName}
-                        <span className="text-muted-foreground text-sm block">({item.unitCode})</span>
+                        <span className="text-muted-foreground text-xs block">({item.unitCode})</span>
                         </td>
                         <td className="p-3 text-right">Rs. {item.price.toLocaleString()}</td>
                     </tr>
@@ -104,25 +104,25 @@ export default function ReceiptView({ order }: { order: Order }) {
             </section>
 
             <section className="mt-6 flex justify-end">
-            <div className="w-full max-w-xs space-y-2">
+            <div className="w-full max-w-xs space-y-2 text-sm">
                 <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span>Rs. {order.total.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg border-t pt-2">
+                <div className="flex justify-between font-bold text-base md:text-lg border-t pt-2">
                 <span>Total Paid</span>
                 <span>Rs. {order.total.toLocaleString()}</span>
                 </div>
             </div>
             </section>
 
-            <footer className="mt-8 pt-4 border-t text-center text-muted-foreground text-sm">
+            <footer className="mt-8 pt-4 border-t text-center text-muted-foreground text-xs">
             <p>Thank you for your purchase!</p>
             <p>If you have any questions, please contact us at +94 75 442 0805.</p>
             </footer>
         </div>
         
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center no-print">
             <Button onClick={handleDownloadPdf} disabled={isGenerating}>
                 {isGenerating ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
