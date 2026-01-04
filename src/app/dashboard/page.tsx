@@ -16,6 +16,7 @@ import UserProfile from "@/components/dashboard/UserProfile";
 import ManualOrderManagement from "@/components/dashboard/ManualOrderManagement";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 function DashboardPageContent() {
   const { user, userProfile, loading } = useUser();
@@ -94,6 +95,7 @@ function DashboardPageContent() {
         </p>
       </div>
       
+      {/* Mobile navigation */}
       <div className="md:hidden grid grid-cols-2 gap-4">
         {tabsToShow.map((tab) => (
             <Card
@@ -109,15 +111,33 @@ function DashboardPageContent() {
             </Card>
         ))}
         <div className="col-span-2 mt-8">
-            <div className="p-4 border rounded-xl">
+            <div className="p-4 border rounded-xl bg-card">
                  {renderContent()}
             </div>
         </div>
       </div>
         
-        <div className="hidden md:block">
+      {/* Desktop navigation */}
+      <div className="hidden md:grid md:grid-cols-4 gap-8">
+        <aside className="md:col-span-1">
+          <div className="sticky top-24 flex flex-col gap-2">
+            {tabsToShow.map((tab) => (
+              <Button
+                key={tab.value}
+                variant={activeTab === tab.value ? "default" : "ghost"}
+                onClick={() => setActiveTab(tab.value)}
+                className="justify-start gap-3"
+              >
+                <tab.icon className="h-5 w-5" />
+                <span>{tab.label}</span>
+              </Button>
+            ))}
+          </div>
+        </aside>
+        <div className="md:col-span-3">
             {renderContent()}
         </div>
+      </div>
     </main>
   );
 }
