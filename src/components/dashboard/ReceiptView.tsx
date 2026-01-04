@@ -81,17 +81,17 @@ export default function ReceiptView({ order }: { order: Order }) {
 
             <section>
             <div className="w-full overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left text-sm table-fixed">
                 <thead className="bg-muted">
                     <tr>
-                    <th className="p-3 font-semibold">Item Description</th>
+                    <th className="p-3 font-semibold w-3/4">Item Description</th>
                     <th className="p-3 font-semibold text-right">Price</th>
                     </tr>
                 </thead>
                 <tbody>
                     {order.items.map((item, index) => (
                     <tr key={index} className="border-b">
-                        <td className="p-3">
+                        <td className="p-3 break-words">
                         {item.itemName}
                         <span className="text-muted-foreground text-xs block">({item.unitCode})</span>
                         </td>
