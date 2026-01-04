@@ -71,21 +71,33 @@ service cloud.firestore {
 service firebase.storage {
   match /b/{bucket}/o {
     
-    // Helper function to find a completed order for the current user
-    function userHasCompletedOrder(userId) {
-      return exists(/databases/$(database)/documents/orders/{orderId} where 
-          get(/databases/$(database)/documents/orders/$(orderId)).data.userId == userId &&
-          get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed'
-      );
-    }
+    // Helper function to check if a user has purchased an item and its access has not expired
+    function hasValidPurchase(userId, unitId, itemType) {
+        // 6 hours in seconds = 6 * 60 * 60 = 21600
+        let sixHoursInMillis = 6 * 60 * 60 * 1000;
 
-    // Helper function to check if an item exists in ANY of the user's completed orders
-    function userPurchasedItem(userId, unitId, itemType) {
-        return exists(/databases/$(database)/documents/orders/{orderId} where
-            get(/databases/$(database)/documents/orders/$(orderId)).data.userId == userId &&
-            get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed' &&
-            [unitId, itemType] in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => [item.unitId, item.itemType])
+        // Check regular orders
+        let hasValidOrder = exists(
+          /databases/$(database)/documents/orders/{orderId} where
+          get(/databases/$(database)/documents/orders/$(orderId)).data.userId == userId &&
+          get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed' &&
+          get(/databases/$(database)/documents/orders/$(orderId)).data.completedAt != null &&
+          (request.time.toMillis() - get(/databases/$(database)/documents/orders/$(orderId)).data.completedAt.toMillis()) < sixHoursInMillis &&
+          [unitId, itemType] in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => [item.unitId, item.itemType])
         );
+
+        // Check redeemed manual keys by finding the "completed" order created from it
+        let hasValidManualOrder = exists(
+          /databases/$(database)/documents/orders/{orderId} where
+          get(/databases/$(database)/documents/orders/$(orderId)).data.userId == userId &&
+          get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'completed' &&
+          get(/databases/$(database)/documents/orders/$(orderId)).data.orderCode.matches("MAN-.*") &&
+          get(/databases/$(database)/documents/orders/$(orderId)).data.completedAt != null &&
+          (request.time.toMillis() - get(/databases/$(database)/documents/orders/$(orderId)).data.completedAt.toMillis()) < sixHoursInMillis &&
+          [unitId, itemType] in get(/databases/$(database)/documents/orders/$(orderId)).data.items.map(item => [item.unitId, item.itemType])
+        );
+
+        return hasValidOrder || hasValidManualOrder;
     }
     
     // Admins can write (upload/update/delete) any file in the units folder.
@@ -101,9 +113,8 @@ service firebase.storage {
                'unknown';
       }
 
-      // Allow a user to read a file if they have purchased that specific item in any completed order.
-      allow read: if request.auth != null && 
-                    userPurchasedItem(request.auth.uid, unitId, getItemType(fileName));
+      // Allow a user to read a file if they have a valid, non-expired purchase.
+      allow read: if request.auth != null && (isAdmin() || hasValidPurchase(request.auth.uid, unitId, getItemType(fileName)));
     }
     
     // Allow authenticated users to upload their own profile picture

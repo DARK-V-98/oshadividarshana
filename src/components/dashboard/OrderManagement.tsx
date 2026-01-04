@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from "react";
 import { useCollection } from "@/firebase/firestore/use-collection";
-import { doc, updateDoc, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, writeBatch, serverTimestamp } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@/components/ui/accordion";
 import {
   Dialog,
   DialogContent,
@@ -60,14 +54,21 @@ export default function OrderManagement() {
   const [bulkStatus, setBulkStatus] = useState<Order['status'] | ''>('');
 
 
-  const handleStatusChange = async (orderId: string, status: Order['status']) => {
+  const handleStatusChange = async (orderId: string, status: Order['status'], currentStatus: Order['status']) => {
     if (!firestore) return;
     
     setProcessingOrder(orderId);
     
     try {
         const orderDocRef = doc(firestore, "orders", orderId);
-        await updateDoc(orderDocRef, { status });
+        const updateData: any = { status };
+
+        // Set completedAt timestamp if status changes to 'completed'
+        if (status === 'completed' && currentStatus !== 'completed') {
+            updateData.completedAt = serverTimestamp();
+        }
+
+        await updateDoc(orderDocRef, updateData);
         
         toast({
           title: "Success",
@@ -112,7 +113,11 @@ export default function OrderManagement() {
     const batch = writeBatch(firestore);
     selectedOrders.forEach(orderId => {
         const orderRef = doc(firestore, 'orders', orderId);
-        batch.update(orderRef, { status: bulkStatus });
+        const updateData: any = { status: bulkStatus };
+        if (bulkStatus === 'completed') {
+            updateData.completedAt = serverTimestamp();
+        }
+        batch.update(orderRef, updateData);
     });
 
     try {
@@ -287,7 +292,7 @@ export default function OrderManagement() {
                                 <TableCell>
                                     <Select
                                         value={order.status}
-                                        onValueChange={(value: Order['status']) => handleStatusChange(order.id, value)}
+                                        onValueChange={(value: Order['status']) => handleStatusChange(order.id, value, order.status)}
                                         disabled={processingOrder === order.id}
                                     >
                                         <SelectTrigger className="w-[120px] h-8 text-xs">
@@ -332,5 +337,3 @@ export default function OrderManagement() {
     </Card>
   );
 }
-
-    

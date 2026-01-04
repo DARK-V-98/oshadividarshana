@@ -37,6 +37,7 @@ const navLinks = [
   { href: "/order", label: "Order" },
   { href: "/#about", label: "About" },
   { href: "/#pricing", label: "Pricing" },
+  { href: "/how-to-unlock", label: "How to Unlock" },
   { href: "/#testimonials", label: "Reviews" },
   { href: "/#contact", label: "Contact" },
 ];
@@ -73,7 +74,7 @@ export const Navbar = () => {
   const [isClient, setIsClient] = useState(false);
   const { cart } = useCart();
 
-  const isNonScrollablePage = pathname.startsWith('/dashboard') || pathname.startsWith('/auth') || pathname.startsWith('/order') || pathname.startsWith('/receipt');
+  const isNonScrollablePage = pathname.startsWith('/dashboard') || pathname.startsWith('/auth') || pathname.startsWith('/order') || pathname.startsWith('/receipt') || pathname.startsWith('/how-to-unlock');
 
   useEffect(() => {
     setIsClient(true);

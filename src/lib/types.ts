@@ -44,6 +44,7 @@ export type Order = {
     total: number;
     status: 'pending' | 'processing' | 'completed' | 'rejected';
     createdAt: any; // Firestore timestamp
+    completedAt: any | null; // Firestore timestamp, set when status becomes 'completed'
 }
 
 export type SiteSettings = {

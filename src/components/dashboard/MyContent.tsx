@@ -9,31 +9,61 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye, AlertTriangle, FileText, KeyRound, Unlock } from "lucide-react";
-import type { Order, CartItem, Unit, ManualOrderKey } from "@/lib/types";
-import { useMemo, useState } from "react";
+import { Loader2, Eye, AlertTriangle, FileText, KeyRound, Unlock, Clock, Info } from "lucide-react";
+import type { Order, CartItem, Unit } from "@/lib/types";
+import { useMemo, useState, useEffect } from "react";
 import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 import { collection, query, where, getDocs, writeBatch, serverTimestamp, doc } from "firebase/firestore";
 import { Input } from "../ui/input";
+import { addHours, differenceInMilliseconds, formatDistanceToNow } from 'date-fns';
 
-const itemTypeToFileName = (itemType: string): string | null => {
-    switch (itemType) {
-        case 'sinhalaNote': return 'sinhala-note.pdf';
-        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
-        case 'englishNote': return 'english-note.pdf';
-        case 'englishAssignment': return 'english-assignment.pdf';
-        default: return null;
+const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
+
+const Countdown = ({ expiryDate }: { expiryDate: Date }) => {
+    const [remainingTime, setRemainingTime] = useState(differenceInMilliseconds(expiryDate, new Date()));
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const newRemainingTime = differenceInMilliseconds(expiryDate, new Date());
+            setRemainingTime(newRemainingTime > 0 ? newRemainingTime : 0);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [expiryDate]);
+
+    if (remainingTime <= 0) {
+        return <span className="text-xs text-red-500 font-medium">Expired</span>;
     }
-};
+    
+    const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
 
-const ViewButton = ({ item }: { item: CartItem }) => {
+    return (
+        <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono" title={`Expires on ${expiryDate.toLocaleString()}`}>
+            <Clock className="h-3 w-3 text-primary" />
+            <span>{String(hours).padStart(2, '0')}:</span>
+            <span>{String(minutes).padStart(2, '0')}:</span>
+            <span>{String(seconds).padStart(2, '0')}</span>
+        </div>
+    );
+}
+
+const ViewButton = ({ item, expiryDate }: { item: CartItem, expiryDate: Date | null }) => {
     const { toast } = useToast();
     const storage = useStorage();
     const [isGenerating, setIsGenerating] = useState(false);
     const { user } = useUser();
+    
+    const isExpired = !expiryDate || new Date() > expiryDate;
 
     const handleView = async () => {
+        if (isExpired) {
+             toast({ variant: "destructive", title: "Content Expired", description: "Your 6-hour access window for this file has ended." });
+             return;
+        }
+
         if (!storage || !user) {
             toast({ variant: "destructive", title: "Error", description: "You are not authenticated." });
             return;
@@ -58,7 +88,7 @@ const ViewButton = ({ item }: { item: CartItem }) => {
              if (error.code === 'storage/object-not-found') {
                  toast({ variant: "destructive", title: "File Not Found", description: "The file is not available yet. Please contact support if the issue persists." });
             } else if (error.code === 'storage/unauthorized') {
-                toast({ variant: "destructive", title: "Permission Denied", description: "You do not have permission to access this file. Please ensure your order has been marked as 'Completed'." });
+                toast({ variant: "destructive", title: "Permission Denied", description: "Your access window for this file may have expired. Please check the countdown." });
             } else {
                 toast({ variant: "destructive", title: "Failed to Open", description: "An unexpected error occurred while trying to access the file." });
             }
@@ -66,22 +96,33 @@ const ViewButton = ({ item }: { item: CartItem }) => {
             setIsGenerating(false);
         }
     };
+    
+    const buttonText = isExpired ? "Expired" : "View";
 
     return (
-        <Button onClick={handleView} size="sm" disabled={isGenerating}>
-            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
-            View
+        <Button onClick={handleView} size="sm" disabled={isGenerating || isExpired}>
+            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : isExpired ? null : <Eye className="mr-2 h-4 w-4" />}
+            {buttonText}
         </Button>
     );
 };
 
+const itemTypeToFileName = (itemType: string): string | null => {
+    switch (itemType) {
+        case 'sinhalaNote': return 'sinhala-note.pdf';
+        case 'sinhalaAssignment': return 'sinhala-assignment.pdf';
+        case 'englishNote': return 'english-note.pdf';
+        case 'englishAssignment': return 'english-assignment.pdf';
+        default: return null;
+    }
+};
 
 export default function MyContent() {
   const { user, userProfile, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const { data: completedOrders, loading: ordersLoading, error: ordersError } = useCollection<Order>(
+  const { data: completedOrders, loading: ordersLoading } = useCollection<Order>(
     user ? 'orders' : undefined,
     user ? [
         ['userId', '==', user.uid],
@@ -97,30 +138,45 @@ export default function MyContent() {
   const purchasedItems = useMemo(() => {
     if (!completedOrders?.length || !allUnits?.length) return [];
     
-    const itemsWithDetails: (CartItem & { category: string, title: string, sinhalaTitle: string })[] = [];
+    const itemsWithDetails: (CartItem & { category: string, title: string, sinhalaTitle: string, expiryDate: Date | null })[] = [];
 
     completedOrders.forEach(order => {
-      order.items.forEach(item => {
-        const unit = allUnits.find(u => u.id === item.unitId);
-        itemsWithDetails.push({ 
-            ...item,
-            category: unit?.category || 'other',
-            title: unit?.title || item.title,
-            sinhalaTitle: unit?.sinhalaTitle || item.sinhalaTitle,
+        const unlockTimestamp = order.completedAt?.toDate();
+        if (!unlockTimestamp) return;
+
+        const expiryDate = addHours(unlockTimestamp, 6);
+        
+        order.items.forEach(item => {
+            const unit = allUnits.find(u => u.id === item.unitId);
+            itemsWithDetails.push({ 
+                ...item,
+                category: unit?.category || 'other',
+                title: unit?.title || item.title,
+                sinhalaTitle: unit?.sinhalaTitle || item.sinhalaTitle,
+                expiryDate: expiryDate,
+            });
         });
-      });
     });
 
-    // Deduplicate items
-    const uniqueItems = Array.from(new Map(itemsWithDetails.map(item => [`${item.unitId}-${item.itemType}`, item])).values());
+    // Deduplicate items, keeping the one with the latest expiry
+    const uniqueItemsMap = new Map<string, (CartItem & { expiryDate: Date | null })>();
+    itemsWithDetails.forEach(item => {
+        const key = `${item.unitId}-${item.itemType}`;
+        const existing = uniqueItemsMap.get(key);
+        if (!existing || (item.expiryDate && existing.expiryDate && item.expiryDate > existing.expiryDate)) {
+            uniqueItemsMap.set(key, item);
+        }
+    });
+
+    const uniqueItems = Array.from(uniqueItemsMap.values());
 
     const filteredItems = uniqueItems.filter(item => 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.sinhalaTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item as any).title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item as any).sinhalaTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.unitCode.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const itemsByCategory: Record<string, (CartItem & { title: string, sinhalaTitle: string })[]> = {};
+    const itemsByCategory: Record<string, (CartItem & { expiryDate: Date | null, title: string, sinhalaTitle: string })[]> = {};
     filteredItems.forEach(item => {
         const category = (item as any).category || 'other';
         if (!itemsByCategory[category]) {
@@ -156,7 +212,7 @@ export default function MyContent() {
         }
 
         const keyDoc = keySnapshot.docs[0];
-        const keyData = keyDoc.data() as ManualOrderKey;
+        const keyData = keyDoc.data() as any;
 
         if (keyData.redeemedBy) {
             toast({ variant: "destructive", title: "Key Already Used", description: "This key has already been redeemed." });
@@ -165,6 +221,7 @@ export default function MyContent() {
         }
 
         const batch = writeBatch(firestore);
+        const completionTime = serverTimestamp();
 
         // 1. Create a new "completed" order for the user
         const newOrderRef = doc(collection(firestore, "orders"));
@@ -176,14 +233,15 @@ export default function MyContent() {
             items: keyData.items,
             total: keyData.total,
             status: 'completed',
-            createdAt: serverTimestamp(),
+            createdAt: keyData.createdAt,
+            completedAt: completionTime,
         };
         batch.set(newOrderRef, newOrderData);
 
         // 2. Mark the key as redeemed
         batch.update(keyDoc.ref, {
             redeemedBy: user.uid,
-            redeemedAt: serverTimestamp()
+            redeemedAt: completionTime
         });
 
         await batch.commit();
@@ -226,13 +284,13 @@ export default function MyContent() {
       <CardHeader>
         <CardTitle>My Unlocked Content</CardTitle>
         <CardDescription>
-          Here are all the study materials you have purchased. You can view them at any time.
+          Here are all the study materials you have purchased. You have <strong>6 hours</strong> to view and download your content after an order is completed or a key is redeemed.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="p-4 border rounded-lg bg-muted/50">
             <h3 className="font-semibold mb-2 flex items-center gap-2"><KeyRound className="h-5 w-5 text-primary"/> Have an Unlock Key?</h3>
-            <p className="text-sm text-muted-foreground mb-3">If you received a key for a manual order, enter it here to unlock your content.</p>
+            <p className="text-sm text-muted-foreground mb-3">If you received a key, enter it here to unlock your content. Your 6-hour access timer will start immediately.</p>
             <div className="flex gap-2">
                 <Input 
                     placeholder="Enter your key..."
@@ -247,20 +305,20 @@ export default function MyContent() {
         </div>
 
         <div className="space-y-4">
+             <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>How to Access Your Content</AlertTitle>
+                <AlertDescription>
+                    Need help with your order or unlock key? <Link href="/how-to-unlock" className="font-semibold text-primary underline">View our step-by-step guide.</Link>
+                </AlertDescription>
+            </Alert>
+
             <Input 
                 placeholder="Search your unlocked content..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="max-w-sm"
             />
-
-            <Alert variant="destructive" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-700 dark:text-yellow-400">
-                <AlertTriangle className="h-4 w-4 !text-yellow-600 dark:!text-yellow-400" />
-                <AlertTitle className="font-semibold !text-yellow-800 dark:!text-yellow-300">A Note on Usage</AlertTitle>
-                <AlertDescription>
-                  These materials are created with love and care for your personal learning journey. Please do not resell or redistribute them. We take the protection of our intellectual property seriously and will pursue legal action against unauthorized distribution.
-                </AlertDescription>
-            </Alert>
 
             {purchasedItems.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
@@ -283,12 +341,15 @@ export default function MyContent() {
                                         <div className="flex items-center gap-4">
                                             <FileText className="h-6 w-6 text-primary" />
                                             <div>
-                                                <p className="font-medium text-sm md:text-base">{item.title}</p>
-                                                <p className="text-muted-foreground text-xs md:text-sm">{item.sinhalaTitle}</p>
+                                                <p className="font-medium text-sm md:text-base">{(item as any).title}</p>
+                                                <p className="text-muted-foreground text-xs md:text-sm">{(item as any).sinhalaTitle}</p>
                                                 <p className="text-xs text-primary mt-1">{item.itemName.split(' - ')[1]}</p>
                                             </div>
                                         </div>
-                                        <ViewButton item={item} />
+                                        <div className="flex flex-col items-end gap-2">
+                                            {(item as any).expiryDate && <Countdown expiryDate={(item as any).expiryDate} />}
+                                            <ViewButton item={item} expiryDate={(item as any).expiryDate} />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
