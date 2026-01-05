@@ -9,6 +9,7 @@ import {
   type Query,
   type DocumentData,
   type WhereFilterOp,
+  and,
 } from "firebase/firestore";
 import { useFirebase } from "@/firebase/client-provider";
 
