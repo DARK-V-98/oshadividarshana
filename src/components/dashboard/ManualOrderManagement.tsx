@@ -41,7 +41,10 @@ const GeneratedKeyHistory = () => {
 
     const sortedKeys = useMemo(() => {
         if (!keys) return [];
-        return [...keys].sort((a,b) => b.createdAt.toDate() - a.createdAt.toDate());
+        return [...keys].sort((a,b) => {
+            if (!a.createdAt || !b.createdAt) return 0;
+            return b.createdAt.toDate() - a.createdAt.toDate();
+        });
     }, [keys]);
     
     return (
@@ -75,7 +78,7 @@ const GeneratedKeyHistory = () => {
                                                 </Button>
                                             </TableCell>
                                             <TableCell>Rs. {key.total.toLocaleString()}</TableCell>
-                                            <TableCell>{format(key.createdAt.toDate(), 'PPp')}</TableCell>
+                                            <TableCell>{key.createdAt ? format(key.createdAt.toDate(), 'PPp') : '...'}</TableCell>
                                             <TableCell>{key.redeemedBy && key.redeemedAt ? `Redeemed on ${format(key.redeemedAt.toDate(), 'PP')}` : 'Not Redeemed'}</TableCell>
                                             <TableCell>
                                                 <Dialog>
