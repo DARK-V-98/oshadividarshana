@@ -53,8 +53,8 @@ export function useCollection<T>(path: string | undefined, options?: {
     const collectionRef = collection(firestore, path);
     
     if (whereClauses.length > 0) {
-        const queryConstraints = whereClauses.map(clause => where(...clause));
-        q = query(collectionRef, and(...queryConstraints));
+      const queryConstraints = whereClauses.map(c => where(c[0], c[1], c[2]));
+      q = query(collectionRef, ...queryConstraints);
     } else {
         q = query(collectionRef);
     }
@@ -80,3 +80,4 @@ export function useCollection<T>(path: string | undefined, options?: {
 
   return { data, loading, error };
 }
+
