@@ -54,7 +54,7 @@ export function useCollection<T>(path: string | undefined, options?: {
     
     if (whereClauses.length > 0) {
         const queryConstraints = whereClauses.map(clause => where(...clause));
-        q = query(collectionRef, ...queryConstraints);
+        q = query(collectionRef, and(...queryConstraints));
     } else {
         q = query(collectionRef);
     }
