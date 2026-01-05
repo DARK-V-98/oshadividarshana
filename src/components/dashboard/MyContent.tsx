@@ -124,10 +124,10 @@ export default function MyContent() {
   
   const { data: completedOrders, loading: ordersLoading } = useCollection<Order>(
     user ? 'orders' : undefined,
-    user ? [
+    user ? { where: [
         ['userId', '==', user.uid],
         ['status', '==', 'completed']
-    ] : undefined
+    ]} : undefined
   );
   const { data: allUnits, loading: unitsLoading } = useCollection<Unit>('units');
 

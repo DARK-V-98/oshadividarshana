@@ -27,7 +27,7 @@ export function useCollection<T>(path: string | undefined, options?: {
   const whereClauses = useMemo(() => {
     if (!options?.where) return [];
     // Ensure it's always an array of arrays
-    if (Array.isArray(options.where[0])) {
+    if (Array.isArray(options.where) && Array.isArray(options.where[0])) {
       return options.where as WhereClause[];
     }
     return [options.where] as WhereClause[];
@@ -80,4 +80,3 @@ export function useCollection<T>(path: string | undefined, options?: {
 
   return { data, loading, error };
 }
-
