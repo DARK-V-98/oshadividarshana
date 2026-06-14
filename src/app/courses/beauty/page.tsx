@@ -7,8 +7,8 @@ import type { Metadata } from 'next';
 const beautyCategory = moduleCategories.find(cat => cat.id === 'beauty');
 
 export const metadata: Metadata = {
-  title: 'Beauty Culture Course Modules | Oshadi Vidarshana',
-  description: 'Explore all modules for the NVQ Level 4 Beauty Culture course. Get complete notes and assignments.',
+  title: 'Beauty Culture Notes & Projects | Oshadi Vidarshana',
+  description: 'Browse all modules of NVQ Level 4 Beauty Culture notes and customized projects. Get complete notes and assignments.',
 };
 
 export default function BeautyCoursePage() {
@@ -20,7 +20,7 @@ export default function BeautyCoursePage() {
     <main className="container my-12 md:my-24">
       <section className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-playfair">
-          Beauty Culture Course
+          Beauty Culture Notes & Projects
         </h1>
         <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
           {beautyCategory.description}
@@ -30,8 +30,8 @@ export default function BeautyCoursePage() {
       <section className="max-w-4xl mx-auto">
         <Card>
             <CardHeader>
-                <CardTitle>Course Modules ({beautyCategory.modules.length})</CardTitle>
-                <CardDescription>A complete list of modules for the Beauty Culture course.</CardDescription>
+                <CardTitle>Modules ({beautyCategory.modules.length})</CardTitle>
+                <CardDescription>Notes and customized projects available for each Beauty Culture module.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="grid gap-4">

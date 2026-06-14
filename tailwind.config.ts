@@ -65,6 +65,12 @@ const config = {
           DEFAULT: "hsl(var(--gold-accent))",
           soft: "hsl(var(--gold-soft))",
         },
+        purple: {
+          DEFAULT: "hsl(var(--purple))",
+          soft: "hsl(var(--purple-soft))",
+          medium: "hsl(var(--purple-medium))",
+          dark: "hsl(var(--purple-dark))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

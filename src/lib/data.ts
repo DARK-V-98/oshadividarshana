@@ -143,7 +143,7 @@ export const moduleCategories = [
     description: "Learn professional hair cutting, coloring, and styling techniques for all types of hair.",
     href: "/courses/hair",
     icon: Scissors,
-    color: "from-gold to-primary",
+    color: "from-purple to-primary",
     modules: [
         { code: "HD-M01", title: "Special qualities & attitudes to be developed by a Hairdresser", sinhala: "කොණ්ඩ මෝස්තර ශිල්පියෙකු විසින් ප්‍රගුණ කළ යුතු ගුණාංග" },
         { code: "HD-M02", title: "Maintain Machinery, Tools and Equipment", sinhala: "යන්ත්‍ර, උපකරණ හා භාණ්ඩ නඩත්තුව" },
@@ -170,7 +170,7 @@ export const moduleCategories = [
     description: "Specialized notes covering salon management, health & safety, etiquette, and more to round out your skills.",
     href: "/courses/extra-notes",
     icon: BookMarked,
-    color: "from-primary to-gold",
+    color: "from-primary to-purple-dark",
     modules: [
         { code: "EN-01", title: "History of Beauty", sinhala: "රූපලාවන්‍ය ඉතිහාසය" },
         { code: "EN-02", title: "History of Cosmetics", sinhala: "කේශලාවන්‍ය ඉතිහාසය" },

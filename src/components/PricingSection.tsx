@@ -202,8 +202,8 @@ export const PricingSection = () => {
                             color: {
                                 'Bridal Dresser': "from-primary to-rose-dark",
                                 'Beauty': "from-rose-medium to-primary",
-                                'Hair Dresser': "from-gold to-primary",
-                                'Extra Notes': "from-primary to-gold",
+                                'Hair Dresser': "from-purple to-primary",
+                                'Extra Notes': "from-primary to-purple-dark",
                             }[category.name] || "from-primary to-rose-dark",
                         }}
                         medium="sinhala"
@@ -225,8 +225,8 @@ export const PricingSection = () => {
                              color: {
                                 'Bridal Dresser': "from-primary to-rose-dark",
                                 'Beauty': "from-rose-medium to-primary",
-                                'Hair Dresser': "from-gold to-primary",
-                                'Extra Notes': "from-primary to-gold",
+                                'Hair Dresser': "from-purple to-primary",
+                                'Extra Notes': "from-primary to-purple-dark",
                             }[category.name] || "from-primary to-rose-dark",
                         }}
                         medium="english"

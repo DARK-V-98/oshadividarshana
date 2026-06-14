@@ -18,13 +18,13 @@ export const CategoriesSection = () => {
           className="text-center mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            Course Categories
+            Notes & Customized Projects
           </span>
           <h2 className="font-playfair text-3xl md:text-5xl font-bold text-foreground mb-4">
-            What You'll <span className="text-gradient">Learn</span>
+            Materials We <span className="text-gradient">Provide</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg">
-            Comprehensive study materials designed specifically for NVQ Level 4 students in Sri Lanka
+            Ready-made notes and customized student projects, organised by module for every NVQ Level 4 stream in Sri Lanka
           </p>
         </motion.div>
 

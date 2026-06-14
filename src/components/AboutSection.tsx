@@ -89,7 +89,7 @@ export const AboutSection = () => {
             className="relative"
           >
             {/* Background decoration */}
-            <div className="absolute -inset-4 bg-gradient-to-br from-primary/10 via-transparent to-gold/10 rounded-3xl blur-3xl" />
+            <div className="absolute -inset-4 bg-gradient-to-br from-primary/10 via-transparent to-purple/10 rounded-3xl blur-3xl" />
             
             <div className="relative grid grid-cols-2 gap-4">
               {features.map((feature, i) => (

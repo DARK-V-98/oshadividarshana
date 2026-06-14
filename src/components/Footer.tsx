@@ -36,13 +36,18 @@ export const Footer = () => {
           >
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              {["Home", "Courses", "Pricing", "About", "Contact"].map((link) => (
-                <li key={link}>
+              {[
+                { label: "Home", href: "#home" },
+                { label: "Notes & Projects", href: "#categories" },
+                { label: "About", href: "#about" },
+                { label: "Contact", href: "#contact" },
+              ].map((link) => (
+                <li key={link.label}>
                   <a
-                    href={`#${link.toLowerCase()}`}
+                    href={link.href}
                     className="text-background/70 hover:text-background transition-colors text-sm"
                   >
-                    {link}
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -70,10 +75,10 @@ export const Footer = () => {
               </li>
               <li>
                 <a
-                  href="mailto:oshadi@example.com"
+                  href="mailto:esystemlk@gmail.com"
                   className="hover:text-background transition-colors"
                 >
-                  Email: oshadi@example.com
+                  Email: esystemlk@gmail.com
                 </a>
               </li>
               <li>

@@ -16,10 +16,10 @@ const siteUrl = 'https://www.oshadividarshana.online';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Oshadi Vidarshana | NVQ Level 4 Courses & Bridal Services in Sri Lanka',
+    default: 'Oshadi Vidarshana | NVQ Level 4 Notes & Customized Student Projects in Sri Lanka',
     template: '%s | Oshadi Vidarshana',
   },
-  description: 'Your expert resource for NVQ Level 4 study materials (Bridal, Beauty, Hair) and professional bridal makeup services in Sri Lanka. Specializing in Kandyan bridal dressing.',
+  description: 'Ready-made NVQ Level 4 student notes and customized projects (Bridal, Beauty, Hair) for Sri Lankan students. We provide study materials and assignments — not courses.',
   keywords: [
     'NVQ Level 4 Sri Lanka',
     'Bridal Makeup Artist Sri Lanka',
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   creator: 'M.K.D Oshadi Vidarshana Perera',
   publisher: 'Oshadi Vidarshana',
   openGraph: {
-    title: 'Oshadi Vidarshana | NVQ Level 4 & Bridal Services',
-    description: 'The #1 resource for NVQ Level 4 beautician courses and professional bridal services in Sri Lanka.',
+    title: 'Oshadi Vidarshana | NVQ Level 4 Notes & Customized Projects',
+    description: 'The #1 resource for NVQ Level 4 student notes and customized projects in Sri Lanka.',
     url: siteUrl,
     siteName: 'Oshadi Vidarshana',
     images: [

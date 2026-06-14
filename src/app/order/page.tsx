@@ -31,8 +31,8 @@ import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 
 const metadata: Metadata = {
-  title: 'Order Course Materials',
-  description: 'Select and order NVQ Level 4 notes and assignments for Bridal, Beauty, and Hair Dressing courses. Secure your study materials today.',
+  title: 'Order Notes & Projects',
+  description: 'Select and order NVQ Level 4 notes and customized projects for Bridal, Beauty, and Hair Dressing. Secure your study materials today.',
 };
 
 export default function OrderPage() {

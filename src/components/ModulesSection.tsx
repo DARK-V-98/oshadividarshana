@@ -20,7 +20,7 @@ export const ModulesSection = () => {
           className="text-center mb-16"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            Course Modules
+            Notes & Project Modules
           </span>
           <h2 className="font-playfair text-3xl md:text-5xl font-bold text-foreground mb-4">
             Complete <span className="text-gradient">Syllabus Coverage</span>

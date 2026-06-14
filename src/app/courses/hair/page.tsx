@@ -7,8 +7,8 @@ import type { Metadata } from 'next';
 const hairCategory = moduleCategories.find(cat => cat.id === 'hair');
 
 export const metadata: Metadata = {
-  title: 'Hair Dresser Course Modules | Oshadi Vidarshana',
-  description: 'Explore all modules for the NVQ Level 4 Hair Dresser course. Get complete notes and assignments.',
+  title: 'Hair Dresser Notes & Projects | Oshadi Vidarshana',
+  description: 'Browse all modules of NVQ Level 4 Hair Dresser notes and customized projects. Get complete notes and assignments.',
 };
 
 export default function HairCoursePage() {
@@ -20,7 +20,7 @@ export default function HairCoursePage() {
     <main className="container my-12 md:my-24">
       <section className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-playfair">
-          Hair Dresser Course
+          Hair Dresser Notes & Projects
         </h1>
         <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
           {hairCategory.description}
@@ -30,8 +30,8 @@ export default function HairCoursePage() {
       <section className="max-w-4xl mx-auto">
         <Card>
             <CardHeader>
-                <CardTitle>Course Modules ({hairCategory.modules.length})</CardTitle>
-                <CardDescription>A complete list of modules for the Hair Dresser course.</CardDescription>
+                <CardTitle>Modules ({hairCategory.modules.length})</CardTitle>
+                <CardDescription>Notes and customized projects available for each Hair Dresser module.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="grid gap-4">

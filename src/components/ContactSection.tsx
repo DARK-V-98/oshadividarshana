@@ -15,8 +15,8 @@ const contactMethods = [
   {
     icon: Mail,
     label: "Email",
-    value: "oshadi@example.com",
-    href: "mailto:oshadi@example.com",
+    value: "esystemlk@gmail.com",
+    href: "mailto:esystemlk@gmail.com",
     color: "from-primary to-rose-dark",
     description: "For detailed inquiries",
   },
@@ -88,7 +88,7 @@ export const ContactSection = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="relative max-w-2xl mx-auto"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-rose-medium/20 to-gold/20 rounded-3xl blur-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple/20 to-purple-dark/20 rounded-3xl blur-2xl" />
           <div className="relative bg-card border border-primary/20 rounded-3xl p-8 md:p-12 text-center shadow-2xl">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mx-auto mb-6">
               <MessageCircle className="w-10 h-10 text-white" />

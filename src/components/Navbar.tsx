@@ -36,7 +36,6 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/order", label: "Order" },
   { href: "/#about", label: "About" },
-  { href: "/#pricing", label: "Pricing" },
   { href: "/how-to-unlock", label: "How to Unlock" },
   { href: "/#testimonials", label: "Reviews" },
   { href: "/#contact", label: "Contact" },
@@ -104,13 +103,13 @@ export const Navbar = () => {
 
   const navLinkClasses = cn(
     "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
-    navIsScrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
+    "text-muted-foreground hover:text-primary focus:text-primary",
     "focus:bg-accent/10 focus:outline-none"
   );
-  
+
   const navTriggerClasses = cn(navigationMenuTriggerStyle(),
     "bg-transparent",
-    navIsScrolled ? "text-muted-foreground hover:text-primary focus:text-primary" : "text-white/80 hover:text-white focus:text-white",
+    "text-muted-foreground hover:text-primary focus:text-primary",
     "focus:bg-accent/10 focus:outline-none data-[state=open]:bg-accent/10"
   );
 
@@ -134,7 +133,7 @@ export const Navbar = () => {
             className="flex items-center gap-2"
           >
             <Image src="/ov.png" alt="Oshadi Vidarshana Logo" width={40} height={40} className="rounded-full" />
-            <span className={cn("font-playfair text-xl font-semibold", navIsScrolled ? "text-foreground" : "text-white")}>
+            <span className="font-playfair text-xl font-semibold text-foreground">
               Oshadi
             </span>
           </Link>
@@ -153,7 +152,7 @@ export const Navbar = () => {
                 ))}
 
                 <NavigationMenuItem>
-                    <NavigationMenuTrigger className={navTriggerClasses}>Courses</NavigationMenuTrigger>
+                    <NavigationMenuTrigger className={navTriggerClasses}>Notes & Projects</NavigationMenuTrigger>
                     <NavigationMenuContent>
                     <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                         {courseCategories.map((component) => (
@@ -185,7 +184,7 @@ export const Navbar = () => {
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-2">
              <Link href="/order" className="relative">
-                <Button variant="ghost" size="icon" className={cn(navIsScrolled ? 'text-foreground' : 'text-white/80 hover:text-white')}>
+                <Button variant="ghost" size="icon" className="text-foreground">
                     <ShoppingCart className="h-5 w-5" />
                 </Button>
                 {isClient && cart.length > 0 && (
@@ -250,7 +249,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className={cn("md:hidden p-2", navIsScrolled ? "text-foreground" : "text-white")}
+            className="md:hidden p-2 text-foreground"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

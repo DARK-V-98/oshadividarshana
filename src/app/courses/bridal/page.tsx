@@ -7,8 +7,8 @@ import type { Metadata } from 'next';
 const bridalCategory = moduleCategories.find(cat => cat.id === 'bridal');
 
 export const metadata: Metadata = {
-  title: 'Bridal Dresser Course Modules | Oshadi Vidarshana',
-  description: 'Explore all modules for the NVQ Level 4 Bridal Dresser course. Get complete notes and assignments.',
+  title: 'Bridal Dresser Notes & Projects | Oshadi Vidarshana',
+  description: 'Browse all modules of NVQ Level 4 Bridal Dresser notes and customized projects. Get complete notes and assignments.',
 };
 
 export default function BridalCoursePage() {
@@ -20,7 +20,7 @@ export default function BridalCoursePage() {
     <main className="container my-12 md:my-24">
       <section className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-playfair">
-          Bridal Dresser Course
+          Bridal Dresser Notes & Projects
         </h1>
         <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
           {bridalCategory.description}
@@ -30,8 +30,8 @@ export default function BridalCoursePage() {
       <section className="max-w-4xl mx-auto">
         <Card>
             <CardHeader>
-                <CardTitle>Course Modules ({bridalCategory.modules.length})</CardTitle>
-                <CardDescription>A complete list of modules for the Bridal Dresser course.</CardDescription>
+                <CardTitle>Modules ({bridalCategory.modules.length})</CardTitle>
+                <CardDescription>Notes and customized projects available for each Bridal Dresser module.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="grid gap-4">
