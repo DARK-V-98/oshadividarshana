@@ -173,20 +173,17 @@ export const HeroSection = () => {
             >
               <a href="#promo">View This Month&apos;s Offers</a>
             </Button>
+            <Button
+              asChild
+              size="lg"
+              className="group bg-gradient-to-r from-purple to-purple-dark hover:from-purple-dark hover:to-purple text-white shadow-lg hover:shadow-xl transition-all w-full sm:w-auto px-8 py-6 text-lg"
+            >
+              <a href="#nails">
+                <Gem className="w-5 h-5 mr-2" />
+                Nails by OV
+              </a>
+            </Button>
           </motion.div>
-
-          {/* Nails mention */}
-          <motion.a
-            variants={item}
-            href="#nails"
-            className="group mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <Gem className="w-4 h-4 text-purple-dark" />
-            <span>
-              We also offer <span className="font-semibold text-foreground">Nails by OV</span> — Gel, Acrylic &amp; Nail Art
-            </span>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </motion.a>
 
           {/* Stats */}
           <motion.div
