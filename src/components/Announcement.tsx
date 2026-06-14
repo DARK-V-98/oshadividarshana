@@ -121,7 +121,7 @@ export default function Announcement() {
             className="fixed top-16 md:top-20 left-0 right-0 z-40 bg-gradient-to-r from-primary via-purple to-primary text-white shadow-md"
           >
             <div className="relative flex items-center h-8 overflow-hidden">
-              <div className="flex w-max animate-marquee">
+              <div className="flex w-max animate-marquee" style={{ animationDuration: '60s' }}>
                 <MarqueeGroup />
                 <MarqueeGroup />
               </div>
