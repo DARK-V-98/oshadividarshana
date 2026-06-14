@@ -9,7 +9,7 @@ import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
 import { FirebaseProvider, useDoc } from '@/firebase';
 import { CartProvider } from '@/context/CartContext';
 import { SiteSettings } from '@/lib/types';
-import AnnouncementBanner from '@/components/AnnouncementBanner';
+import Announcement from '@/components/Announcement';
 
 const siteUrl = 'https://www.oshadividarshana.online';
 
@@ -98,8 +98,8 @@ export default function RootLayout({
         <div className="relative overflow-x-hidden">
           <FirebaseProvider>
             <CartProvider>
-              <AnnouncementBanner />
               <Navbar />
+              <Announcement />
               <main>{children}</main>
               <Footer />
               <FloatingWhatsApp />
