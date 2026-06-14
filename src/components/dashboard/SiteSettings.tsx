@@ -60,13 +60,15 @@ export default function SiteSettings() {
   const reviewImages = form.watch("reviewImages") || [];
 
   const addReviewImage = (url: string) => {
-    form.setValue("reviewImages", [...reviewImages, url], { shouldDirty: true });
+    const current = form.getValues("reviewImages") || [];
+    form.setValue("reviewImages", [...current, url], { shouldDirty: true });
   };
 
   const removeReviewImage = (index: number) => {
+    const current = form.getValues("reviewImages") || [];
     form.setValue(
       "reviewImages",
-      reviewImages.filter((_, i) => i !== index),
+      current.filter((_, i) => i !== index),
       { shouldDirty: true }
     );
   };
