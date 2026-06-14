@@ -60,6 +60,7 @@ export type SiteSettings = {
         text: string;
         rating: number;
     }[];
+    reviewImages?: string[];
 }
 
 export type ManualOrderKey = {

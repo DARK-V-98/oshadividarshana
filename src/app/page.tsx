@@ -8,6 +8,7 @@ import { AboutSection } from "@/components/AboutSection";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
 import { NailsSection } from "@/components/NailsSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
+import { ReviewsGallery } from "@/components/ReviewsGallery";
 import { ContactSection } from "@/components/ContactSection";
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
       <HowItWorksSection />
       <NailsSection />
       <TestimonialsSection />
+      <ReviewsGallery />
       <ContactSection />
     </>
   );

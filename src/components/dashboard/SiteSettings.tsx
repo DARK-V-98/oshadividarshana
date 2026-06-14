@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Trash2, PlusCircle } from "lucide-react";
 import type { SiteSettings } from "@/lib/types";
+import ImageUpload from "./ImageUpload";
 
 const testimonialSchema = z.object({
   id: z.string(),
@@ -31,6 +32,7 @@ const settingsSchema = z.object({
     enabled: z.boolean(),
   }),
   testimonials: z.array(testimonialSchema),
+  reviewImages: z.array(z.string()).default([]),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -46,6 +48,7 @@ export default function SiteSettings() {
     values: {
         announcement: siteSettings?.announcement || { message: '', enabled: false },
         testimonials: siteSettings?.testimonials || [],
+        reviewImages: siteSettings?.reviewImages || [],
     }
   });
 
@@ -53,6 +56,20 @@ export default function SiteSettings() {
     control: form.control,
     name: "testimonials",
   });
+
+  const reviewImages = form.watch("reviewImages") || [];
+
+  const addReviewImage = (url: string) => {
+    form.setValue("reviewImages", [...reviewImages, url], { shouldDirty: true });
+  };
+
+  const removeReviewImage = (index: number) => {
+    form.setValue(
+      "reviewImages",
+      reviewImages.filter((_, i) => i !== index),
+      { shouldDirty: true }
+    );
+  };
 
   const onSubmit = async (values: SettingsFormValues) => {
     if (!firestore) return;
@@ -184,6 +201,39 @@ export default function SiteSettings() {
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Testimonial
                 </Button>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Client Review Images</CardTitle>
+                <CardDescription>Upload screenshots of client reviews to display on the homepage gallery.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {reviewImages.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {reviewImages.map((url, index) => (
+                            <div key={url} className="relative group rounded-lg overflow-hidden border">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={url} alt={`Review ${index + 1}`} className="w-full h-32 object-cover" />
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-1 right-1 h-7 w-7 opacity-90"
+                                    onClick={() => removeReviewImage(index)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {reviewImages.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No review images yet. Upload one below.</p>
+                )}
+                <ImageUpload pathPrefix="reviews" onUploadComplete={addReviewImage} />
+                <p className="text-xs text-muted-foreground">After uploading, click "Save Settings" to publish changes.</p>
             </CardContent>
         </Card>
 
