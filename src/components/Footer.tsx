@@ -89,6 +89,9 @@ export const Footer = () => {
                   Phone: +94 75 442 0805
                 </a>
               </li>
+              <li>
+                Address: 618 Jana Jaya City Building, Rajagiriya
+              </li>
             </ul>
           </motion.div>
         </div>

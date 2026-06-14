@@ -121,7 +121,7 @@ export const ContactSection = () => {
           className="flex items-center justify-center gap-2 mt-12 text-muted-foreground"
         >
           <MapPin className="w-4 h-4" />
-          <span>Sri Lanka</span>
+          <span>618 Jana Jaya City Building, Rajagiriya, Sri Lanka</span>
         </motion.div>
       </div>
     </section>
