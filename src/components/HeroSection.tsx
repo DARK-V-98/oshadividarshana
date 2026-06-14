@@ -1,6 +1,7 @@
 
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   ArrowRight,
   BookOpen,
@@ -11,6 +12,7 @@ import {
   GraduationCap,
   ShieldCheck,
   ChevronDown,
+  Gem,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -83,6 +85,21 @@ export const HeroSection = () => {
         className="container mx-auto px-4 relative z-10"
       >
         <div className="max-w-4xl mx-auto text-center">
+          {/* Logo */}
+          <motion.div variants={item} className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-purple/30 blur-xl" />
+              <Image
+                src="/ov.png"
+                alt="Oshadi Vidarshana Logo"
+                width={96}
+                height={96}
+                priority
+                className="relative rounded-full shadow-lg ring-2 ring-white"
+              />
+            </div>
+          </motion.div>
+
           {/* Badge */}
           <motion.div
             variants={item}
@@ -157,6 +174,19 @@ export const HeroSection = () => {
               <a href="#promo">View This Month&apos;s Offers</a>
             </Button>
           </motion.div>
+
+          {/* Nails mention */}
+          <motion.a
+            variants={item}
+            href="#nails"
+            className="group mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Gem className="w-4 h-4 text-purple-dark" />
+            <span>
+              We also offer <span className="font-semibold text-foreground">Nails by OV</span> — Gel, Acrylic &amp; Nail Art
+            </span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </motion.a>
 
           {/* Stats */}
           <motion.div
