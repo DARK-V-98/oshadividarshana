@@ -1,7 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Sparkles, MapPin, MessageCircle, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const nailGallery = ["/n1.jpg", "/n2.jpg", "/n3.webp"];
 
 const nailServices = [
   { name: "Gel Extension", price: 3000 },
@@ -36,6 +39,33 @@ export const NailsSection = () => {
             Beautiful, long-lasting nails done by Oshadi. Visit us for gel, acrylic, and custom nail art.
           </p>
         </motion.div>
+
+        {/* Example gallery */}
+        <div className="grid grid-cols-3 gap-3 md:gap-5 max-w-3xl mx-auto mb-10">
+          {nailGallery.map((src, index) => (
+            <motion.div
+              key={src}
+              initial={{ opacity: 0, scale: 0.92 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -6 }}
+              className="group relative aspect-square rounded-2xl overflow-hidden shadow-lg border border-border"
+            >
+              <Image
+                src={src}
+                alt={`Nail design inspiration ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 33vw, 220px"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </motion.div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-muted-foreground mb-10 -mt-6">
+          * Images shown are design inspiration examples.
+        </p>
 
         <div className="max-w-3xl mx-auto">
           <motion.div
