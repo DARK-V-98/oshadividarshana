@@ -17,11 +17,11 @@ export default function Home() {
       <MarqueeBar />
       <PromoSection />
       <CategoriesSection />
+      <NailsSection />
       <PrintBindSection />
       <WhyChooseSection />
       <AboutSection />
       <HowItWorksSection />
-      <NailsSection />
       <TestimonialsSection />
       <ContactSection />
     </>
