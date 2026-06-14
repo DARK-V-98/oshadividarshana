@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Quote, X } from "lucide-react";
+import { Quote, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDoc } from "@/firebase";
 import { SiteSettings } from "@/lib/types";
 
@@ -10,12 +11,36 @@ export const ReviewsGallery = () => {
   const images = siteSettings?.reviewImages || [];
   const [active, setActive] = useState<string | null>(null);
 
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop: true,
+    dragFree: true,
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+  }, [emblaApi, onSelect]);
+
   if (loading || images.length === 0) {
     return null;
   }
 
   return (
-    <section id="client-reviews" className="py-24 bg-white">
+    <section id="client-reviews" className="py-24 bg-white overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -36,27 +61,52 @@ export const ReviewsGallery = () => {
           </p>
         </motion.div>
 
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 max-w-6xl mx-auto [column-fill:_balance]">
-          {images.map((src, index) => (
-            <motion.button
-              key={src}
-              type="button"
-              onClick={() => setActive(src)}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: (index % 8) * 0.05 }}
-              className="mb-4 block w-full overflow-hidden rounded-2xl border border-border shadow-sm hover:shadow-lg transition-shadow group"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt={`Client review ${index + 1}`}
-                loading="lazy"
-                className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </motion.button>
-          ))}
+        <div className="relative max-w-6xl mx-auto">
+          {/* Carousel viewport */}
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex -ml-4">
+              {images.map((src, index) => (
+                <div
+                  key={src}
+                  className="pl-4 shrink-0 grow-0 basis-1/2 sm:basis-1/3 lg:basis-1/4"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActive(src)}
+                    className="block w-full overflow-hidden rounded-2xl border border-border shadow-sm hover:shadow-lg transition-shadow group"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={`Client review ${index + 1}`}
+                      loading="lazy"
+                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Arrows */}
+          <button
+            type="button"
+            onClick={scrollPrev}
+            disabled={!canScrollPrev}
+            aria-label="Previous reviews"
+            className="absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-border shadow-lg flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-40"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={scrollNext}
+            disabled={!canScrollNext}
+            aria-label="Next reviews"
+            className="absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-border shadow-lg flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-40"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </div>
       </div>
 
